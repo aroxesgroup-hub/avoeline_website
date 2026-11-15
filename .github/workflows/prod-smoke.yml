@@ -1,0 +1,28 @@
+name: Production read-only smoke
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [production-deployed]
+  schedule:
+    # Light daily check; also trigger via repository_dispatch after deploy.
+    - cron: "15 6 * * *"
+
+jobs:
+  prod-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Read-only API smoke
+        env:
+          # Do not pass CRON_SECRET — only unauthorized cron → 401 checks run.
+          PRODUCTION_SMOKE_URL: ${{ secrets.PRODUCTION_SMOKE_URL }}
+        run: |
+          URL="${PRODUCTION_SMOKE_URL:-https://avoeline-website.vercel.app}"
+          echo "Smoking $URL (read-only)"
+          node scripts/smoke-api-routes.mjs "$URL"

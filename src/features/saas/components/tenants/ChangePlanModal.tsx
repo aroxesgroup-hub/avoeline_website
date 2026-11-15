@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import { filterPlansForAudience } from "@/src/features/saas/tenantBoard.filters";
 import type { PlanOption, TenantBoardCard } from "@/src/features/saas/tenantBoard.types";
 import { changePlanAction } from "@/src/features/saas/actions/subscriptions.action";
+import { newClientRequestId } from "@/src/lib/clientRequestId";
 
 export function ChangePlanModal({
   open,
@@ -75,6 +76,8 @@ export function ChangePlanModal({
     });
   };
 
+  const confirmRequestIdRef = useRef(newClientRequestId());
+
   const confirm = () => {
     if (!selected || !toPlan) return;
     setError(null);
@@ -86,11 +89,14 @@ export function ChangePlanModal({
         reason: reason || null,
         sendEmail,
         includeReason,
+        clientRequestId: confirmRequestIdRef.current,
       });
       if (!res.ok) {
         setError(res.error.message);
+        confirmRequestIdRef.current = newClientRequestId();
         return;
       }
+      confirmRequestIdRef.current = newClientRequestId();
       onClose();
       router.refresh();
     });

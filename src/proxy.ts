@@ -15,14 +15,20 @@ function redirectToSignIn(request: NextRequest) {
 const PUBLIC_PATHS = ["/admin/signin"];
 
 export async function proxy(request: NextRequest) {
+  const requestId = request.headers.get("x-request-id") || crypto.randomUUID();
+
   if (PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    res.headers.set("x-request-id", requestId);
+    return res;
   }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set("x-request-id", requestId);
 
   let response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("x-request-id", requestId);
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 

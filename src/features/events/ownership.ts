@@ -106,16 +106,45 @@ export async function assertOwnedEvent(eventId: string): Promise<EventModel | nu
  * Pass a tab for staff-capable mutations (e.g. "attendees", "competitions").
  * Omit `tab` only when the call should stay owner-only (same as assertOwnedEvent).
  */
+const HACKATHON_MODULE_TABS = new Set([
+  "competitions",
+  "tasks",
+  "submissions",
+  "scoreboard",
+  "settings",
+]);
+
+async function eventPassesModuleGate(event: EventModel, tab?: string): Promise<boolean> {
+  if (!tab) return true;
+  const { hasModuleAccess } = await import("@/src/features/permissions/permissions.service");
+  if (HACKATHON_MODULE_TABS.has(tab)) {
+    return hasModuleAccess(event.organizerId, "hackathon_ops");
+  }
+  if (tab === "vendors") {
+    return hasModuleAccess(event.organizerId, "vendor_store");
+  }
+  if (tab === "certificates") {
+    return hasModuleAccess(event.organizerId, "certificates");
+  }
+  return true;
+}
+
 export async function assertEventActor(
   eventId: string,
   tab?: string,
   trackId?: string | null,
 ): Promise<EventModel | null> {
   const owned = await assertOwnedEvent(eventId);
-  if (owned) return owned;
+  if (owned) {
+    if (!(await eventPassesModuleGate(owned, tab))) return null;
+    return owned;
+  }
   if (!tab || !eventId) return null;
   if (!(await staffCanAct(eventId, tab, trackId))) return null;
-  return EventService.getEventByID(eventId);
+  const event = await EventService.getEventByID(eventId);
+  if (!event) return null;
+  if (!(await eventPassesModuleGate(event, tab))) return null;
+  return event;
 }
 
 /**

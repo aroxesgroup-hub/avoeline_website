@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState, useTransition } from "react";
+import { newClientRequestId } from "@/src/lib/clientRequestId";
 import { registerAttendeeAction } from "../actions/registerAttendee.action";
 import { previewPromo } from "../actions/previewPromo.action";
 import { SubmitButton } from "@/src/shared_components/SubmitButton";
@@ -104,6 +105,7 @@ export function RegistrationForm({
   } | null>(null);
   const [promoPending, startPromo] = useTransition();
   const [consent, setConsent] = useState(defaultConsentState);
+  const [clientRequestId] = useState(() => newClientRequestId());
 
   const selected = useMemo(
     () => competitions.find((c) => c.id === trackId) ?? competitions[0],
@@ -455,6 +457,7 @@ export function RegistrationForm({
       />
       <input type="hidden" name="legalAccepted" value={consent.legalAccepted ? "1" : "0"} />
       <input type="hidden" name="communityOptIn" value={consent.communityOptIn ? "1" : "0"} />
+      <input type="hidden" name="clientRequestId" value={clientRequestId} />
 
       <SubmitButton
         pendingText="Registering…"

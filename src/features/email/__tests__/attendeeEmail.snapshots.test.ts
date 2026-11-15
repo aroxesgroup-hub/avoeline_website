@@ -158,7 +158,7 @@ describe("N6 attendee email templates", () => {
         verifyUrl: "https://example.com/verify/ABC",
       }),
     );
-    assert.match(cert, /View certificate/);
+    assert.match(cert, /Download certificate/);
 
     const judge = await render(
       createElement(JudgeInviteEmail, {

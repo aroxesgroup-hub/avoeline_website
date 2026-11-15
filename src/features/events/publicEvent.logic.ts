@@ -3,9 +3,9 @@
  * Kept free of `server-only` so unit tests can import without Next runtime.
  */
 
-import { toDate } from "@/src/lib/datetime";
 import type { EventLifecycle } from "@/src/lib/eventState";
-import type { PublicOrgCredit, RegisterButtonState } from "./types";
+import { getRegistrationState } from "@/src/lib/registrationState";
+import type { LegacyRegisterButtonState, PublicOrgCredit } from "./types";
 
 /** Keys that must never appear on a client-facing public event payload. */
 export const PUBLIC_EVENT_FORBIDDEN_KEYS = [
@@ -70,7 +70,8 @@ export function dtoContainsForbiddenKey(value: unknown, path = ""): string | nul
 }
 
 /**
- * Register CTA state matrix for the public page (and tests).
+ * @deprecated Prefer getRegistrationState from `@/src/lib/registrationState`.
+ * Thin adapter kept for legacy tests / call sites.
  */
 export function resolveRegisterButtonState(input: {
   preview: boolean;
@@ -83,35 +84,58 @@ export function resolveRegisterButtonState(input: {
   hasTracks: boolean;
   openCompetitionCount: number;
   now?: Date;
-}): RegisterButtonState {
-  const now = input.now ?? new Date();
-  // Any staff preview (draft or published) is preview-only — never a live submit.
-  if (input.preview) return "admin_preview";
+  timezone?: string | null;
+  registrationCloseDate?: string | null;
+}): LegacyRegisterButtonState {
+  const statusFromLifecycle =
+    input.lifecycle === "draft"
+      ? "draft"
+      : input.lifecycle === "completed"
+        ? "completed"
+        : input.lifecycle === "cancelled"
+          ? "cancelled"
+          : input.lifecycle === "archived"
+            ? "archived"
+            : "published";
+
+  const competitions =
+    input.hasTracks && input.openCompetitionCount === 0
+      ? [{ id: "closed", ended: true as const, registrationClosesAt: null }]
+      : input.hasTracks
+        ? Array.from({ length: Math.max(1, input.openCompetitionCount) }, (_, i) => ({
+            id: `open-${i}`,
+            ended: false as const,
+            registrationClosesAt: null as string | null,
+          }))
+        : null;
+
+  const result = getRegistrationState({
+    event: {
+      status: statusFromLifecycle,
+      requiresRegistration: input.requiresRegistration,
+      registrationOpenDate: input.registrationOpenDate || null,
+      registrationCloseDate: input.registrationCloseDate ?? null,
+      waitlistEnabled: input.waitlistEnabled,
+      seatsLeft: input.seatsLeft,
+      schedule: { timezone: input.timezone || "UTC" },
+      hasCompetitions: input.hasTracks,
+    },
+    competitions,
+    preview: input.preview,
+    now: input.now,
+    timezone: input.timezone || "UTC",
+  });
+
+  if (result.state === "preview") return "admin_preview";
   if (!input.requiresRegistration) return "no_registration";
-  if (
-    input.lifecycle === "completed" ||
-    input.lifecycle === "cancelled" ||
-    input.lifecycle === "archived"
-  ) {
-    return "ended";
-  }
-  // Future open date must win over competitions_closed (tracks look closed before open).
-  const opens = toDate(input.registrationOpenDate);
-  if (opens) {
-    // Date-only → treat as start of that calendar day (UTC parse of YYYY-MM-DD).
-    const start = /^\d{4}-\d{2}-\d{2}$/.test(String(input.registrationOpenDate || "").trim())
-      ? new Date(`${String(input.registrationOpenDate).trim()}T00:00:00`)
-      : new Date(opens);
-    if (now < start) return "opens_at";
-  }
-
-  if (input.hasTracks && input.openCompetitionCount === 0) return "competitions_closed";
-
-  if (!input.registrationOpen) return "closed";
-
-  if (input.seatsLeft === 0) {
-    return input.waitlistEnabled ? "waitlist" : "sold_out";
-  }
+  if (result.state === "event_ended") return "ended";
+  if (result.state === "not_open") return "opens_at";
+  if (result.state === "closed" && input.hasTracks) return "competitions_closed";
+  if (result.state === "closed") return "closed";
+  if (result.state === "full") return "sold_out";
+  if (result.state === "waitlist") return "waitlist";
+  // Legacy: registrationOpen false without dates → closed
+  if (!input.registrationOpen && result.state === "open") return "closed";
   return "open";
 }
 

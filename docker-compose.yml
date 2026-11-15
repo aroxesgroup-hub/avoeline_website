@@ -1,0 +1,32 @@
+# Local stack helpers (docs/25 T0).
+# Database: use Supabase CLI — `npx supabase start` (owns its containers).
+# Then: docker compose up -d mailpit
+# App (optional production build): docker compose --profile app up --build
+#
+# Mailpit UI http://localhost:8025  SMTP smtp://127.0.0.1:1025
+
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  app:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      APP_ENV: local
+      GOOGLE_MODE: mock
+      EMAIL_TRANSPORT: mailpit
+      MAILPIT_SMTP_URL: smtp://mailpit:1025
+    depends_on:
+      - mailpit
+    command: ["npm", "run", "start"]

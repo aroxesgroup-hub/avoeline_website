@@ -42,7 +42,7 @@
 - Uploads: `src/features/media/uploadMedia.action.ts` (C3 alias `FileUploadField`). Body limits **50mb** (`serverActions.bodySizeLimit` + `proxyClientMaxBodySize`).
 - Paid modules: `hasModuleAccess` / `checkPermission` / `can` — no new raw role gates for modules.
 - C3 UI primitives: `EventCard`, `EventThumb`, `CompetitionFilter`, `FileUploadField`, plus existing Modal/ConfirmDialog/StatusBadge/EmptyState/`DataTable` (Server Component)/`ClientDataTable` (row clicks only)/FilterTabs under `shared_components/ui`. Never mark `DataTable` as `"use client"` — that breaks organizer/vendor/attendee list pages.
-- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `test:api-smoke` / `analyze`; husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Route Handler Postman: collection **Avoeline API Routes** (export `postman/avoeline-api-routes.postman_collection.json`, envs Local/Production). Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
+- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `test:load:reads` / `test:api-smoke` / `analyze`; husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Route Handler Postman: collection **Avoeline API Routes** (export `postman/avoeline-api-routes.postman_collection.json`, envs Local/Production). Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
 
 ---
 
@@ -245,7 +245,7 @@ Platform tenant/subscription admin (docs/01). Plan archive: `plans/2026-10-25-ad
 
 ### `permissions`
 
-`hasModuleAccess` + `LockedModulePanel`. Paid organizer surfaces: marketplace (`vendor_store`), certificates, designer (`ai_designer`), ushers (`ushers_ops`), hackathon (`hackathon_ops`).
+`hasModuleAccess` (pure core: `resolveModuleAccessFromRows`) + `LockedModulePanel`. Paid organizer surfaces: marketplace (`vendor_store`), certificates, designer (`ai_designer`), ushers (`ushers_ops`), hackathon (`hackathon_ops`). Event Vendors tab + booking writes require `vendor_store`. `assertEventActor` also gates hackathon/vendors/certificates tabs. T9 seed: `npm run seed:test`; report `docs/testing/plan-isolation-report.md`.
 
 ### `department` extras
 
@@ -332,7 +332,7 @@ Organizer home (`/organizer/[organizer_id]/dashboard`): no plan banner (plan blo
 Browse + wizard + ownership. My Events list: `organizerEvents.filters.ts` / `organizerEvents.stats.ts` / toolbar + row menu components; `EventThumb` `showTitle`; occupancy tallies; 20/page URL pagination.
 
 - `browse.service.ts`, `event.controller.ts`, `ownership.ts`
-- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, `resolveRegisterButtonState`) + client-safe `types.ts` (`PublicEventDto` allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / promo codes**, structured bank/IBAN, attendee/team secrets, sponsor contract/benefits). Allowlisted `paymentInstructions` (plain text) for paid events only. Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false); `events.payment_instructions`.
+- **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, **`getRegistrationState`** from `src/lib/registrationState.ts` — docs/24) + client-safe `types.ts` (`PublicEventDto.registration` + per-competition `registerState`/`canRegister`/`closeInherited`; allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / private promo codes**, structured bank/IBAN, attendee/team secrets, sponsor contract/benefits). Allowlisted `paymentInstructions` (plain text) for paid events only. Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false); `events.payment_instructions`. Reminder CTA: `RegistrationReminderButton` on `not_open`.
 - Actions: `toggleChecklistItem.action.ts`, `updateEventBasics.action.ts`, `archiveEvent.action.ts`, `deleteEvent.action.ts`, `updatePublicShowToggles.action.ts`
 - Public UI (N3): clean banner hero + meta (`PublicEventHero`); Share / Add-to-calendar menus; `PublicMedia` (banner+gallery lightbox, lazy YouTube/Vimeo); Facts hide unlimited seats; sections Facts → Media → About → Tickets → Agenda → Speakers → Competitions → Sponsors → Organizer → Report; sticky `PublicRegisterCard` with `paymentInstructions` before screenshot + “What happens next”. Helpers in `publicPage.logic.ts` + `addToCalendar.ts`.
 - Wizard: `EventWizardLayout` (shell) + `wizard/steps/{Basic,ScheduleLocation,HackathonTracks,Registration,Review}Step`, widgets `DescriptionEditor`, `TimeField`, `MapPreview`, `FormBuilder`. Registration uses shared `TiersAndPromosEditor` (tiers+promos) plus **Entry fee (PKR)** (`PriceOfTicket`) for paid non-hackathons (tiers optional; create seeds a General SKU when fee-only). Hackathons: fees on Competitions (`Entry fee` for single track, per-competition `Fee` when multi); Registration points organizers there. Review shows banner preview + `formatRegistrationSummary` (never “0 seats”), Publish immediately, CMS-linked Terms / Organizer Agreement / Content Rights (acceptances recorded as `user_consents` context `event_publish`). Sponsor show-* toggles live on Sponsors tab only. Defaults: free tickets, PKT timezone (no TZ picker). Validates schedule order, named hackathon tracks, paid entry fee or tiers before next/publish. Product rules: `docs/09-event-creation.md`. Full tab/flow inventory: `docs/10-events-and-hackathon-dashboards.md`.
@@ -727,7 +727,7 @@ Styling helpers: `src/lib/ui.ts` (`buttonClass`, etc.). Theme: `data-theme` on `
 - `src/proxy.ts` — auth middleware
 - Windows: PowerShell often blocks `npm.ps1`. Use Command Prompt, `npm.cmd install`, or `install.bat` / `dev.bat`. Cursor terminal is set to Command Prompt in `.vscode/settings.json`. Node **>=20.9**.
 - `tailwind.config.js` / `.json`, `postcss.config.mjs`, `eslint.config.mjs`
-- `package.json` scripts: `dev`, `build`, `start`, `lint`, `setup:buckets`, `seed:owners`, `seed:demo`, `reset:wipe-data` (`CONFIRM=YES`)
+- `package.json` scripts: `dev`, `build`, `start`, `lint`, `setup:buckets`, `seed:owners`, `seed:demo`, `seed:test`, `cleanup:test`, `test:plan-gating`, `test:e2e:t9`, `test:ci:postman`, `test:e2e:smoke`, `test:prod-smoke`, `reset:wipe-data` (`CONFIRM=YES`)
 - Cursor MCP: `.cursor/mcp.json` — hosted Supabase MCP for project `pfepncjkjamukhvsfwkx` (`docs`, `account`, `database`, `debugging`, `development`, `functions`, `branching`). Enable/login via Cursor CLI: `agent mcp enable supabase`, `agent mcp login supabase`, `agent mcp list`.
 - Agent skills: `.agents/skills/supabase`, `.agents/skills/supabase-postgres-best-practices` (from `npx skills add supabase/agent-skills`; lockfile `skills-lock.json`).
 - **Plans archive:** [`plans/`](plans/) — README + INDEX; every agent plan copied as `YYYY-MM-DD-short-slug.md`. Cursor rule: `.cursor/rules/plans-archive.mdc`.
@@ -761,6 +761,46 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-15 — T10 release readiness + CI
+- What: Honest **NO-GO** gate in `docs/testing/release-readiness.md`. CI: PR Postman/authz after `next start`, merge E2E smoke, nightly security+k6 soft-skip, prod read-only smoke. Batch B: pin `private.gen_registration_short_code` search_path. SEC-005 accepted as tooling-only.
+- Files: `docs/testing/release-readiness.md`, `.github/workflows/{ci,nightly-local,prod-smoke}.yml`, `scripts/ci-start-and-postman.mjs`, `package.json`, `playwright.config.ts`, `supabase/migrations/20261115120000_t10_search_path_short_code.sql`, `plans/2026-11-15-t10-release-readiness.md`
+- Next: Install k6 + run load group 1; T5 live-smoke.md; marketing Lighthouse checklist; flip readiness to GO when gates clear.
+
+### 2026-11-15 — T9 plan gating and tenant isolation
+- What: Restored `seed:test` / `cleanup:test` (Social Lite / Partial Ops / Full + isolation peers). Extracted `resolveModuleAccessFromRows`; gated event Vendors + booking writes on `vendor_store`; vendor booking IDOR `notFound`; `assertEventActor` module gates for hackathon/vendors/certs. Harness `test:plan-gating` + Playwright `test:e2e:t9`. Report + matrix rows.
+- Files: `scripts/seed-test.mjs`, `scripts/cleanup-test.mjs`, `src/features/permissions/resolveModuleAccess.logic.ts`, `permissions.service.ts`, `src/features/events/ownership.ts`, `src/app/organizer/.../vendors/page.tsx`, `src/app/vendor/.../bookings/[booking_id]/page.tsx`, `tests/security/authz-tenant.mjs`, `e2e/t9/plan-gating.spec.ts`, `docs/testing/plan-isolation-report.md`, `plans/2026-11-15-t9-plan-isolation.md`
+- Next: T10 release gate; optional SSR cookie chunks in authz-tenant; dept/club Playwright isolation.
+
+### 2026-11-14 — T8 UI sweep (double-tap + idempotency)
+- What: Playwright T8 harness (`assertSingleSubmit`, axe, console guard, theme/viewports), `client_request_ids` + `safeAction`/`form` idempotency, `SubmitButton`/`PendingButton` on approve/check-in, specs under `e2e/t8/`, ui-sweep report.
+- Files: `e2e/helpers/*`, `e2e/t8/**`, `playwright.config.ts`, `src/lib/idempotency.ts`, `src/lib/formIdempotency.ts`, `src/lib/safeAction.ts`, `src/lib/clientRequestId.ts`, `src/shared_components/PendingButton.tsx`, `supabase/migrations/20261114210000_t8_client_request_ids.sql`, `docs/testing/ui-sweep-report.md`, `plans/2026-11-14-t8-ui-sweep.md`
+- Next: `npm run test:e2e:t8` against local `next start` + `seed:demo`; commit visual baselines with `--update-snapshots`; expand dept/vendor auth projects.
+
+### 2026-11-14 — T7 full security program
+- What: Security harness (local/staging guards), unit corpus (XSS/CSV/SSRF/headers/upload spoof/rate limit/overrides), transport/authz HTTP probes, Postman Negative folder for all Route Handlers, deps/advisors recording. Fixed cert + calendar.ics UUID 500s; revoked DEFINER EXECUTE on `cleanup_is_test_data` / `get_marketing_insights`; bumped sharp. ZAP/osv/gitleaks not executed (tools missing). Staging Postman skipped (no allowlisted staging URL).
+- Files: `tests/security/**`, `docs/testing/security-report.md`, `docs/testing/README.md`, `docs/testing/test-matrix.md`, `src/app/api/certificates/[id]/route.ts`, `src/app/api/events/[eventId]/calendar.ics/route.ts`, `supabase/migrations/20261114180000_t7_revoke_definer_anon_execute.sql`, `src/features/permissions/overrideLive.logic.ts`, `plans/2026-11-14-t7-security.md`
+- Next: Install Docker (ZAP), osv-scanner, gitleaks; configure staging `BASE_URL` + allowlist and re-run Postman/advisors; T10 for remaining npm highs and advisor WARNs.
+
+### 2026-11-13 — Registration timezone harden
+- What: Invalid schedule labels such as `Pakistan Standard Time (PKT, UTC+5)` are mapped to `Asia/Karachi` (or `UTC`) so the public event page no longer throws in `Intl.DateTimeFormat`.
+- Files: `src/lib/registrationState.ts`
+- Next: Rebuild and restart local production, then reload the event URL and run `npm run test:load:reads`.
+
+### 2026-11-13 — Production build modules restored
+- What: Restored `getRegistrationState` and the non-production email route so `npm run build` finishes. Also restored agenda sort, the client sponsor strip, and the judge invite form that the same compile was missing.
+- Files: `src/lib/registrationState.ts`, `src/lib/email/emailTestGuard.ts`, `src/features/agendas/agendaSort.ts`, `src/features/events/components/public/PublicSponsorsStrip.client.tsx`, `src/features/hackathon/components/JudgeInviteRespondForm.tsx`, `src/features/certificates/fitCenter.ts`
+- Next: `set APP_ENV=local`, then `npm run start`, then `npm run test:load:reads` with a published `EVENT_ID`.
+
+### 2026-11-13 — T6 group 1 local read-path load
+- What: k6 scripts for the public event page (300 VUs, 5 minutes, p95 under 800 ms) and directory search (50 VUs, 2 minutes). Local-only guard. Run was not executed because k6 is not on PATH. Registration, check-in, hackathon, and the soak are later pauses.
+- Files: `tests/load/public-event.js`, `tests/load/directory.js`, `tests/load/run-reads.mjs`, `tests/load/guard.mjs`, `docs/testing/load-report.md`, `docs/testing/test-matrix.md`
+- Next: install k6, `npm run build && npm run start` with `APP_ENV=local` and a published `EVENT_ID`, then `npm run test:load:reads`.
+
+### 2026-11-11 — Registration state A1 (docs/24)
+- What: Unified `getRegistrationState` (TZ date-only bounds, inherit competition close, `not_open` before open, hackathon closed only after open when all comps closed/full, `closing_soon` ≤48h, copy + Add reminder). Wired public DTO/UI, track detail, registration submit + eligibility; legacy helpers delegate.
+- Files: `src/lib/registrationState.ts`, `src/lib/__tests__/registrationState.test.ts`, `publicEvent.service.ts`, `PublicRegisterCard.tsx`, `RegistrationReminderButton.tsx`, `PublicCompetitions.tsx`, `tracks/[trackId]/page.tsx`, `registration.service.ts`, `publicRegistrationEligibility.ts`, `competitionRegistration.ts`, `publicEventStatus.ts`, `publicEvent.logic.ts`, `docs/24-registration-state.md`, `docs/11-…`, `plans/2026-11-11-registration-state-a1.md`
+- Next: Prefer `getRegistrationState` for any new registration-window call site; remove legacy adapters when unused.
 
 ### 2026-11-11 — Access, certificates, hackathon status, public page
 - What: Access UI tokens + `vip_tiered`/`extra.access` persist; ReviewStep visibility; browse includes VIP; unlock cookie; guest email SenderPicker; CTA `opens_at` before `competitions_closed` + server registration window; `promo_codes.visibility` public|private + chips; cert editor hydrate/Preview/Transformer/assets + email fail-closed; public competitions polish + `?track=` + DTO tracks list.

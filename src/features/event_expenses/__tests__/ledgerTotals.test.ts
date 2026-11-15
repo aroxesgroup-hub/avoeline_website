@@ -128,4 +128,12 @@ describe("ledgerTotals", () => {
     assert.equal(totals.incomeReceived, 400);
     assert.equal(totals.incomeExpected, 1000);
   });
+
+  it("empty ledger keeps budget and a zero net", () => {
+    const totals = computeLedgerTotals([], 5000);
+    assert.equal(totals.net, 0);
+    assert.equal(totals.projectedNet, 0);
+    assert.equal(totals.budget, 5000);
+    assert.deepEqual(totals.byCategory, []);
+  });
 });

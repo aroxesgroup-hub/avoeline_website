@@ -78,6 +78,8 @@ export const TABLES = {
   CUSTOM_PRICING_AGREEMENTS: "custom_pricing_agreements",
   INSTITUTES: "institutes",
   EMAIL_LOG: "email_log",
+  /** T8 double-submit / client request idempotency. */
+  CLIENT_REQUEST_IDS: "client_request_ids",
   EMAIL_OUTBOX: "email_outbox",
   EMAIL_SEND_BATCHES: "email_send_batches",
   PLAN_EMAIL_LIMITS: "plan_email_limits",

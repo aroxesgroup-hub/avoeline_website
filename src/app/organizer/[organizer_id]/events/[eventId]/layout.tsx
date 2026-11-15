@@ -51,9 +51,10 @@ export default async function EventLayout({
         : `/organizer/${organizer_id}/events`;
 
   const takesRegistrations = event.requiresRegistration !== false;
-  const [hackathon, certsOk] = await Promise.all([
+  const [hackathon, certsOk, vendorsOk] = await Promise.all([
     eventIsHackathon(event),
     hasModuleAccess(organizer_id, "certificates"),
+    hasModuleAccess(organizer_id, "vendor_store"),
   ]);
   const ev = `/organizer/${organizer_id}/events/${eventId}`;
   const tabs = [
@@ -65,7 +66,7 @@ export default async function EventLayout({
     { label: "Access", value: "access", href: `${ev}/access` },
     { label: "Agenda", value: "agenda", href: `${ev}/agenda` },
     { label: "Speakers", value: "speakers", href: `${ev}/speakers` },
-    { label: "Vendors", value: "vendors", href: `${ev}/vendors` },
+    ...(vendorsOk ? [{ label: "Vendors", value: "vendors", href: `${ev}/vendors` }] : []),
     { label: "Sponsors", value: "sponsors", href: `${ev}/sponsors` },
     { label: "Expenses", value: "expenses", href: `${ev}/expenses` },
     ...(hackathon

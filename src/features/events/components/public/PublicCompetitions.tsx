@@ -6,17 +6,21 @@ import { formatDate } from "@/src/lib/datetime";
 import { HACKATHON_KIND_LABELS } from "@/src/features/hackathon/kinds";
 import type { PublicCompetition } from "@/src/features/events/types";
 
-function registerLabel(state: PublicCompetition["registerState"]): string {
-  if (state === "full") return "Full";
-  if (state === "closed") return "Closed";
-  if (state === "not_yet_open") return "Not yet open";
-  return "Register team";
+function registerLabel(track: PublicCompetition): string {
+  if (track.registrationCtaLabel) return track.registrationCtaLabel;
+  if (track.registerState === "full") return "Sold out";
+  if (track.registerState === "not_open") return "Not yet open";
+  if (track.registerState === "waitlist") return "Join the waitlist";
+  if (track.registerState === "closing_soon") return "Register";
+  if (track.canRegister) return "Register team";
+  return "Closed";
 }
 
 function statusBadge(state: PublicCompetition["registerState"]): string {
-  if (state === "open") return "Open";
+  if (state === "open" || state === "closing_soon") return "Open";
   if (state === "full") return "Full";
-  if (state === "not_yet_open") return "Not yet open";
+  if (state === "waitlist") return "Waitlist";
+  if (state === "not_open") return "Not yet open";
   return "Closed";
 }
 
@@ -55,10 +59,12 @@ export function PublicCompetitions({
           const detailHref = `/events/${eventId}/tracks/${track.id}${qsSuffix}`;
           const registerHref = `/events/${eventId}${qsSuffix}${join}track=${encodeURIComponent(track.id)}#register`;
           const closeLabel = track.effectiveRegistrationClosesAt
-            ? formatDate(track.effectiveRegistrationClosesAt)
-            : null;
+            ? `${formatDate(track.effectiveRegistrationClosesAt)}${
+                track.closeInherited ? " (event deadline)" : ""
+              }`
+            : "See event page";
           const isCtf = track.kind === "ctf";
-          const open = track.registerState === "open";
+          const open = track.canRegister && track.registerState !== "waitlist";
           return (
             <li
               key={track.id}
@@ -142,20 +148,21 @@ export function PublicCompetitions({
                   </details>
                 ) : null}
                 <p className="text-2xs font-medium uppercase text-ink-soft">
-                  {closeLabel
-                    ? `Registration closes ${closeLabel}`
-                    : "Uses event registration close"}
+                  Registration closes {closeLabel}
                 </p>
+                {track.registrationMessage ? (
+                  <p className="text-xs text-ink-soft">{track.registrationMessage}</p>
+                ) : null}
                 <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                  {open ? (
+                  {open || track.registerState === "waitlist" ? (
                     <Link href={registerHref} className={buttonClass("primary", "sm")}>
-                      Register team
+                      {registerLabel(track)}
                     </Link>
                   ) : (
                     <span
                       className={`${buttonClass("secondary", "sm")} pointer-events-none opacity-70`}
                     >
-                      {registerLabel(track.registerState)}
+                      {registerLabel(track)}
                     </span>
                   )}
                   <Link href={detailHref} className={buttonClass("ghost", "sm")}>

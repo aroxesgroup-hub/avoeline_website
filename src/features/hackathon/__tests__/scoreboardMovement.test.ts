@@ -4,6 +4,7 @@ import {
   aggregateScoreboardDetailAt,
   computeRankMovement,
   withRankMovement,
+  type ScoreboardDetailRow,
 } from "../scoreboardAggregate";
 
 const base = {
@@ -94,5 +95,11 @@ describe("scoreboard rank movement", () => {
     const move = computeRankMovement(withMove, aggregateScoreboardDetailAt(input, now - 3_600_000));
     assert.equal(move.get("b")?.direction, "up");
     assert.ok((move.get("b")?.delta ?? 0) > 0);
+  });
+
+  it("marks a team missing from the earlier board as new", () => {
+    const move = computeRankMovement([{ teamId: "newcomer" } as ScoreboardDetailRow], []);
+    assert.equal(move.get("newcomer")?.direction, "new");
+    assert.equal(move.get("newcomer")?.priorRank, null);
   });
 });

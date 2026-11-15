@@ -160,9 +160,39 @@ async function recordOrganizerSendLog(opts: {
 }
 
 export async function sendAsConnection(
-  input: ConnectionSendInput & { kind?: string; idempotencyKey?: string },
+  input: ConnectionSendInput & {
+    kind?: string;
+    idempotencyKey?: string;
+    /** When true, caller already applied emailTestGuard (subject may be prefixed). */
+    skipEmailTestGuard?: boolean;
+  },
   actorId?: string,
 ): Promise<ConnectionSendResult> {
+  let sendSubject = input.subject;
+  if (!input.skipEmailTestGuard) {
+    const { decideEmailRoute, sendViaMailpit } = await import("@/src/lib/email/emailTestGuard");
+    const decision = decideEmailRoute({ to: input.to, subject: input.subject });
+    if (decision.route === "blocked") {
+      return { ok: false, code: "QUOTA", error: decision.reason };
+    }
+    if (decision.route === "sink") {
+      if (decision.sink === "mailpit") {
+        const sunk = await sendViaMailpit({
+          to: decision.recipients,
+          subject: decision.subject,
+          html: input.html,
+          text: input.text,
+          replyTo: input.replyTo,
+          attachments: input.attachments,
+        });
+        if (!sunk.ok) return { ok: false, code: "SEND_FAILED", error: sunk.error };
+        return { ok: true };
+      }
+      return { ok: true };
+    }
+    sendSubject = decision.subject;
+  }
+
   const conn = await getConnectionById(input.connectionId);
   if (!conn || conn.status !== "active") {
     return {
@@ -223,6 +253,7 @@ export async function sendAsConnection(
     const accessToken = await getAccessTokenForConnection(conn.id);
     const result = await GoogleEmailSender.send(accessToken, {
       ...input,
+      subject: sendSubject,
       fromEmail,
       fromName,
     });
@@ -286,38 +317,27 @@ export async function sendAsOrganizer(opts: {
   attachments?: ConnectionSendInput["attachments"];
   idempotencyKey?: string;
 }): Promise<ConnectionSendResult & { connectionId?: string }> {
-  // Local Mailpit escape hatch (N6) — never used in production.
-  if (process.env.EMAIL_TRANSPORT === "mailpit" && process.env.NODE_ENV !== "production") {
-    try {
-      const nodemailer = await import("nodemailer");
-      const smtpUrl = process.env.MAILPIT_SMTP_URL || "smtp://127.0.0.1:1025";
-      const transporter = nodemailer.createTransport(smtpUrl);
-      await transporter.sendMail({
-        from: process.env.MAIL_FROM || "avoeline@localhost",
-        to: Array.isArray(opts.to) ? opts.to.join(", ") : opts.to,
-        subject: opts.subject,
+  const { decideEmailRoute, sendViaMailpit } = await import("@/src/lib/email/emailTestGuard");
+  const decision = decideEmailRoute({ to: opts.to, subject: opts.subject });
+  if (decision.route === "blocked") {
+    return { ok: false, code: "QUOTA", error: decision.reason };
+  }
+  if (decision.route === "sink") {
+    if (decision.sink === "mailpit") {
+      const sunk = await sendViaMailpit({
+        to: decision.recipients,
+        subject: decision.subject,
         html: opts.html,
         text: opts.text,
         replyTo: opts.replyTo,
-        attachments: (opts.attachments || []).map((a) => ({
-          filename: a.filename,
-          content:
-            typeof a.content === "string"
-              ? Buffer.from(a.content, "base64")
-              : Buffer.from(a.content),
-          contentType: a.contentType,
-          cid: a.cid,
-          contentDisposition: a.cid ? ("inline" as const) : ("attachment" as const),
-        })),
+        attachments: opts.attachments,
       });
+      if (!sunk.ok) {
+        return { ok: false, code: "SEND_FAILED", error: sunk.error };
+      }
       return { ok: true, connectionId: "mailpit" };
-    } catch (err) {
-      return {
-        ok: false,
-        code: "SEND_FAILED",
-        error: err instanceof Error ? err.message : "Mailpit send failed",
-      };
     }
+    return { ok: true, connectionId: "log-sink" };
   }
 
   const sender = await resolveSender({
@@ -338,13 +358,14 @@ export async function sendAsOrganizer(opts: {
     {
       connectionId: sender.connectionId,
       to: opts.to,
-      subject: opts.subject,
+      subject: decision.subject,
       html: opts.html,
       text: opts.text,
       replyTo: opts.replyTo,
       attachments: opts.attachments,
       kind: opts.kind || "custom",
       idempotencyKey: opts.idempotencyKey,
+      skipEmailTestGuard: true,
     },
     opts.organizerId,
   );

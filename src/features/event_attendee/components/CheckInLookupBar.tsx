@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { ScanLine } from "lucide-react";
 import { buttonClass } from "@/src/lib/ui";
 import { lookupAndCheckInAction } from "@/src/features/event_attendee/actions/lookupCheckIn.action";
+import { newClientRequestId } from "@/src/lib/clientRequestId";
+import { PendingButton } from "@/src/shared_components/PendingButton";
 
 export function CheckInLookupBar({ eventId }: { eventId: string }) {
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const requestIdRef = useRef(newClientRequestId());
 
   return (
     <form
@@ -20,8 +23,14 @@ export function CheckInLookupBar({ eventId }: { eventId: string }) {
         setError(null);
         const value = query.trim();
         if (!value) return;
+        const clientRequestId = requestIdRef.current;
         startTransition(async () => {
-          const result = await lookupAndCheckInAction({ eventId, query: value });
+          const result = await lookupAndCheckInAction({
+            eventId,
+            query: value,
+            clientRequestId,
+          });
+          requestIdRef.current = newClientRequestId();
           if (!result.ok) {
             setError(result.error.message);
             return;
@@ -51,14 +60,16 @@ export function CheckInLookupBar({ eventId }: { eventId: string }) {
           autoComplete="off"
           spellCheck={false}
         />
-        <button
+        <PendingButton
           type="submit"
-          disabled={pending || !query.trim()}
+          pending={pending}
+          pendingText="Checking…"
+          disabled={!query.trim()}
           className={buttonClass("primary", "sm")}
         >
           <ScanLine className="h-3.5 w-3.5" aria-hidden="true" />
-          {pending ? "Checking…" : "Check in"}
-        </button>
+          Check in
+        </PendingButton>
       </div>
       {message ? <p className="mt-2 text-xs text-emerald-700">{message}</p> : null}
       {error ? <p className="mt-2 text-xs text-rose-600">{error}</p> : null}

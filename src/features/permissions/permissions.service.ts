@@ -2,14 +2,8 @@ import { cache } from "react";
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { isModuleKey, type ModuleKey } from "./moduleKeys";
-
-function overrideLive(
-  row: { expires_at?: string | null } | null | undefined,
-  nowIso: string,
-): boolean {
-  if (!row) return false;
-  return !row.expires_at || String(row.expires_at) > nowIso;
-}
+import { overrideLive } from "./overrideLive.logic";
+import { resolveModuleAccessFromRows } from "./resolveModuleAccess.logic";
 
 /** Clubs this user presidents or owns — not only organizer_profiles.org_id. */
 export const clubsLedByUser = cache(async (userId: string): Promise<string[]> => {
@@ -64,26 +58,17 @@ export const hasModuleAccess = cache(
         .limit(40),
     ]);
 
-    const live = (overrides ?? []).filter((row) => overrideLive(row, nowIso));
-    if (live.some((row) => row.denied)) return false;
-    if (live.some((row) => !row.denied)) return true;
-
     const orgId = profile?.org_id as string | undefined;
-    const orgLive = (orgOverrides ?? []).filter(
-      (row) => row.target_org_id === orgId && overrideLive(row, nowIso),
-    );
-    if (orgLive.some((row) => row.denied)) return false;
-    if (orgLive.some((row) => !row.denied)) return true;
-
     const ledClubs = await clubsLedByUser(organizerId);
     const clubIds = [...new Set([orgId, ...ledClubs].filter(Boolean))] as string[];
+    let clubAccessEnabled = false;
     if (clubIds.length) {
       const { data: clubRows } = await supabaseAdmin
         .from(TABLES.ORG_MODULE_ACCESS)
         .select("org_id, enabled")
         .in("org_id", clubIds)
         .eq("module_key", moduleKey);
-      if ((clubRows ?? []).some((row) => row.enabled !== false)) return true;
+      clubAccessEnabled = (clubRows ?? []).some((row) => row.enabled !== false);
     }
 
     const planKey = String(profile?.plan_type || "free");
@@ -93,10 +78,17 @@ export const hasModuleAccess = cache(
       .eq("key", planKey)
       .maybeSingle();
 
-    if (plan && plan.is_active === false) return false;
-
-    const included = (plan?.included_modules as string[] | null) ?? [];
-    return included.includes(moduleKey);
+    return resolveModuleAccessFromRows({
+      nowIso,
+      personalOverrides: overrides ?? [],
+      orgOverrides: orgOverrides ?? [],
+      profileOrgId: orgId,
+      clubAccessEnabled,
+      planIncludedModules: (plan?.included_modules as string[] | null) ?? [],
+      planIsActive: plan?.is_active,
+      moduleKey,
+      overrideLive,
+    });
   },
 );
 

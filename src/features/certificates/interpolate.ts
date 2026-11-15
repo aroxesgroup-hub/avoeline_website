@@ -26,6 +26,12 @@ export function interpolateTokens(text: string, data: CertificateData): string {
         return data.event_dates || "";
       case "role":
         return data.role || data.award || "";
+      case "teamName":
+        return data.team_name || "";
+      case "competitionName":
+        return data.competition_name || "";
+      case "rank":
+        return data.rank || "";
       case "certificateNumber":
         return data.certificate_number || "";
       case "issuerName":

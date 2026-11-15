@@ -21,6 +21,13 @@ export default async function MakingTemplate({
   }
 
   const template = await ensureTemplateForEvent(eventId, event.organizerId);
+  const { listActiveFields } = await import("@/src/features/registration/forms/formFields.service");
+  const fields = await listActiveFields(eventId).catch(() => []);
+  const formFieldKeys = fields
+    .map((f) => f.key)
+    .filter((k) => k && k !== "name" && k !== "email" && k !== "phone");
 
-  return <CertificateEditorLazy eventId={eventId} initial={template} />;
+  return (
+    <CertificateEditorLazy eventId={eventId} initial={template} formFieldKeys={formFieldKeys} />
+  );
 }

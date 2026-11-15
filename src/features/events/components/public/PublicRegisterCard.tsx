@@ -1,11 +1,13 @@
 import { Users } from "lucide-react";
 import { formatDateMedium } from "@/src/lib/datetime";
 import { formatCurrency } from "@/src/lib/money";
+import type { RegistrationState } from "@/src/lib/registrationState";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import type { EventFormField } from "@/src/features/registration/forms/formFields.types";
-import type { PublicEventDto, RegisterButtonState } from "@/src/features/events/types";
+import type { PublicEventDto } from "@/src/features/events/types";
 import { whatHappensNextLine } from "./publicPage.logic";
+import { RegistrationReminderButton } from "./RegistrationReminderButton";
 
 type Props = {
   dto: PublicEventDto;
@@ -24,7 +26,8 @@ export function PublicRegisterCard({
   attendee = null,
   initialTrackId = null,
 }: Props) {
-  const state = dto.registerState;
+  const reg = dto.registration;
+  const state = preview ? ("preview" as RegistrationState) : reg.state;
   const formFields = dtoToFormFields(dto);
 
   return (
@@ -60,6 +63,7 @@ export function PublicRegisterCard({
       <div className="mt-6">
         <RegisterBody
           state={state}
+          message={reg.message}
           dto={dto}
           preview={preview}
           formFields={formFields}
@@ -75,6 +79,7 @@ export function PublicRegisterCard({
 
 function RegisterBody({
   state,
+  message,
   dto,
   preview,
   formFields,
@@ -83,7 +88,8 @@ function RegisterBody({
   attendee,
   initialTrackId,
 }: {
-  state: RegisterButtonState;
+  state: RegistrationState;
+  message: string;
   dto: PublicEventDto;
   preview: boolean;
   formFields: EventFormField[];
@@ -96,13 +102,13 @@ function RegisterBody({
     isFree: dto.isFree,
     requiresApproval: dto.requiresApproval,
   });
+  const openCompetitions = dto.competitions.filter((c) => c.canRegister);
 
-  if (state === "admin_preview" || preview) {
-    const openCompetitions = dto.competitions.filter((c) => c.registrationOpen);
+  if (state === "preview" || preview) {
     return (
       <div className="space-y-3">
         <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
-          Preview only — registration cannot be submitted from this view.
+          {message || "Preview only — registration cannot be submitted from this view."}
         </p>
         <RegistrationForm
           eventId={dto.id}
@@ -129,63 +135,60 @@ function RegisterBody({
     );
   }
 
-  if (state === "no_registration") {
+  if (state === "unpublished") {
     return (
-      <p className="text-sm text-ink-soft">
-        This event does not take registrations. Details are listed on this page.
+      <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+        {message}
       </p>
     );
   }
 
-  if (state === "ended") {
+  if (state === "event_ended") {
     return (
       <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
-        This event has ended. Registration is closed.
+        {message}
       </p>
     );
   }
 
-  if (state === "opens_at") {
-    const when = dto.registerOpensAt
-      ? formatDateMedium(dto.registerOpensAt)
-      : formatDateMedium(dto.registrationOpenDate);
+  if (state === "not_open") {
+    const reminder = dto.registration.reminder;
     return (
-      <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
-        Registration opens{when ? ` on ${when}` : " soon"}.
-      </p>
+      <div className="space-y-3">
+        <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+          {message}
+        </p>
+        {reminder ? (
+          <RegistrationReminderButton
+            title={reminder.title}
+            startsAt={reminder.startsAt}
+            endsAt={reminder.endsAt}
+            url={dto.sharePath}
+          />
+        ) : null}
+      </div>
     );
   }
 
   if (state === "closed") {
     return (
       <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
-        Registration is closed for this event.
+        {message}
       </p>
     );
   }
 
-  if (state === "sold_out") {
+  if (state === "full") {
     return (
       <EmptyState
         icon={<Users className="h-5 w-5" />}
-        title="Fully booked"
-        description="Every seat for this event has been taken. Check back in case someone cancels."
+        title="Sold out"
+        description={message || "Every seat for this event has been taken."}
       />
     );
   }
 
-  if (state === "competitions_closed") {
-    return (
-      <EmptyState
-        icon={<Users className="h-5 w-5" />}
-        title="Competitions closed"
-        description="Every competition on this hackathon has ended or closed registration, so signup is not open."
-      />
-    );
-  }
-
-  if (state === "waitlist" || state === "open") {
-    const openCompetitions = dto.competitions.filter((c) => c.registrationOpen);
+  if (state === "waitlist" || state === "open" || state === "closing_soon") {
     const needsConnections =
       !dto.isFree ||
       dto.formFields.some((f) => f.type === "file" || f.key === "payment_screenshot") ||
@@ -200,11 +203,9 @@ function RegisterBody({
     }
     return (
       <div className="space-y-3">
-        {state === "waitlist" ? (
-          <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
-            Seats are full — you will join the waitlist.
-          </p>
-        ) : null}
+        <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+          {message}
+        </p>
         <RegistrationForm
           eventId={dto.id}
           isPaid={!dto.isFree}
@@ -260,7 +261,6 @@ function competitionChoice(c: PublicEventDto["competitions"][number]) {
   };
 }
 
-/** Reconstruct EventFormField-shaped rows for RegistrationForm (ids are synthetic). */
 function dtoToFormFields(dto: PublicEventDto): EventFormField[] {
   return dto.formFields.map((f, i) => ({
     id: `${dto.id}-${f.key}`,

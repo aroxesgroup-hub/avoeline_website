@@ -245,6 +245,14 @@ export function diagnoseGooglePickerEnv(): {
   };
 }
 
+export function getGoogleMode(): "mock" | "live" {
+  const mode = process.env.GOOGLE_MODE?.trim().toLowerCase();
+  if (mode === "live") return "live";
+  if (mode === "mock") return "mock";
+  if ((process.env.APP_ENV || "").trim().toLowerCase() === "production") return "live";
+  return "mock";
+}
+
 const CONNECTIONS_CALLBACK_PATH = "/api/connections/google/callback";
 
 /**

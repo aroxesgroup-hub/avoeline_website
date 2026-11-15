@@ -12,14 +12,15 @@
        line-loud  input + interactive borders
        ink        primary text, primary fill
        ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
-       ink-faint  decorative ONLY — 2.5:1, never text */
+       ink-faint  secondary labels — ≥4.5:1 on paper (WCAG AA) */
   --paper: #ffffff;
   --canvas: oklch(0.985 0 0);
   --line: oklch(0.922 0 0);
   --line-loud: oklch(0.87 0 0);
   --ink: oklch(0.205 0 0);
   --ink-soft: oklch(0.545 0 0);
-  --ink-faint: oklch(0.708 0 0);
+  /* Was 0.708 (~2.5:1); ≥4.5:1 on paper so public labels using this token pass AA. */
+  --ink-faint: oklch(0.52 0 0);
   --ink-invert: #ffffff;
 
   /* Recessive fills: chips, meter tracks, table zebra, avatar placeholders. These
@@ -58,8 +59,9 @@
      bar, NOT for text, which is why rail labels stay white and --accent-on-ink
      exists for the cases that do need to read on a dark surface. */
   /* ── Primary & Accent ── */
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
+  /* #6366f1 failed WCAG AA as small link text on paper; indigo-600 clears ~4.5:1+. */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --primary-foreground: #ffffff;
   --primary-soft: #eef2ff;
   --primary-line: #c7d2fe;
@@ -451,7 +453,7 @@
   --line-loud: oklch(0.87 0 0);
   --ink: oklch(0.205 0 0);
   --ink-soft: oklch(0.545 0 0);
-  --ink-faint: oklch(0.708 0 0);
+  --ink-faint: oklch(0.52 0 0);
   --ink-invert: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-strong: oklch(0.922 0 0);
@@ -756,7 +758,7 @@ body::after {
   --mkt-accent-soft: #c7cbff;
   --mkt-accent-tint: #eef0ff;
   --mkt-text: #1f2937;
-  --mkt-muted: #6b7280;
+  --mkt-muted: #4b5563; /* AA on white for small marketing labels */
   --mkt-line: #d9dce8;
 }
 

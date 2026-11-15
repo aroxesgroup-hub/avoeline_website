@@ -1,51 +1,37 @@
-import { parseScheduleDateTime, toDate } from "@/src/lib/datetime";
 import type { PublicAgendaItem } from "@/src/features/events/types";
-import type { Session } from "@/src/services/models/agenda.model";
 
-/** Calendar order for schedule day keys (ISO yyyy-mm-dd or legacy display dates). */
+/** Chronological day key. ISO dates sort as written; DD/MM/YYYY is normalized. */
 export function compareAgendaDayKeys(a: string, b: string): number {
-  const da = toDate(a);
-  const db = toDate(b);
-  if (da && db) return da.getTime() - db.getTime();
-  if (da) return -1;
-  if (db) return 1;
-  return String(a).localeCompare(String(b));
-}
-
-/** Start time order within a day (falls back to title). */
-export function compareSessionsByStart(a: Session, b: Session): number {
-  const ta = parseScheduleDateTime(a.date, a.startTime)?.getTime();
-  const tb = parseScheduleDateTime(b.date, b.startTime)?.getTime();
-  if (ta != null && tb != null && ta !== tb) return ta - tb;
-  if (ta != null && tb == null) return -1;
-  if (ta == null && tb != null) return 1;
-  return (
-    String(a.startTime || "").localeCompare(String(b.startTime || "")) ||
-    a.title.localeCompare(b.title)
-  );
-}
-
-export function sortSessionsBySchedule(sessions: Session[]): Session[] {
-  return [...sessions].sort(compareSessionsByStart);
+  return daySortKey(a).localeCompare(daySortKey(b));
 }
 
 export function comparePublicAgendaItems(
-  a: Pick<PublicAgendaItem, "date" | "startTime" | "title">,
-  b: Pick<PublicAgendaItem, "date" | "startTime" | "title">,
+  a: Pick<PublicAgendaItem, "date" | "startTime">,
+  b: Pick<PublicAgendaItem, "date" | "startTime">,
 ): number {
   const day = compareAgendaDayKeys(a.date || "", b.date || "");
   if (day !== 0) return day;
-  const ta = parseScheduleDateTime(a.date, a.startTime)?.getTime();
-  const tb = parseScheduleDateTime(b.date, b.startTime)?.getTime();
-  if (ta != null && tb != null && ta !== tb) return ta - tb;
-  if (ta != null && tb == null) return -1;
-  if (ta == null && tb != null) return 1;
-  return (
-    String(a.startTime || "").localeCompare(String(b.startTime || "")) ||
-    a.title.localeCompare(b.title)
-  );
+  return String(a.startTime || "").localeCompare(String(b.startTime || ""));
 }
 
-export function sortPublicAgendaItems(items: PublicAgendaItem[]): PublicAgendaItem[] {
+export function sortPublicAgendaItems<T extends { date: string; startTime: string }>(
+  items: T[],
+): T[] {
   return [...items].sort(comparePublicAgendaItems);
+}
+
+export function sortSessionsBySchedule<T extends { date: string; startTime: string }>(
+  sessions: T[],
+): T[] {
+  return sortPublicAgendaItems(sessions);
+}
+
+function daySortKey(raw: string): string {
+  const value = String(raw || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  const dmy = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!dmy) return value;
+  const day = dmy[1].padStart(2, "0");
+  const month = dmy[2].padStart(2, "0");
+  return `${dmy[3]}-${month}-${day}`;
 }

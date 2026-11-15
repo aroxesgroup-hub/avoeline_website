@@ -26,7 +26,12 @@ export interface AttendeeCertProp {
   name: string;
   email: string;
   checkedIn: boolean;
+  /** confirmed / attended / checked_in style eligibility for "all confirmed" preset */
+  confirmed: boolean;
   certStatus: CertificateRow | null;
+  teamName?: string;
+  competitionName?: string;
+  rank?: number;
 }
 
 interface CertificateIssuanceClientProps {
@@ -34,10 +39,17 @@ interface CertificateIssuanceClientProps {
   eventId: string;
   organizerId: string;
   driveConnected?: boolean;
+  hasScoreboardRanks?: boolean;
   onGenerateCertificates: (
     selectedAttendeeIds: string[],
     roles: Record<string, string>,
-    opts?: { archiveToDrive?: boolean },
+    opts?: {
+      archiveToDrive?: boolean;
+      recipientMeta?: Record<
+        string,
+        { teamName?: string; competitionName?: string; rank?: string }
+      >;
+    },
   ) => Promise<CertificateGenerationResult>;
   onEmailCertificates: (
     resend: boolean,
@@ -63,6 +75,7 @@ export default function CertificateIssuanceClient({
   eventId,
   organizerId,
   driveConnected = false,
+  hasScoreboardRanks = false,
   onGenerateCertificates,
   onEmailCertificates,
 }: CertificateIssuanceClientProps) {
@@ -165,6 +178,33 @@ export default function CertificateIssuanceClient({
     setSelectAll(ids.length > 0 && ids.length === filteredPendingAttendees.length);
   };
 
+  const handleSelectConfirmed = () => {
+    const ids = filteredPendingAttendees.filter((a) => a.confirmed).map((a) => a.registrationId);
+    setSelectedAttendees(new Set(ids));
+    setSelectAll(ids.length > 0 && ids.length === filteredPendingAttendees.length);
+  };
+
+  const handleSelectWinners = (topN = 3) => {
+    const ids = filteredPendingAttendees
+      .filter((a) => a.rank != null && a.rank > 0 && a.rank <= topN)
+      .map((a) => a.registrationId);
+    setSelectedAttendees(new Set(ids));
+    setSelectAll(ids.length > 0 && ids.length === filteredPendingAttendees.length);
+    for (const a of filteredPendingAttendees) {
+      if (a.rank != null && a.rank > 0 && a.rank <= topN) {
+        setRoles((prev) => ({ ...prev, [a.registrationId]: "Winner" }));
+      }
+    }
+  };
+
+  const handleSelectTeamMembers = () => {
+    const ids = filteredPendingAttendees
+      .filter((a) => Boolean(a.teamName))
+      .map((a) => a.registrationId);
+    setSelectedAttendees(new Set(ids));
+    setSelectAll(ids.length > 0 && ids.length === filteredPendingAttendees.length);
+  };
+
   const toggleAttendee = (id: string) => {
     setSelectedAttendees((prev) => {
       const next = new Set(prev);
@@ -185,8 +225,23 @@ export default function CertificateIssuanceClient({
     }
     startGenerating(async () => {
       setGenerationSummary(null);
+      const recipientMeta: Record<
+        string,
+        { teamName?: string; competitionName?: string; rank?: string }
+      > = {};
+      for (const a of attendees) {
+        if (!selected.includes(a.registrationId)) continue;
+        if (a.teamName || a.competitionName || a.rank != null) {
+          recipientMeta[a.registrationId] = {
+            teamName: a.teamName,
+            competitionName: a.competitionName,
+            rank: a.rank != null ? String(a.rank) : undefined,
+          };
+        }
+      }
       const result = await onGenerateCertificates(selected, roles, {
         archiveToDrive: driveConnected && archiveToDrive,
+        recipientMeta,
       });
       setGenerationSummary(result.message);
       const byReg: Record<string, CertificateGenerationAttendeeResult> = {};
@@ -258,9 +313,27 @@ export default function CertificateIssuanceClient({
               placeholder="Search name or email"
               className={fieldClass}
             />
-            <Button type="button" variant="secondary" size="sm" onClick={handleSelectCheckedIn}>
-              Select checked-in
+            <Button type="button" variant="secondary" size="sm" onClick={handleSelectConfirmed}>
+              All confirmed
             </Button>
+            <Button type="button" variant="secondary" size="sm" onClick={handleSelectCheckedIn}>
+              Checked-in
+            </Button>
+            {hasScoreboardRanks ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => handleSelectWinners(3)}
+              >
+                Winners (top 3)
+              </Button>
+            ) : null}
+            {hasScoreboardRanks ? (
+              <Button type="button" variant="secondary" size="sm" onClick={handleSelectTeamMembers}>
+                Team members
+              </Button>
+            ) : null}
             <Button type="button" variant="secondary" size="sm" onClick={handleSelectAll}>
               {selectAll ? "Clear selection" : "Select all"}
             </Button>

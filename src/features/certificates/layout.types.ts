@@ -68,6 +68,9 @@ export type CertificateData = {
   award?: string;
   event_title: string;
   event_dates?: string;
+  team_name?: string;
+  competition_name?: string;
+  rank?: string;
   issuer_name?: string;
   issuer_title?: string;
   certificate_number?: string;

@@ -20,8 +20,9 @@ import {
   listTeams,
 } from "@/src/features/hackathon/hackathon.service";
 import { trackDueAmount, trackSponsor } from "@/src/features/hackathon/types";
-import { publicEventPresentation, trackRegistrationOpen } from "@/src/lib/publicEventStatus";
+import { getRegistrationState } from "@/src/lib/registrationState";
 import { PublicShareMenu } from "@/src/features/events/components/public/PublicShareMenu";
+import { RegistrationReminderButton } from "@/src/features/events/components/public/RegistrationReminderButton";
 import { RichDescription } from "@/src/shared_components/ui/RichDescription";
 
 export const metadata = { title: "Competition — Avoeline" };
@@ -89,11 +90,27 @@ export default async function PublicTrackDetailPage({
     );
   }
 
-  const presentation = publicEventPresentation(event.status, event.schedule, event.registration);
-  const trackOpen = trackRegistrationOpen(track, {
-    eventRegistrationOpen: presentation.registrationOpen,
+  const timezone = event.schedule?.timezone || "Asia/Karachi";
+  const reg = getRegistrationState({
+    event: {
+      status: event.status,
+      requiresRegistration: event.requiresRegistration !== false,
+      registrationOpenDate: event.registration?.registrationOpenDate || "",
+      registrationCloseDate: event.registration?.registrationCloseDate || "",
+      waitlistEnabled: !!event.access?.waitlistEnabled,
+      seatsLeft: null,
+      schedule: event.schedule,
+      hasCompetitions: true,
+    },
+    competition: {
+      id: track.id,
+      registrationClosesAt: track.registrationClosesAt || null,
+      ended: String(track.status || "").toLowerCase() === "ended",
+    },
+    timezone,
+    eventTitle: event.title,
   });
-  const canRegister = presentation.registrationOpen && trackOpen;
+  const canRegister = reg.canRegister;
 
   const [orgs, prizesByTrack, teams, shareUrl, rulesUrl] = await Promise.all([
     getEventOrganizations(eventId),
@@ -161,25 +178,47 @@ export default async function PublicTrackDetailPage({
             <Fact
               label="Registration closes"
               value={
-                track.registrationClosesAt ? formatDateMedium(track.registrationClosesAt) : "—"
+                reg.closesAt
+                  ? `${formatDateMedium(reg.closesAt)}${
+                      reg.closeInherited ? " (event deadline)" : ""
+                    }`
+                  : "See event page"
               }
             />
-            <Fact label="Status" value={trackOpen ? "Open" : "Closed"} />
+            <Fact
+              label="Status"
+              value={
+                reg.state === "open" || reg.state === "closing_soon"
+                  ? "Open"
+                  : reg.state === "not_open"
+                    ? "Not yet open"
+                    : reg.state === "waitlist"
+                      ? "Waitlist"
+                      : reg.state === "full"
+                        ? "Full"
+                        : "Closed"
+              }
+            />
           </dl>
 
           <div className="mt-6 space-y-3">
             <PublicShareMenu sharePath={shareUrl} title={track.name} />
+            <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+              {reg.message}
+            </p>
+            {reg.state === "not_open" && reg.reminder ? (
+              <RegistrationReminderButton
+                title={reg.reminder.title}
+                startsAt={reg.reminder.startsAt}
+                endsAt={reg.reminder.endsAt}
+                url={shareUrl}
+              />
+            ) : null}
             {canRegister ? (
               <Link href={registerHref} className={buttonClass("primary")}>
-                Register for this event
+                {reg.ctaLabel || "Register for this event"}
               </Link>
-            ) : (
-              <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
-                {!presentation.registrationOpen
-                  ? "Registration is closed for this event."
-                  : "Registration for this competition has closed."}
-              </p>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

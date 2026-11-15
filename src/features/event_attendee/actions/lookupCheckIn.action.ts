@@ -15,6 +15,7 @@ import { safeAction, safeFail, safeOk } from "@/src/lib/safeAction";
 const inputSchema = z.object({
   eventId: z.string().uuid(),
   query: z.string().min(1).max(500),
+  clientRequestId: z.string().uuid().optional(),
 });
 
 /**
@@ -27,6 +28,10 @@ export const lookupAndCheckInAction = safeAction({
     const user = await AuthService.getCurrentUser().catch(() => null);
     if (!user?.userId) return safeFail("UNAUTHORIZED", "Sign in required.");
     return { userId: user.userId, label: "lookupAndCheckIn" };
+  },
+  idempotency: {
+    scope: "checkin.lookup",
+    keyFrom: (input) => input.clientRequestId,
   },
   run: async ({ eventId, query }, auth) => {
     const event = await assertEventActor(eventId, "attendees");
@@ -99,7 +104,7 @@ export const lookupAndCheckInAction = safeAction({
     const history = Array.isArray(row.status_history) ? [...(row.status_history as unknown[])] : [];
     history.push({ status: "checked_in", timestamp: now });
 
-    const { error: updateError } = await supabaseAdmin
+    const { data: updated, error: updateError } = await supabaseAdmin
       .from(TABLES.REGISTRATIONS)
       .update({
         status: regStatusToDb("checked_in"),
@@ -110,8 +115,20 @@ export const lookupAndCheckInAction = safeAction({
         checked_in_by: auth.userId || event.organizerId,
         updated_at: now,
       })
-      .eq("id", registrationId);
+      .eq("id", registrationId)
+      .eq("checked_in", false)
+      .select("id")
+      .maybeSingle();
     if (updateError) throw updateError;
+    if (!updated) {
+      return safeOk({
+        alreadyCheckedIn: true,
+        registrationId: String(row.id),
+        shortCode: String(row.short_code || ""),
+        name: String(row.attendee_name || ""),
+        method,
+      });
+    }
 
     const { scheduleSheetRefresh } =
       await import("@/src/features/connections/server/sheetSync.service");

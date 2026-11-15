@@ -1,6 +1,11 @@
 import type { z } from "zod";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { logger } from "@/src/lib/logger";
+import {
+  claimClientRequestId,
+  completeClientRequestId,
+  isClientRequestId,
+} from "@/src/lib/idempotency";
 
 /**
  * C2 action result. New actions should return this shape.
@@ -23,11 +28,19 @@ export type SafeActionAuthContext = {
   label?: string;
 };
 
+type IdempotencyConfig<TInput> = {
+  scope: string;
+  /** Extract stable client request id from parsed input. */
+  keyFrom: (input: TInput) => string | null | undefined;
+};
+
 type SafeActionConfig<TSchema extends z.ZodType, TData, TAuth> = {
   input: TSchema;
   /** Return auth context or a SafeActionResult failure. */
   auth?: () => Promise<TAuth | SafeActionResult<never>>;
   run: (input: z.infer<TSchema>, auth: TAuth) => Promise<SafeActionResult<TData> | TData>;
+  /** When set, duplicate clientRequestId replays the first response. */
+  idempotency?: IdempotencyConfig<z.infer<TSchema>>;
 };
 
 function isResult<T>(value: unknown): value is SafeActionResult<T> {
@@ -60,10 +73,38 @@ export function safeAction<TSchema extends z.ZodType, TData = void, TAuth = void
       auth = authResult;
     }
 
+    const idem = config.idempotency;
+    let claimKey: string | null = null;
+    if (idem) {
+      const key = idem.keyFrom(parsed.data);
+      if (key && isClientRequestId(key)) {
+        claimKey = key.trim();
+        const actorUserId = (auth as SafeActionAuthContext | undefined)?.userId;
+        const claim = await claimClientRequestId({
+          scope: idem.scope,
+          key: claimKey,
+          actorUserId,
+        });
+        if (claim.kind === "replay") {
+          return claim.response as SafeActionResult<TData>;
+        }
+        if (claim.kind === "inflight") {
+          return safeFail("IDEMPOTENT_INFLIGHT", "That request is already being processed.");
+        }
+      }
+    }
+
     try {
       const out = await config.run(parsed.data, auth);
-      if (isResult<TData>(out)) return out;
-      return safeOk(out as TData);
+      const result = isResult<TData>(out) ? out : safeOk(out as TData);
+      if (idem && claimKey) {
+        await completeClientRequestId({
+          scope: idem.scope,
+          key: claimKey,
+          response: result,
+        });
+      }
+      return result;
     } catch (err) {
       // next/navigation redirect() throws a special error that must propagate.
       if (isRedirectError(err)) throw err;

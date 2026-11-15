@@ -86,10 +86,13 @@ function snap(n: number, enabled: boolean) {
 export default function CertificateEditor({
   eventId,
   initial,
+  formFieldKeys: _formFieldKeys = [],
 }: {
   eventId: string;
   initial: CertificateTemplateRow;
+  formFieldKeys?: string[];
 }) {
+  void _formFieldKeys;
   const [layout, setLayout] = useState<CertificateLayout>(() => hydrateLayout(initial.layout));
   const [assets, setAssets] = useState<TemplateAssets>(() => initial.assets || {});
   const [selectedId, setSelectedId] = useState<string | null>(null);

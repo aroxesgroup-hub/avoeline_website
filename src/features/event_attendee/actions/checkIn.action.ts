@@ -27,6 +27,14 @@ export async function setCheckIn(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
+  const { withFormClientRequestId } = await import("@/src/lib/formIdempotency");
+  const actor = await AuthService.getCurrentUser().catch(() => null);
+  return withFormClientRequestId("checkin.set", formData, actor?.userId, () =>
+    setCheckInImpl(formData),
+  );
+}
+
+async function setCheckInImpl(formData: FormData): Promise<ActionResult> {
   try {
     const registrationId = String(formData.get("registrationId") ?? "").trim();
     const checkedIn = String(formData.get("checkedIn")) === "true";
@@ -70,7 +78,7 @@ export async function setCheckIn(
     const nextStatus = checkedIn ? "checked_in" : previousStatus || "confirmed";
     history.push({ status: nextStatus, timestamp: now });
 
-    const { error: updateError } = await supabaseAdmin
+    let updateQuery = supabaseAdmin
       .from(TABLES.REGISTRATIONS)
       .update({
         status: regStatusToDb(nextStatus),
@@ -82,7 +90,15 @@ export async function setCheckIn(
         updated_at: now,
       })
       .eq("id", registrationId);
+    // Check-in: only win if not already checked in (concurrent double-tap safe).
+    if (checkedIn) {
+      updateQuery = updateQuery.eq("checked_in", false);
+    }
+    const { data: updated, error: updateError } = await updateQuery.select("id").maybeSingle();
     if (updateError) throw updateError;
+    if (checkedIn && !updated) {
+      return ok(); // already checked in by a concurrent request
+    }
 
     const { scheduleSheetRefresh } =
       await import("@/src/features/connections/server/sheetSync.service");

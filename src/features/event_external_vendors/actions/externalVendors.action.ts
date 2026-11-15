@@ -6,6 +6,7 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { assertEventActor } from "@/src/features/events/ownership";
 import { AuthService } from "@/src/features/auth/authService";
+import { hasModuleAccess } from "@/src/features/permissions/permissions.service";
 import { ActionResult, fail, ok } from "@/src/lib/action";
 import { isExternalVendorStatus } from "../types";
 
@@ -17,6 +18,9 @@ export async function saveExternalVendorAction(
     const eventId = String(formData.get("eventId") ?? "").trim();
     const event = await assertEventActor(eventId, "vendors");
     if (!event) return fail("You cannot manage vendors for that event.");
+    if (!(await hasModuleAccess(event.organizerId, "vendor_store"))) {
+      return fail("Vendor Store is not enabled for this organizer.");
+    }
     const name = String(formData.get("name") ?? "").trim();
     if (!name) return fail("Vendor name is required.");
     const statusRaw = String(formData.get("status") ?? "planned").trim();
@@ -67,6 +71,7 @@ export async function deleteExternalVendorAction(formData: FormData): Promise<vo
   const id = String(formData.get("id") ?? "").trim();
   const event = await assertEventActor(eventId, "vendors");
   if (!event || !id) return;
+  if (!(await hasModuleAccess(event.organizerId, "vendor_store"))) return;
   await supabaseAdmin
     .from(TABLES.EVENT_EXTERNAL_VENDORS)
     .delete()

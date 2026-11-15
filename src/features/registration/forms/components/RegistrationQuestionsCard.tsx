@@ -9,7 +9,6 @@ export async function RegistrationQuestionsCard({
   bare = false,
 }: {
   eventId: string;
-  /** When true, render only the editor (parent supplies the Card chrome). */
   bare?: boolean;
 }) {
   const [event, fields] = await Promise.all([
@@ -35,9 +34,7 @@ export async function RegistrationQuestionsCard({
     />
   );
 
-  if (bare) {
-    return <div className="p-5">{editor}</div>;
-  }
+  if (bare) return editor;
 
   return (
     <Card title="Registration questions">

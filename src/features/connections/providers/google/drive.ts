@@ -35,14 +35,8 @@ async function googleFetch(
   init?: RequestInit,
   attempt = 0,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-      ...(init?.headers || {}),
-    },
-  });
+  const { googleHttp } = await import("./googleHttp");
+  const res = await googleHttp(accessToken, url, init);
   if (res.status === 429 || res.status >= 500) {
     const mapped = mapGoogleApiError(
       res.status,

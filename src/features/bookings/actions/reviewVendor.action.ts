@@ -67,6 +67,10 @@ export async function submitVendorReview(input: SubmitVendorReviewInput): Promis
 
     const gate = await requireSelfOrAdmin(organizerId);
     if (!gate.ok) return { success: false, error: gate.error };
+    const { hasModuleAccess } = await import("@/src/features/permissions/permissions.service");
+    if (!(await hasModuleAccess(organizerId, "vendor_store"))) {
+      return { success: false, error: "Vendor Store is not enabled for this organizer." };
+    }
     const me = await AuthService.getCurrentUser();
     if (
       me &&

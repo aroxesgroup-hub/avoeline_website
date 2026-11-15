@@ -4,7 +4,9 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import { pgGet, pgGetEq } from "@/data/pg";
 import { toIsoString } from "@/src/lib/datetime";
-import type { UserRow } from "@/src/lib/database.types";
+import type { Database } from "@/src/lib/database.types";
+
+type UserRow = Database["public"]["Tables"]["users"]["Row"] & { user_id?: string };
 
 function mapToUser(raw: Partial<UserRow> & { id?: string; user_id?: string }): User {
   const userTypeDb = String(raw.user_type ?? "attendee");
@@ -76,8 +78,12 @@ async function withOrgStanding(user: User): Promise<User> {
     .in("role", ["department_admin", "president"]);
   if (!memberships?.length) return user;
 
-  const departmentIds = memberships.filter((m) => m.role === "department_admin").map((m) => String(m.org_id));
-  const presidentOf = memberships.filter((m) => m.role === "president").map((m) => String(m.org_id));
+  const departmentIds = memberships
+    .filter((m) => m.role === "department_admin")
+    .map((m) => String(m.org_id));
+  const presidentOf = memberships
+    .filter((m) => m.role === "president")
+    .map((m) => String(m.org_id));
 
   if (!departmentIds.length) return { ...user, presidentOfOrgIds: presidentOf };
 
@@ -98,7 +104,10 @@ async function withOrgStanding(user: User): Promise<User> {
 
 /** Where a signed-in user lands after login, password reset, or access-denied. */
 export function landingPathFor(
-  user: { userId: string; role?: string; userType: string; presidentOfOrgIds?: string[] } | null | undefined,
+  user:
+    | { userId: string; role?: string; userType: string; presidentOfOrgIds?: string[] }
+    | null
+    | undefined,
 ): string {
   if (!user?.userId) return "/";
   if (user.role === "platform_admin" || user.userType === "admin") return "/admin";

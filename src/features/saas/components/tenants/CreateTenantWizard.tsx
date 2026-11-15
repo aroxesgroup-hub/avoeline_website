@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -11,6 +11,7 @@ import type {
   TenantType,
 } from "@/src/features/saas/tenantBoard.types";
 import { createTenantAccountAction } from "@/src/features/saas/actions/tenants.action";
+import { newClientRequestId } from "@/src/lib/clientRequestId";
 
 const TYPES: { value: TenantType; label: string; hint: string }[] = [
   { value: "department", label: "Department", hint: "Manages clubs under one org" },
@@ -71,6 +72,8 @@ export function CreateTenantWizard({
     onClose();
   };
 
+  const clientRequestIdRef = useRef(newClientRequestId());
+
   const submit = () => {
     if (!tenantType) return;
     setError(null);
@@ -86,12 +89,14 @@ export function CreateTenantWizard({
         accessMode,
         password: accessMode === "temp_password" ? password || null : null,
         sendEmail,
-        idempotencyKey: `create-${email}-${Date.now()}`,
+        clientRequestId: clientRequestIdRef.current,
       });
       if (!res.ok) {
         setError(res.error.message);
+        clientRequestIdRef.current = newClientRequestId();
         return;
       }
+      clientRequestIdRef.current = newClientRequestId();
       if (res.data.temporaryPassword) {
         setResultPw(res.data.temporaryPassword);
         setStep(4);

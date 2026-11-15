@@ -83,6 +83,100 @@ async function runArchiveJob(certificateId: string, eventId: string): Promise<vo
     storedFileId: uploaded.fileId,
     providerFileId: uploaded.providerFileId,
   });
+
+  // Soft-update index sheet in Certificates folder (never throws out of archive).
+  await upsertCertificateIndexSheet(eventId, cert.organizerId).catch((err) => {
+    logger.warn("[certificateJobs] index sheet soft-skip", {
+      eventId,
+      err: err instanceof Error ? err.message : String(err),
+    });
+  });
+}
+
+/** Index Google Sheet: name, code, link, date — create/update in Certificates folder. */
+export async function upsertCertificateIndexSheet(
+  eventId: string,
+  organizerId: string,
+): Promise<void> {
+  const { listConnections, getAccessTokenForConnection } =
+    await import("@/src/features/connections/server/connections.service");
+  const conns = await listConnections({
+    ownerType: "user",
+    ownerId: organizerId,
+    includeQuota: false,
+  });
+  const drive = conns.find(
+    (c) =>
+      c.status === "active" &&
+      (c.capabilities || []).some((cap) => cap.capability === "drive.files" && cap.enabled),
+  );
+  if (!drive) return;
+  const accessToken = await getAccessTokenForConnection(drive.id);
+  if (!accessToken) return;
+
+  const { listCertificatesForEvent } = await import("./certificates.service");
+  const { absoluteUrl } = await import("@/src/lib/appUrl");
+  const { sanitizeSheetMatrix } = await import("@/src/features/connections/lib/sheetSanitize");
+  const { resolveEventUploadFolder } = await import("@/src/features/files/folders");
+  const { GoogleDriveClient } = await import("@/src/features/connections/providers/google/drive");
+
+  const certs = (await listCertificatesForEvent(eventId)).filter((c) => c.status === "issued");
+  const rows: unknown[][] = [["Name", "Code", "Link", "Date"]];
+  for (const c of certs) {
+    const link = await absoluteUrl(`/certificate/${c.verificationCode}`);
+    rows.push([
+      c.data.recipient_name || "",
+      c.verificationCode,
+      link,
+      c.issuedAt || c.createdAt || "",
+    ]);
+  }
+  const matrix = sanitizeSheetMatrix(rows);
+
+  const parentId = await resolveEventUploadFolder({
+    connectionId: drive.id,
+    accessToken,
+    eventId,
+    kind: "certificates",
+  });
+
+  const { data: eventRow } = await supabaseAdmin
+    .from(TABLES.EVENTS)
+    .select("extra")
+    .eq("id", eventId)
+    .maybeSingle();
+  const priorExtra =
+    eventRow?.extra && typeof eventRow.extra === "object" && !Array.isArray(eventRow.extra)
+      ? { ...(eventRow.extra as Record<string, unknown>) }
+      : {};
+  let spreadsheetId = priorExtra.certificate_index_sheet_id
+    ? String(priorExtra.certificate_index_sheet_id)
+    : "";
+
+  if (spreadsheetId) {
+    const meta = await GoogleDriveClient.getFileMetadata(accessToken, spreadsheetId).catch(
+      () => null,
+    );
+    if (!meta) spreadsheetId = "";
+  }
+
+  if (!spreadsheetId) {
+    const created = await GoogleDriveClient.createBlankFile(accessToken, {
+      kind: "sheet",
+      name: "Certificate index",
+      parentId,
+    });
+    spreadsheetId = created.id;
+    await supabaseAdmin
+      .from(TABLES.EVENTS)
+      .update({
+        extra: { ...priorExtra, certificate_index_sheet_id: spreadsheetId },
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", eventId);
+  }
+
+  await GoogleDriveClient.clearAndWriteSheetValues(accessToken, spreadsheetId, matrix);
 }
 
 async function readExtra(certificateId: string): Promise<Record<string, unknown>> {

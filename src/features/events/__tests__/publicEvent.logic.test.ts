@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { getRegistrationState } from "@/src/lib/registrationState";
 import {
   dtoContainsForbiddenKey,
   filterPublicOrgCredits,
@@ -66,9 +67,22 @@ describe("resolveRegisterButtonState", () => {
       }),
       "opens_at",
     );
+    assert.equal(
+      getRegistrationState({
+        event: {
+          status: "published",
+          requiresRegistration: true,
+          registrationOpenDate: "2026-07-01",
+          schedule: { timezone: "UTC" },
+        },
+        now,
+        timezone: "UTC",
+      }).state,
+      "not_open",
+    );
   });
 
-  it("prefers opens_at over competitions_closed when hackathon open is in the future", () => {
+  it("prefers opens_at / not_open over competitions_closed when hackathon open is in the future", () => {
     const now = new Date("2026-06-01T12:00:00Z");
     assert.equal(
       resolveRegisterButtonState({
@@ -80,6 +94,21 @@ describe("resolveRegisterButtonState", () => {
         now,
       }),
       "opens_at",
+    );
+    assert.equal(
+      getRegistrationState({
+        event: {
+          status: "published",
+          requiresRegistration: true,
+          registrationOpenDate: "2026-07-01",
+          hasCompetitions: true,
+          schedule: { timezone: "UTC" },
+        },
+        competitions: [{ id: "c1", ended: true }],
+        now,
+        timezone: "UTC",
+      }).state,
+      "not_open",
     );
   });
 

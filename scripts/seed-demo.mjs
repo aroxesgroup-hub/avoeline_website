@@ -11,8 +11,10 @@
 import { createHash, randomBytes } from "crypto";
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { assertSafeTestTargetOrExit } from "./lib/testSafety.mjs";
 
 config({ path: ".env.local" });
+assertSafeTestTargetOrExit();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

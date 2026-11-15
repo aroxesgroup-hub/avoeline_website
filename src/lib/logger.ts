@@ -3,7 +3,15 @@
  * client bundles and we can swap the sink later (ENGINEERING_RULES C5 / S17).
  */
 
+import { getRequestId } from "@/src/lib/requestContext";
+
 type Meta = Record<string, unknown>;
+
+function withRequestId(meta?: Meta): Meta | undefined {
+  const requestId = getRequestId();
+  if (!requestId && !meta) return undefined;
+  return { ...(requestId ? { requestId } : {}), ...(meta || {}) };
+}
 
 function scrub(meta?: Meta): Meta | undefined {
   if (!meta) return undefined;
@@ -35,12 +43,12 @@ function scrub(meta?: Meta): Meta | undefined {
 
 export const logger = {
   info(message: string, meta?: Meta): void {
-    console.info(message, scrub(meta) ?? "");
+    console.info(message, scrub(withRequestId(meta)) ?? "");
   },
   warn(message: string, meta?: Meta): void {
-    console.warn(message, scrub(meta) ?? "");
+    console.warn(message, scrub(withRequestId(meta)) ?? "");
   },
   error(message: string, meta?: Meta): void {
-    console.error(message, scrub(meta) ?? "");
+    console.error(message, scrub(withRequestId(meta)) ?? "");
   },
 };

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
+// clientRequestId: one UUID per form mount (T8)
 import { useRouter } from "next/navigation";
 import { MemberEmailForm } from "./EventEmailPanels";
 import { DrawerTabs } from "./DrawerTabs";
@@ -36,6 +37,8 @@ import { updateAttendeeDetailsAction } from "@/src/features/event_attendee/actio
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import type { ActionResult } from "@/src/lib/action";
 import { fieldClass, labelClass } from "@/src/lib/ui";
+import { SubmitButton } from "@/src/shared_components/SubmitButton";
+import { newClientRequestId } from "@/src/lib/clientRequestId";
 import { hackathonTeamCodesVisible } from "../roster";
 import { registrantIdentity } from "@/src/features/event_attendee/registrantIdentity";
 import { approveDisabledReason } from "@/src/features/event_attendee/approveDisabledReason";
@@ -133,6 +136,8 @@ export function SingleAttendeeView({
   const [editError, setEditError] = useState<string | null>(null);
   const [editPending, startEditTransition] = useTransition();
   const [rejectReason, setRejectReason] = useState("");
+  const [decideRequestId] = useState(() => newClientRequestId());
+  const [checkInRequestId] = useState(() => newClientRequestId());
   const toast = useToast();
   const router = useRouter();
 
@@ -646,6 +651,7 @@ export function SingleAttendeeView({
                 <form action={decisionAction} className="mt-3 space-y-3">
                   <input type="hidden" name="eventId" value={registration.eventId} />
                   <input type="hidden" name="registrationId" value={registration.registrationId} />
+                  <input type="hidden" name="clientRequestId" value={decideRequestId} />
                   <div>
                     <label className={labelClass} htmlFor="reject-reason">
                       Reject reason
@@ -661,16 +667,16 @@ export function SingleAttendeeView({
                     />
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      type="submit"
+                    <SubmitButton
                       name="decision"
                       value="approve"
                       disabled={Boolean(approveBlock)}
                       title={approveBlock || undefined}
                       className={buttonClass("primary", "sm")}
+                      pendingText="Approving…"
                     >
                       Approve
-                    </button>
+                    </SubmitButton>
                     <ConfirmSubmit
                       name="decision"
                       value="reject"
@@ -729,12 +735,13 @@ export function SingleAttendeeView({
                   value={registration?.registrationId ?? ""}
                 />
                 <input type="hidden" name="checkedIn" value={isCheckedIn ? "false" : "true"} />
-                <button
-                  type="submit"
+                <input type="hidden" name="clientRequestId" value={checkInRequestId} />
+                <SubmitButton
                   className={buttonClass(isCheckedIn ? "secondary" : "primary", "sm")}
+                  pendingText={isCheckedIn ? "Undoing…" : "Checking in…"}
                 >
                   {isCheckedIn ? "Undo check-in" : "Check in"}
-                </button>
+                </SubmitButton>
               </form>
               {checkInState?.error ? (
                 <FormFeedback error={checkInState.error} className="w-full" />

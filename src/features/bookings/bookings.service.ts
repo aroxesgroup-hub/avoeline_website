@@ -501,6 +501,12 @@ export const BookingServices = {
     eventId: string = "",
     vendorId: string = "",
   ) {
+    const { hasModuleAccess } = await import("@/src/features/permissions/permissions.service");
+    const allowed = await hasModuleAccess(organizerId, "vendor_store");
+    if (!allowed) {
+      throw new Error("MODULE: Vendor Store is not enabled for this organizer.");
+    }
+
     const id_generated = randomUUID();
     const now = new Date();
 

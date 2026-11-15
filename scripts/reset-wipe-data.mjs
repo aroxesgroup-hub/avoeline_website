@@ -6,8 +6,10 @@
 //
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { assertSafeTestTargetOrExit } from "./lib/testSafety.mjs";
 
 config({ path: ".env.local" });
+assertSafeTestTargetOrExit();
 
 if (String(process.env.CONFIRM || "").toUpperCase() !== "YES") {
   console.error(

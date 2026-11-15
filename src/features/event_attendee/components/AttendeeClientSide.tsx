@@ -173,11 +173,13 @@ export function AttendeeClientSide({
           : "";
       setBulkBusy(true);
       try {
+        const { newClientRequestId } = await import("@/src/lib/clientRequestId");
         const result = await bulkDecideRegistrationsAction({
           eventId,
           registrationIds: [...selectedIds],
           decision,
           reason,
+          clientRequestId: newClientRequestId(),
         });
         if (!result.ok) {
           toast.error(result.error.message);

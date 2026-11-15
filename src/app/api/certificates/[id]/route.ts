@@ -18,6 +18,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   if (!certId) {
     return NextResponse.json({ error: "Missing certificate id" }, { status: 400 });
   }
+  if (!/^[0-9a-f-]{36}$/i.test(certId)) {
+    return NextResponse.json({ error: "Invalid certificate id" }, { status: 400 });
+  }
 
   const limited = rateLimit(`cert:api:${certId}`, 60, 60);
   if (!limited.ok) {
@@ -27,7 +30,12 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     );
   }
 
-  const cert = await getCertificateById(certId);
+  let cert;
+  try {
+    cert = await getCertificateById(certId);
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   if (!cert || cert.status !== "issued") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

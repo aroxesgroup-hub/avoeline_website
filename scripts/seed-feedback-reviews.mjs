@@ -6,15 +6,10 @@
  */
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { assertSafeTestTargetOrExit } from "./lib/testSafety.mjs";
 
 config({ path: ".env.local" });
-
-const nodeEnv = process.env.NODE_ENV || "development";
-const vercelEnv = process.env.VERCEL_ENV || "";
-if (nodeEnv === "production" || vercelEnv === "production") {
-  console.error("Refusing to seed feedback reviews in production.");
-  process.exit(1);
-}
+assertSafeTestTargetOrExit();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

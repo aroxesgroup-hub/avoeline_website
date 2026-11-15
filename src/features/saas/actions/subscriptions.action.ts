@@ -45,11 +45,16 @@ const changePlanSchema = z.object({
   sendEmail: z.boolean().default(true),
   includeReason: z.boolean().default(true),
   previewOnly: z.boolean().optional(),
+  clientRequestId: z.string().uuid().optional(),
 });
 
 export const changePlanAction = safeAction({
   input: changePlanSchema,
   auth: () => requireTenantAdmin("plans:change"),
+  idempotency: {
+    scope: "plan.change",
+    keyFrom: (input) => input.clientRequestId,
+  },
   async run(input, admin) {
     const rl = rateLimit(`tenant-plan:${admin.userId}`, 40, 60);
     if (!rl.ok) return safeFail("RATE_LIMIT", "Too many plan changes.");

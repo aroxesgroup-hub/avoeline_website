@@ -18,6 +18,12 @@ blockchain.cred.txt
 /reports/marketing/*
 !/reports/marketing/README.md
 !/reports/marketing/CHECKLIST.md
+/reports/load/*
+!/reports/load/README.md
+/reports/security/*
+!/reports/security/README.md
+/reports/mutation/
+/reports/stryker/
 
 # next.js
 /.next/

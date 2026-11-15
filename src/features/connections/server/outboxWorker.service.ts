@@ -29,18 +29,27 @@ function jitterMs(): number {
 }
 
 /** Docs/18 send-time render for certificate emails (O7). */
-async function renderCertificateOutboxPayload(
-  payload: Record<string, unknown>,
-): Promise<
-  | { ok: true; subject: string; html: string; text: string; certificateId: string }
+async function renderCertificateOutboxPayload(payload: Record<string, unknown>): Promise<
+  | {
+      ok: true;
+      subject: string;
+      html: string;
+      text: string;
+      certificateId: string;
+      attachments?: Array<{ filename: string; content: Buffer; contentType?: string }>;
+    }
   | { ok: false; reason: string }
 > {
   const registrationId = payload.registrationId ? String(payload.registrationId) : "";
   const eventId = payload.eventId ? String(payload.eventId) : "";
   if (!registrationId || !eventId) return { ok: false, reason: "certificate_missing_ids" };
 
-  const { getCertsOfEventByRegistration, markCertificatesEmailed } =
-    await import("@/src/features/certificates/certificates.service");
+  const {
+    getCertsOfEventByRegistration,
+    markCertificatesEmailed,
+    getTemplateForEvent,
+    renderCertPdfBytes,
+  } = await import("@/src/features/certificates/certificates.service");
   const byReg = await getCertsOfEventByRegistration(eventId);
   const cert = byReg.get(registrationId);
   if (!cert || cert.status === "revoked") return { ok: false, reason: "certificate_missing" };
@@ -63,6 +72,24 @@ async function renderCertificateOutboxPayload(
     driveShareUrl,
   });
 
+  // Attach in-memory PDF only when template.email_attach_pdf is true (default false).
+  let attachments: Array<{ filename: string; content: Buffer; contentType?: string }> | undefined;
+  const tpl = await getTemplateForEvent(eventId).catch(() => null);
+  if (tpl?.emailAttachPdf) {
+    try {
+      const pdf = await renderCertPdfBytes(cert);
+      attachments = [
+        {
+          filename: `${cert.certificateNumber || "certificate"}.pdf`,
+          content: Buffer.from(pdf),
+          contentType: "application/pdf",
+        },
+      ];
+    } catch {
+      /* link-first still sends without attachment */
+    }
+  }
+
   // Stamp after successful send — caller marks when send ok; keep id for that.
   void markCertificatesEmailed;
   return {
@@ -71,6 +98,7 @@ async function renderCertificateOutboxPayload(
     html: built.html,
     text: built.text,
     certificateId: cert.id,
+    attachments,
   };
 }
 
@@ -307,6 +335,8 @@ export async function processEmailOutbox(limit = 40): Promise<{
     let html = payload.html ? String(payload.html) : undefined;
     let text = payload.text ? String(payload.text) : undefined;
     let certificateIdForStamp: string | null = null;
+    let sendAttachments:
+      Array<{ filename: string; content: Buffer; contentType?: string; cid?: string }> | undefined;
 
     if (kind === "certificate") {
       const rendered = await renderCertificateOutboxPayload(payload);
@@ -326,10 +356,8 @@ export async function processEmailOutbox(limit = 40): Promise<{
       html = rendered.html;
       text = rendered.text;
       certificateIdForStamp = rendered.certificateId;
+      if (rendered.attachments?.length) sendAttachments = rendered.attachments;
     }
-
-    let sendAttachments:
-      Array<{ filename: string; content: Buffer; contentType?: string; cid?: string }> | undefined;
 
     if (payload.renderAtSend === true && payload.registrationId && payload.eventId) {
       try {

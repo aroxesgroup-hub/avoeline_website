@@ -65,12 +65,18 @@ const createSchema = z.object({
   accessMode: z.enum(["invite", "temp_password"]).default("invite"),
   password: z.string().min(8).max(128).optional().nullable(),
   sendEmail: z.boolean().default(true),
-  idempotencyKey: z.string().trim().min(8).max(80),
+  /** Stable UUID for T8 idempotency (preferred over legacy idempotencyKey). */
+  clientRequestId: z.string().uuid().optional(),
+  idempotencyKey: z.string().trim().min(8).max(80).optional(),
 });
 
 export const createTenantAccountAction = safeAction({
   input: createSchema,
   auth: () => requireTenantAdmin("tenants:create"),
+  idempotency: {
+    scope: "tenant.create",
+    keyFrom: (input) => input.clientRequestId || null,
+  },
   async run(input, admin) {
     const rl = rateLimit(`tenant-create:${admin.userId}`, 20, 60);
     if (!rl.ok) return safeFail("RATE_LIMIT", "Too many creates. Try again shortly.");
@@ -253,7 +259,7 @@ export const createTenantAccountAction = safeAction({
       /** Shown once in the UI when accessMode is temp_password — never emailed. */
       temporaryPassword: input.accessMode === "temp_password" ? password : null,
       inviteSent: Boolean(inviteLink && input.sendEmail),
-      idempotencyKey: input.idempotencyKey,
+      idempotencyKey: input.clientRequestId || input.idempotencyKey || null,
     });
   },
 });

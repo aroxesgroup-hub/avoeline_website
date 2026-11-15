@@ -21,6 +21,9 @@ describe("check-in token", () => {
 
     assert.equal(verifyCheckInToken(token.slice(0, -2) + "ff"), null);
     assert.equal(verifyCheckInToken("not-a-token"), null);
+    assert.equal(verifyCheckInToken(""), null);
+    assert.equal(verifyCheckInToken(null), null);
+    assert.equal(verifyCheckInToken(undefined), null);
     assert.ok(checkInQrImagePath(token).startsWith("/api/qr/"));
     assert.ok(checkInQrImagePath(token).endsWith(".png"));
   });

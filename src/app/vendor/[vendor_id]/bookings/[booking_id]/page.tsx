@@ -2,6 +2,8 @@ import { BookingServices } from "@/src/features/bookings/bookings.service";
 import { EventVendorService } from "@/src/features/event_vendors/event_venders.services";
 import { EventService } from "@/src/services/event.service";
 import { OrganizerService } from "@/src/services/organizer.service";
+import { AuthService } from "@/src/features/auth/authService";
+import { isSupportViewer } from "@/src/features/admin/supportPreview";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate, formatDateTime, formatTime } from "@/src/lib/datetime";
@@ -23,8 +25,24 @@ export default async function VendorBookingDetailPage({
 }) {
   const { vendor_id, booking_id } = await params;
 
-  const raw_booking = await BookingServices.getBookingById(booking_id);
+  const [raw_booking, me] = await Promise.all([
+    BookingServices.getBookingById(booking_id),
+    AuthService.getCurrentUser(),
+  ]);
   if (!raw_booking) {
+    notFound();
+  }
+
+  // Tenant isolation: URL vendor must own the booking; session vendor must match.
+  const bookingVendorId = String(raw_booking.vendorId || "");
+  if (!bookingVendorId || bookingVendorId !== vendor_id) {
+    notFound();
+  }
+  const isAdmin = isSupportViewer(me);
+  if (!isAdmin && me?.userId && me.userId !== vendor_id) {
+    notFound();
+  }
+  if (!me?.userId && !isAdmin) {
     notFound();
   }
 

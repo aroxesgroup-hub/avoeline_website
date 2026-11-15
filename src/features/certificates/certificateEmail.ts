@@ -30,7 +30,7 @@ export function buildCertificateEmail(
     "",
     `Your certificate for ${eventTitle} is ready.`,
     "",
-    `View your certificate: ${openUrl}`,
+    `Download your certificate: ${openUrl}`,
     drive ? `Google Drive copy (shared link): ${drive}` : null,
     `Verify authenticity: ${verifyUrl}`,
   ]

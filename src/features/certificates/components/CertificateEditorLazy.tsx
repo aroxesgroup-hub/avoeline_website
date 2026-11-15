@@ -11,9 +11,11 @@ const CertificateEditor = dynamic(
 export function CertificateEditorLazy({
   eventId,
   initial,
+  formFieldKeys = [],
 }: {
   eventId: string;
   initial: CertificateTemplateRow;
+  formFieldKeys?: string[];
 }) {
-  return <CertificateEditor eventId={eventId} initial={initial} />;
+  return <CertificateEditor eventId={eventId} initial={initial} formFieldKeys={formFieldKeys} />;
 }

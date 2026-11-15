@@ -203,7 +203,7 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Access:** published + public/hybrid/VIP → full DTO; private/invite → title + `AccessGate` until server-validated code/token (rate-limited) or unlock cookie; draft/archived/cancelled → unavailable for guests; owner/staff/dept/club/support → full + Admin preview banner.
 
-**Registration CTA:** `resolveRegisterButtonState` checks future `registrationOpenDate` (`opens_at`) **before** `competitions_closed`. Server enforces the same window (+ competition close) on submit. `?track=` preselects a competition on the register form. `/events/.../tracks` uses the same DTO + `PublicCompetitions` cards + `PublicShareMenu`.
+**Registration CTA:** Canonical `getRegistrationState` (`src/lib/registrationState.ts`, docs/24). States: `unpublished` \| `not_open` \| `open` \| `closing_soon` \| `closed` \| `full` \| `waitlist` \| `event_ended` \| `preview`. Before open → `not_open` (never `closed`); hackathon with all comps closed/full is `closed` only **after** open. Date-only bounds use event TZ (open 00:00, close 23:59:59). DTO exposes `registration.{state,message,ctaLabel,canRegister,opensAt,closesAt,closeInherited,reminder}`; competitions always show effective close (`(event deadline)` when inherited). `not_open` offers Add reminder. Server re-checks `canRegister` on submit. `?track=` preselects a competition. `/events/.../tracks` uses the same DTO + `PublicCompetitions` + `PublicShareMenu`.
 
 **Layout:** hero (Share + .ics only here); desktop two-column sticky Register / mobile Register first; facts (no truncated venue/date); Register card without shareable link; form fields from `event_form_fields` (seed defaults if empty); about/gallery/video; tiers + automatic discounts + public promo chips; agenda; speakers; competitions (image, CTF, team size, original fee, status, expandable rules); sponsors strips only when toggles on; footer organizer chip + Report. SEO: `generateMetadata`, OG, schema.org Event JSON-LD, `loading.tsx`.
 
@@ -217,7 +217,7 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Keep-list fields (competition modal):** name, description, image, **This is a CTF** checkbox (`kind` = `ctf` \| `other`), team size min/max, entry fee, discount (% / note / expiry), structured prizes, optional dedicated sponsor, one optional **Registration closes** datetime, one **Rules & instructions** rich text + optional file (`instructions` / `instructions_file_*`; `rules_*` kept in sync for legacy readers).
 
-**Timing:** Only `registration_closes_at` is editable. When it passes, team rosters lock automatically (organizer can still unlock a single team). **Phases** (`hackathon_phases.opens_at` / `closes_at`) control when participants may work. Deprecated track date columns are nulled on save.
+**Timing:** Only `registration_closes_at` is editable. When it passes, team rosters lock automatically (organizer can still unlock a single team). Public/API registration window uses `getRegistrationState` (docs/24): missing track close **inherits** the event close (`closeInherited`); never treat a blank track close as closed by itself. **Phases** (`hackathon_phases.opens_at` / `closes_at`) control when participants may work. Deprecated track date columns are nulled on save.
 
 **Add/Edit:** modal — Basics, Team & timing (sizes + registration closes), Pricing, Prizes, Rules & instructions.
 
@@ -375,6 +375,8 @@ Shared rules across these three pages (cleanup 2026-10-25):
 ---
 
 ## Part 4 — Registration & Public Flows
+
+**Registration window:** Sole source of truth is `getRegistrationState` (docs/24 A1). UI copy + CTA come from its `message` / `ctaLabel` / `canRegister`. `createPublicRegistration` and `assertPublicRegistrationEvent` re-run it server-side and refuse when `!canRegister` (S2). Do not invent parallel open/close helpers.
 
 **Form engine:** Definitions live in `event_form_fields` (not hardcoded name/email/phone on the public form). System seeds: `name`, `email`, `phone` (+ `payment_screenshot` when paid). Types: text/textarea/number/email/phone/url/date/dropdown/radio/checkbox/file. Scope `per_member` | `per_group`. Public UI renders via `CustomFieldsRenderer`; validation via `buildRegistrationSchema` (zod + honeypot `website`). When group registration is allowed, public form offers an optional **Register as a team** checkbox (solo default). File fields use signed upload to `payment-screenshots` under `registration/{eventId}/…` (`requestRegistrationUpload`). Rate-limited register. Duplicate email → clear error. Drawer/export columns: active fields + archived fields that still have answers.
 

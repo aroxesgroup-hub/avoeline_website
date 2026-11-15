@@ -15,7 +15,15 @@ export interface AccessGateProps {
     | "invite_expired"
     | "invite_used"
     | "not_whitelisted"
-    | "not_found";
+    | "not_found"
+    | "closed"
+    | "rate_limited";
+  title?: string;
+  organizerName?: string;
+  hasCode?: boolean;
+  hasWhitelist?: boolean;
+  whitelistEmailVerify?: boolean;
+  rateLimited?: boolean;
 }
 
 export function AccessGate({
@@ -23,7 +31,33 @@ export function AccessGate({
   inviteToken,
   wrongCode = false,
   reason = "needs_code",
+  organizerName,
+  rateLimited = false,
 }: AccessGateProps) {
+  if (rateLimited || reason === "rate_limited") {
+    return (
+      <div className="rounded-2xl border border-line bg-paper p-8 text-center shadow-sm">
+        <h1 className="mb-2 font-display text-xl font-bold text-ink">Too many attempts</h1>
+        <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-ink-soft">
+          Wait a minute, then try the access code again.
+        </p>
+      </div>
+    );
+  }
+
+  if (reason === "closed") {
+    return (
+      <div className="rounded-2xl border border-line bg-paper p-8 text-center shadow-sm">
+        <h1 className="mb-2 font-display text-xl font-bold text-ink">Registration is closed</h1>
+        <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-ink-soft">
+          {organizerName
+            ? `${organizerName} is not taking new registrations.`
+            : "This event is not taking new registrations."}
+        </p>
+      </div>
+    );
+  }
+
   if (
     reason === "needs_invite" ||
     reason === "invite_expired" ||

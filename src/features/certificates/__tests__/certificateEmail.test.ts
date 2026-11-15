@@ -25,28 +25,28 @@ function buildEmailSnippet(opts: {
   const openUrl = opts.viewerUrl;
   return {
     text: [
-      `View your certificate: ${openUrl}`,
+      `Download your certificate: ${openUrl}`,
       drive ? `Google Drive copy (shared link): ${drive}` : null,
     ]
       .filter((line): line is string => line !== null)
       .join("\n"),
     html: [
-      `<a href="${openUrl}">View certificate</a>`,
+      `<a href="${openUrl}">Download certificate</a>`,
       drive ? `<a href="${drive}">Open Drive copy</a>` : "",
     ].join(""),
   };
 }
 
 describe("buildCertificateEmail CTA", () => {
-  it("uses viewer URL as primary CTA (works with Drive down)", () => {
+  it("uses viewer URL as primary Download CTA (works with Drive down)", () => {
     const built = buildEmailSnippet({
       viewerUrl: "https://app.example/certificate/VERIFY01",
     });
     assert.match(
       built.text,
-      /View your certificate: https:\/\/app\.example\/certificate\/VERIFY01/,
+      /Download your certificate: https:\/\/app\.example\/certificate\/VERIFY01/,
     );
-    assert.match(built.html, /View certificate/);
+    assert.match(built.html, /Download certificate/);
     assert.doesNotMatch(built.html, /Open Drive copy/);
     assert.doesNotMatch(built.text, /Google Drive copy/);
   });

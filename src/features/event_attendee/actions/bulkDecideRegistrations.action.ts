@@ -23,11 +23,16 @@ const schema = z.object({
   registrationIds: z.array(z.string().uuid()).min(1).max(200),
   decision: z.enum(["approve", "reject"]),
   reason: z.string().max(2000).optional().default(""),
+  clientRequestId: z.string().uuid().optional(),
 });
 
 export const bulkDecideRegistrationsAction = safeAction({
   input: schema,
   auth: async () => ({ label: "bulkDecideRegistrations" }),
+  idempotency: {
+    scope: "registration.decide.bulk",
+    keyFrom: (input) => input.clientRequestId,
+  },
   run: async (input) => {
     const event = await assertEventActor(input.eventId, "attendees");
     if (!event) return safeFail("FORBIDDEN", "Not allowed.");

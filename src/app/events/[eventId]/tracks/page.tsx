@@ -57,11 +57,15 @@ export default async function PublicTracksPage({
         <p className="mb-6 text-center font-display text-xl text-ink">{view.title}</p>
         <AccessGate
           eventId={view.eventId}
+          title={view.title}
+          organizerName={view.meta?.organizerName}
           inviteToken={view.inviteToken ?? invite ?? null}
           wrongCode={view.reason === "bad_code" || bad === "1"}
-          reason={
-            view.reason === "rate_limited" || view.reason === "closed" ? "needs_code" : view.reason
-          }
+          hasCode={view.meta?.hasCode !== false}
+          hasWhitelist={!!view.meta?.hasWhitelist}
+          whitelistEmailVerify={!!view.meta?.whitelistEmailVerify}
+          rateLimited={view.reason === "rate_limited"}
+          reason={view.reason === "closed" ? "closed" : view.reason}
         />
         <p className="mt-6 text-center text-sm text-ink-soft">
           <Link href={eventHref} className="underline">

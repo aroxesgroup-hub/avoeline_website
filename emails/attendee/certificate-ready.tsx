@@ -18,7 +18,7 @@ export function CertificateReadyEmail(props: CertificateReadyProps) {
         { label: "Verification code", value: props.verificationCode },
         ...props.details,
       ]}
-      primaryCta={{ label: "View certificate", url: props.viewerUrl }}
+      primaryCta={{ label: "Download certificate", url: props.viewerUrl }}
       replyTo={props.replyTo}
     >
       <AttendeeBodyText>

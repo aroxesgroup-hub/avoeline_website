@@ -1,0 +1,873 @@
+openapi: 3.1.0
+info:
+  title: Avoeline API
+  version: "1.0.0"
+  description: |
+    HTTP Route Handlers for Avoeline (docs/25 T1).
+    Request bodies for uploads mirror zod in tests/postman/schemas/http.mjs
+    (kept aligned with src/app/api/uploads/*/route.ts).
+    Server Actions are out of scope for this OpenAPI surface.
+servers:
+  - url: "{baseUrl}"
+    variables:
+      baseUrl:
+        default: http://127.0.0.1:3000
+tags:
+  - name: Health
+  - name: Certificates
+  - name: FilesUploads
+  - name: Connections
+  - name: Cron
+  - name: Auth
+  - name: PublicEvent
+paths:
+  /api/health:
+    get:
+      summary: "Liveness"
+      operationId: getHealth
+      tags: [Health]
+      x-response-time-ms: 1000
+      security: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /api/events/{eventId}/calendar.ics:
+    get:
+      summary: "Public calendar ICS"
+      operationId: getEventCalendarIcs
+      tags: [PublicEvent]
+      x-response-time-ms: 2000
+      security: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string }
+          example: "{{eventId}}"
+      responses:
+        "200":
+          description: "text/calendar"
+        "404":
+          description: "not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/qr/{token}:
+    get:
+      summary: "Check-in QR (token)"
+      operationId: getQrToken
+      tags: [PublicEvent]
+      x-response-time-ms: 2000
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+          example: "{{qrToken}}"
+      responses:
+        "200":
+          description: "image or redirect"
+        "400":
+          description: "bad token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/certificates/{id}:
+    get:
+      summary: "Issued certificate JSON"
+      operationId: getCertificateJson
+      tags: [Certificates]
+      x-response-time-ms: 2000
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          example: "{{certificateId}}"
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CertificateJson"
+        "404":
+          description: "not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+        "429":
+          description: "rate limited"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /certificate/{code}/download:
+    get:
+      summary: "Certificate PDF download"
+      operationId: getCertificatePdf
+      tags: [Certificates]
+      x-response-time-ms: 2000
+      security: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string }
+          example: "{{certificateCode}}"
+      responses:
+        "200":
+          description: "application/pdf"
+        "404":
+          description: "not found"
+  /api/files/{id}:
+    get:
+      summary: "Private file proxy"
+      operationId: getFile
+      tags: [FilesUploads]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          example: "{{fileId}}"
+      responses:
+        "200":
+          description: "file bytes"
+        "401":
+          description: "unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+        "403":
+          description: "forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/uploads/proof:
+    post:
+      summary: "Public payment proof upload"
+      operationId: postUploadProof
+      tags: [FilesUploads]
+      x-response-time-ms: 2000
+      security: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofUploadResponse"
+        "400":
+          description: "validation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+        "429":
+          description: "rate limited"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/uploads/session:
+    post:
+      summary: "Resumable Drive upload session"
+      operationId: postUploadSession
+      tags: [FilesUploads]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadSessionBody"
+      responses:
+        "200":
+          description: "session url"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "sign in"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/uploads/complete:
+    post:
+      summary: "Finalize resumable upload"
+      operationId: postUploadComplete
+      tags: [FilesUploads]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadCompleteBody"
+      responses:
+        "200":
+          description: "stored file"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "sign in"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/admin/picker-diagnostics:
+    get:
+      summary: "Picker env diagnostics"
+      operationId: getPickerDiagnostics
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      responses:
+        "200":
+          description: "flags"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+        "403":
+          description: "forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/connections/{provider}/start:
+    get:
+      summary: "OAuth start"
+      operationId: getConnectionStart
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema: { type: string }
+          example: "google"
+        - name: capability
+          in: query
+          required: false
+          schema: { type: string }
+          example: "email.send"
+      responses:
+        "302":
+          description: "redirect to provider"
+        "401":
+          description: "sign in redirect"
+  /api/connections/{provider}/callback:
+    get:
+      summary: "OAuth callback"
+      operationId: getConnectionCallback
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema: { type: string }
+          example: "google"
+      responses:
+        "302":
+          description: "redirect"
+        "401":
+          description: "sign in"
+  /api/connections/google/picker-token:
+    get:
+      summary: "Google Picker token"
+      operationId: getPickerToken
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      parameters:
+        - name: connectionId
+          in: query
+          required: true
+          schema: { type: string }
+          example: "{{connectionId}}"
+      responses:
+        "200":
+          description: "token payload"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/connections/google/picker-token:
+    post:
+      summary: "Google Picker token (POST)"
+      operationId: postPickerToken
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: 
+        - cookieAuth: []
+      responses:
+        "400":
+          description: "missing connectionId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+        "401":
+          description: "unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/email/google/callback:
+    get:
+      summary: "Legacy Google email OAuth redirect"
+      operationId: getLegacyEmailGoogleCallback
+      tags: [Connections]
+      x-response-time-ms: 2000
+      security: []
+      responses:
+        "302":
+          description: "redirect to connections callback"
+  /api/cron/plan-expiry:
+    get:
+      summary: "Cron plan-expiry (GET)"
+      operationId: cron_plan_expiry_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/plan-expiry:
+    post:
+      summary: "Cron plan-expiry (POST)"
+      operationId: cron_plan_expiry_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/email-outbox:
+    get:
+      summary: "Cron email-outbox (GET)"
+      operationId: cron_email_outbox_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/email-outbox:
+    post:
+      summary: "Cron email-outbox (POST)"
+      operationId: cron_email_outbox_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/file-promote:
+    get:
+      summary: "Cron file-promote (GET)"
+      operationId: cron_file_promote_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/file-promote:
+    post:
+      summary: "Cron file-promote (POST)"
+      operationId: cron_file_promote_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/certificate-jobs:
+    get:
+      summary: "Cron certificate-jobs (GET)"
+      operationId: cron_certificate_jobs_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/certificate-jobs:
+    post:
+      summary: "Cron certificate-jobs (POST)"
+      operationId: cron_certificate_jobs_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/linked-files:
+    get:
+      summary: "Cron linked-files (GET)"
+      operationId: cron_linked_files_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/linked-files:
+    post:
+      summary: "Cron linked-files (POST)"
+      operationId: cron_linked_files_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/sheet-syncs:
+    get:
+      summary: "Cron sheet-syncs (GET)"
+      operationId: cron_sheet_syncs_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/sheet-syncs:
+    post:
+      summary: "Cron sheet-syncs (POST)"
+      operationId: cron_sheet_syncs_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/connections-health:
+    get:
+      summary: "Cron connections-health (GET)"
+      operationId: cron_connections_health_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/connections-health:
+    post:
+      summary: "Cron connections-health (POST)"
+      operationId: cron_connections_health_post
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /api/cron/feature-override-expiry:
+    get:
+      summary: "Cron feature-override-expiry (GET)"
+      operationId: cron_feature_override_expiry_get
+      tags: [Cron]
+      x-response-time-ms: 10000
+      security: 
+        - cronBearer: []
+      responses:
+        "200":
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CronResult"
+        "401":
+          description: "missing/invalid secret"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorJson"
+  /auth/callback:
+    get:
+      summary: "Supabase auth callback"
+      operationId: getAuthCallback
+      tags: [Auth]
+      x-response-time-ms: 2000
+      security: []
+      responses:
+        "302":
+          description: "redirect"
+        "400":
+          description: "missing code"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: header
+      name: Cookie
+      description: Supabase session cookie string (placeholder env cookie_*).
+    cronBearer:
+      type: http
+      scheme: bearer
+      description: CRON_SECRET
+  schemas:
+    HealthResponse:
+      type: "object"
+      required:
+        - "ok"
+        - "appEnv"
+        - "timestamp"
+        - "requestId"
+      properties:
+        ok:
+          type: "boolean"
+          enum:
+            - true
+        appEnv:
+          type: "string"
+          enum:
+            - "local"
+            - "staging"
+            - "production"
+        timestamp:
+          type: "string"
+          format: "date-time"
+        requestId:
+          type: "string"
+    ErrorJson:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+        ok:
+          type: "boolean"
+        message:
+          type: "string"
+    UploadSessionBody:
+      type: "object"
+      required:
+        - "eventId"
+        - "fileName"
+        - "mime"
+        - "size"
+        - "category"
+      properties:
+        eventId:
+          type: "string"
+          format: "uuid"
+        fileName:
+          type: "string"
+          minLength: 1
+          maxLength: 200
+        mime:
+          type: "string"
+          minLength: 3
+          maxLength: 120
+        size:
+          type: "integer"
+          minimum: 1
+          maximum: 209715200
+        category:
+          type: "string"
+          enum:
+            - "payment_proof"
+            - "submission"
+            - "media"
+            - "certificate"
+            - "export"
+            - "other"
+        folderKind:
+          type: "string"
+          enum:
+            - "payment_proofs"
+            - "certificates"
+            - "media"
+            - "exports"
+            - "submissions"
+        entityType:
+          type: "string"
+        entityId:
+          type: "string"
+        registrationId:
+          type: "string"
+          format: "uuid"
+      example:
+        eventId: "00000000-0000-4000-8000-000000000001"
+        fileName: "slide.pdf"
+        mime: "application/pdf"
+        size: 1024
+        category: "media"
+    UploadCompleteBody:
+      type: "object"
+      required:
+        - "eventId"
+        - "providerFileId"
+        - "fileName"
+        - "mime"
+        - "size"
+        - "category"
+        - "folderKind"
+      properties:
+        eventId:
+          type: "string"
+          format: "uuid"
+        providerFileId:
+          type: "string"
+          minLength: 5
+          maxLength: 128
+        fileName:
+          type: "string"
+        mime:
+          type: "string"
+        size:
+          type: "integer"
+          minimum: 0
+          maximum: 209715200
+        category:
+          type: "string"
+          enum:
+            - "payment_proof"
+            - "submission"
+            - "media"
+            - "certificate"
+            - "export"
+            - "other"
+        folderKind:
+          type: "string"
+          enum:
+            - "payment_proofs"
+            - "certificates"
+            - "media"
+            - "exports"
+            - "submissions"
+        connectionId:
+          type: "string"
+          format: "uuid"
+      example:
+        eventId: "00000000-0000-4000-8000-000000000001"
+        providerFileId: "drive-file-id-xxxxx"
+        fileName: "slide.pdf"
+        mime: "application/pdf"
+        size: 1024
+        category: "media"
+        folderKind: "media"
+    ProofUploadResponse:
+      type: "object"
+      required:
+        - "fileId"
+      properties:
+        fileId:
+          type: "string"
+    CertificateJson:
+      type: "object"
+      required:
+        - "templateLayout"
+        - "version"
+        - "assets"
+        - "data"
+      properties:
+        templateLayout: {}
+        version: {}
+        assets: {}
+        data: {}
+    CronResult:
+      type: "object"
+      additionalProperties: true
+      properties:
+        ok:
+          type: "boolean"
+

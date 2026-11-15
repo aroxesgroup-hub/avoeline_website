@@ -7,8 +7,10 @@
 //   SAAS_OWNER_PASSWORD_2=...   (password for the second email, and so on)
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { assertSafeTestTargetOrExit } from "./lib/testSafety.mjs";
 
 config({ path: ".env.local" });
+assertSafeTestTargetOrExit();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -52,7 +54,11 @@ for (const [i, email] of emails.entries()) {
   try {
     let id = await findUserId(email);
     if (id) {
-      const { error } = await admin.auth.admin.updateUserById(id, { password, email_confirm: true, ban_duration: "none" });
+      const { error } = await admin.auth.admin.updateUserById(id, {
+        password,
+        email_confirm: true,
+        ban_duration: "none",
+      });
       if (error) throw error;
       console.log(`• ${email}: existing Auth user, password updated`);
     } else {

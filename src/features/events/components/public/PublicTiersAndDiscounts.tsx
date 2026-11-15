@@ -28,7 +28,7 @@ export function PublicTiersAndDiscounts({ dto }: { dto: PublicEventDto }) {
               {t.description ? (
                 <p className="mt-1 break-words text-xs text-ink-soft">{t.description}</p>
               ) : null}
-              <ul className="mt-3 space-y-1 text-2xs text-ink-faint">
+              <ul className="mt-3 space-y-1 text-2xs text-ink-soft">
                 {t.availableUntil ? (
                   <li>Available until {formatDateMedium(t.availableUntil)}</li>
                 ) : (

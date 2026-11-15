@@ -2,8 +2,7 @@ import "server-only";
 
 import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
-import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
-import { isWithinRegistrationDates } from "@/src/lib/publicEventStatus";
+import { getRegistrationState } from "@/src/lib/registrationState";
 import { logger } from "@/src/lib/logger";
 
 export type RegistrationEligibleEvent = {
@@ -85,33 +84,28 @@ export async function assertPublicRegistrationEvent(
     endDate?: string;
     timezone?: string;
   };
-  if (!isActiveLifecycle(eventLifecycle(String(event.status || ""), schedule))) {
-    return {
-      ok: false,
-      code: "CLOSED",
-      message: "This event is not open for registration right now.",
-      status: 400,
-    };
-  }
-
   const tz =
     String(schedule.timezone || "").trim() ||
     String((event as { timezone?: string | null }).timezone || "").trim() ||
-    null;
-  if (
-    !isWithinRegistrationDates(
-      {
-        registrationOpenDate: event.registration_open_date,
-        registrationCloseDate: event.registration_close_date,
-        timezone: tz,
-      },
-      new Date(),
-    )
-  ) {
+    "UTC";
+
+  const reg = getRegistrationState({
+    event: {
+      status: String(event.status || ""),
+      requiresRegistration: event.requires_registration !== false,
+      registrationOpenDate: event.registration_open_date,
+      registrationCloseDate: event.registration_close_date,
+      schedule,
+    },
+    timezone: tz,
+  });
+
+  // S2: server re-check — only states with canRegister (open | closing_soon | waitlist).
+  if (!reg.canRegister) {
     return {
       ok: false,
       code: "CLOSED",
-      message: "This event is not open for registration right now.",
+      message: reg.message || "This event is not open for registration right now.",
       status: 400,
     };
   }

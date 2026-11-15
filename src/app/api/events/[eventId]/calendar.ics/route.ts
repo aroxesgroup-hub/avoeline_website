@@ -12,7 +12,16 @@ export async function GET(
   ctx: { params: Promise<{ eventId: string }> },
 ): Promise<Response> {
   const { eventId } = await ctx.params;
-  const event = await EventService.getEventByID(eventId);
+  const id = String(eventId ?? "").trim();
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) {
+    return new NextResponse("Invalid event id", { status: 400 });
+  }
+  let event;
+  try {
+    event = await EventService.getEventByID(id);
+  } catch {
+    return new NextResponse("Not found", { status: 404 });
+  }
   if (!event || event.status === "cancelled" || event.status === "draft") {
     return new NextResponse("Not found", { status: 404 });
   }

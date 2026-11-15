@@ -1,4 +1,3 @@
-import { fromEventLocalInput, toDate } from "@/src/lib/datetime";
 import type { EventLifecycle } from "@/src/lib/eventState";
 import { eventLifecycle, isActiveLifecycle } from "@/src/lib/eventState";
 import {
@@ -6,6 +5,10 @@ import {
   effectiveRegistrationClosesAt,
   isCompetitionRegistrationOpen,
 } from "@/src/lib/competitionRegistration";
+import {
+  getRegistrationState,
+  registrationBoundInstant as registrationBoundInstantCanonical,
+} from "@/src/lib/registrationState";
 
 export type PublicEventBanner = {
   lifecycle: EventLifecycle;
@@ -24,43 +27,43 @@ export type RegistrationWindow = {
 
 /**
  * Instant for a date-only (YYYY-MM-DD) bound in the event timezone.
- * Open = start of that local day; close = end of that local day.
- * Full ISO strings are used as absolute instants.
+ * Delegates to canonical registrationBoundInstant (docs/24 A1).
  */
 export function registrationBoundInstant(
   raw: string | null | undefined,
   edge: "start" | "end",
   timeZone?: string | null,
 ): Date | null {
-  const s = String(raw || "").trim();
-  if (!s) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-    const tz = String(timeZone || "").trim() || "UTC";
-    const local = edge === "start" ? `${s}T00:00:00` : `${s}T23:59:59`;
-    const iso = fromEventLocalInput(local, tz);
-    return iso ? new Date(iso) : toDate(s);
-  }
-  return toDate(s);
+  return registrationBoundInstantCanonical(raw, edge, String(timeZone || "").trim() || "UTC");
 }
 
 /**
  * Whether the event's registration open/close dates currently allow signup.
- * Missing dates mean "no extra window constraint". Date-only bounds use event TZ.
+ * Thin wrapper over getRegistrationState (date window only — ignores seats).
  */
 export function isWithinRegistrationDates(
   registration: RegistrationWindow | null | undefined,
   now: Date = new Date(),
 ): boolean {
   if (!registration) return true;
-  const tz = registration.timezone;
-
-  const opens = registrationBoundInstant(registration.registrationOpenDate, "start", tz);
-  if (opens && now < opens) return false;
-
-  const closes = registrationBoundInstant(registration.registrationCloseDate, "end", tz);
-  if (closes && now > closes) return false;
-
-  return true;
+  const tz = String(registration.timezone || "").trim() || "UTC";
+  const reg = getRegistrationState({
+    event: {
+      status: "published",
+      requiresRegistration: true,
+      registrationOpenDate: registration.registrationOpenDate,
+      registrationCloseDate: registration.registrationCloseDate,
+      schedule: { timezone: tz },
+    },
+    timezone: tz,
+    now,
+  });
+  return (
+    reg.state === "open" ||
+    reg.state === "closing_soon" ||
+    reg.state === "waitlist" ||
+    reg.state === "full"
+  );
 }
 
 export function publicEventPresentation(
@@ -124,6 +127,7 @@ export function trackRegistrationOpen(
   const effective = effectiveRegistrationClosesAt(
     track.registrationClosesAt,
     opts?.eventRegistrationCloseDate,
+    "UTC",
   );
   const state = competitionRegisterState({
     effectiveClosesAt: effective,

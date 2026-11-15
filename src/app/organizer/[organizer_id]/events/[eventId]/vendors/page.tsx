@@ -17,6 +17,7 @@ import { VendorData, PricingPackage } from "@/src/services/models/vendor.model";
 import { listExternalVendors } from "@/src/features/event_external_vendors/externalVendors.service";
 import { AddOwnVendorModal } from "@/src/features/event_external_vendors/components/AddOwnVendorModal";
 import { deleteExternalVendorAction } from "@/src/features/event_external_vendors/actions/externalVendors.action";
+import { hasModuleAccess } from "@/src/features/permissions/permissions.service";
 
 export default async function Vendors({
   params,
@@ -26,6 +27,12 @@ export default async function Vendors({
   const resolvedParams = await params;
   const event_id = resolvedParams.eventId;
   const organizer_id = resolvedParams.organizer_id;
+
+  if (!(await hasModuleAccess(organizer_id, "vendor_store"))) {
+    const { LockedModulePanel } =
+      await import("@/src/features/permissions/components/LockedModulePanel");
+    return <LockedModulePanel moduleKey="vendor_store" />;
+  }
 
   const [vendors, ownVendors] = await Promise.all([
     EventVendorService.getVendorsByEvent(event_id),

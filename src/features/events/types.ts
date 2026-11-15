@@ -8,7 +8,10 @@ import type {
 } from "@/src/features/registration/forms/formFields.types";
 import type { HackathonKind } from "@/src/features/hackathon/kinds";
 import type { EventLifecycle } from "@/src/lib/eventState";
+import type { RegistrationState } from "@/src/lib/registrationState";
 import type { EventFormat, EventStatus, EventVisibility } from "@/src/services/models/event.model";
+
+export type { RegistrationState };
 
 export type PublicOrganizerChip = {
   name: string;
@@ -90,7 +93,8 @@ export type PublicCompetitionPrize = {
   description: string;
 };
 
-export type CompetitionRegisterState = "not_yet_open" | "open" | "closed" | "full";
+/** @deprecated Use RegistrationState from registrationState.ts */
+export type CompetitionRegisterState = RegistrationState;
 
 export type PublicCompetition = {
   id: string;
@@ -111,13 +115,18 @@ export type PublicCompetition = {
   submissionDeadline: string;
   /** Track-only close if set (raw). */
   registrationClosesAt: string;
-  /** Track close or event close fallback. */
+  /** Track close or event close fallback (ISO). Never null when event has a close. */
   effectiveRegistrationClosesAt: string | null;
+  /** True when effective close came from the event deadline. */
+  closeInherited: boolean;
   prizePool: string;
   /** Structured prizes from hackathon_track_prizes (public-safe). */
   prizes: PublicCompetitionPrize[];
   registrationOpen: boolean;
-  registerState: CompetitionRegisterState;
+  registerState: RegistrationState;
+  registrationMessage: string;
+  registrationCtaLabel: string | null;
+  canRegister: boolean;
   sponsorLogoUrl?: string | null;
   sponsorName?: string | null;
 };
@@ -139,16 +148,20 @@ export type PublicLocation = {
   mapsUrl: string;
 };
 
-export type RegisterButtonState =
+/** @deprecated Prefer RegistrationState on PublicEventDto.registration.state */
+export type RegisterButtonState = RegistrationState;
+
+/** @deprecated Legacy CTA labels from resolveRegisterButtonState only. */
+export type LegacyRegisterButtonState =
   | "open"
-  | "opens_at"
-  | "closed"
-  | "waitlist"
-  | "sold_out"
-  | "ended"
   | "admin_preview"
   | "no_registration"
-  | "competitions_closed";
+  | "ended"
+  | "opens_at"
+  | "competitions_closed"
+  | "closed"
+  | "waitlist"
+  | "sold_out";
 
 export type PublicEventDto = {
   id: string;
@@ -204,6 +217,18 @@ export type PublicEventDto = {
   allowTierSelfSelect: boolean;
   attendeeTiers: string[];
   lockedTiers: string[];
+  /** Canonical registration window (docs/24 A1). */
+  registration: {
+    state: RegistrationState;
+    opensAt: string | null;
+    closesAt: string | null;
+    closeInherited: boolean;
+    message: string;
+    ctaLabel: string | null;
+    canRegister: boolean;
+    reminder: { startsAt: string; endsAt: string; title: string } | null;
+  };
+  /** @deprecated Use registration.state */
   registerState: RegisterButtonState;
   registerOpensAt: string | null;
   admissionLabel: string;
@@ -234,6 +259,12 @@ export type PublicEventView =
       eventId: string;
       reason: PublicEventGateReason;
       inviteToken?: string;
+      meta?: {
+        organizerName?: string;
+        hasCode?: boolean;
+        hasWhitelist?: boolean;
+        whitelistEmailVerify?: boolean;
+      };
     }
   | {
       kind: "full";

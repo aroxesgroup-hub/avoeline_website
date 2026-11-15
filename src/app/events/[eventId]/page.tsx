@@ -156,9 +156,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
       price: dto.isFree ? 0 : undefined,
       priceCurrency: dto.currency,
       availability:
-        dto.registerState === "sold_out"
-          ? "https://schema.org/SoldOut"
-          : "https://schema.org/InStock",
+        dto.registerState === "full" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
       url: dto.sharePath,
     },
   };

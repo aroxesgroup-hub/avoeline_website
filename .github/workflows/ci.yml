@@ -5,6 +5,17 @@ on:
     branches: [main, master]
   pull_request:
 
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholderplaceholderplaceholder
+  SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.service-role-placeholderxx
+  HACKATHON_COMPETE_SECRET: ci-hackathon-compete-secret
+  NEXT_TELEMETRY_DISABLED: "1"
+  APP_ENV: local
+  BASE_URL: http://127.0.0.1:3000
+  PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+  TEST_HOST_ALLOWLIST: localhost,127.0.0.1
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,18 +40,21 @@ jobs:
         run: |
           test -f src/lib/database.types.ts
           grep -q "export type Database" src/lib/database.types.ts
-          # Fail if types file is empty or missing Tables (must be regenerated after migrations)
           grep -q "Tables:" src/lib/database.types.ts
       - name: Knip (dependencies)
         run: npm run knip -- --include dependencies
       - name: Build
         run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholderplaceholderplaceholder
-          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.service-role-placeholderxx
-          HACKATHON_COMPETE_SECRET: ci-hackathon-compete-secret
-          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Start app for Postman / authz
+        run: |
+          npm run start &
+          echo $! > /tmp/next-pid
+      - name: Postman negatives + authz HTTP
+        run: npm run test:ci:postman
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next-pid ]; then kill $(cat /tmp/next-pid) || true; fi
 
   # Optional: set repo secret SUPABASE_DB_URL to run. Job-level `if: secrets.*`
   # is invalid in GitHub Actions — gate inside the job instead.
@@ -76,3 +90,35 @@ jobs:
         run: npm run test:sql:marketing
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+  e2e-smoke:
+    name: E2E smoke (merge)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chrome
+        run: npx playwright install chrome --with-deps
+      - name: Build
+        run: npm run build
+      - name: Start app
+        run: |
+          npm run start &
+          echo $! > /tmp/next-pid
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://127.0.0.1:3000/events; then exit 0; fi
+            sleep 2
+          done
+          echo "server did not become ready"
+          exit 1
+      - name: Playwright smoke
+        run: npm run test:e2e:smoke
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next-pid ]; then kill $(cat /tmp/next-pid) || true; fi

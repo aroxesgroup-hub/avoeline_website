@@ -156,6 +156,14 @@ export async function promoteFromWaitlist(eventId: string): Promise<number> {
 }
 
 export async function decideRegistration(formData: FormData): Promise<ActionResult> {
+  const { withFormClientRequestId } = await import("@/src/lib/formIdempotency");
+  const actor = await AuthService.getCurrentUser().catch(() => null);
+  return withFormClientRequestId("registration.decide", formData, actor?.userId, () =>
+    decideRegistrationImpl(formData),
+  );
+}
+
+async function decideRegistrationImpl(formData: FormData): Promise<ActionResult> {
   try {
     const eventId = String(formData.get("eventId") ?? "").trim();
     const registrationId = String(formData.get("registrationId") ?? "").trim();

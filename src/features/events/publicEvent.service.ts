@@ -7,13 +7,8 @@ import { absoluteUrl } from "@/src/lib/appUrl";
 import { formatCurrency } from "@/src/lib/money";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { eventLifecycle } from "@/src/lib/eventState";
-import {
-  competitionRegisterState,
-  effectiveRegistrationClosesAt,
-  publicEventPresentation,
-  trackRegistrationOpen,
-} from "@/src/lib/publicEventStatus";
-import { toDate } from "@/src/lib/datetime";
+import { publicEventPresentation } from "@/src/lib/publicEventStatus";
+import { getRegistrationState } from "@/src/lib/registrationState";
 import { isSupportViewer } from "@/src/features/admin/supportPreview";
 import { accessTypeOf, resolveEventAccess } from "@/src/features/access/access.service";
 import {
@@ -57,16 +52,11 @@ import type {
   PublicFormField,
   PublicOrgCredit,
 } from "./types";
-import { resolveRegisterButtonState } from "./publicEvent.logic";
 import { sortPublicAgendaItems } from "@/src/features/agendas/agendaSort";
 import { AgendaService } from "@/src/features/agendas/agenda.service";
 import { normalizeAgendaType } from "@/src/features/agendas/agendaTypes";
 
-export {
-  resolveRegisterButtonState,
-  dtoContainsForbiddenKey,
-  filterPublicOrgCredits,
-} from "./publicEvent.logic";
+export { dtoContainsForbiddenKey, filterPublicOrgCredits } from "./publicEvent.logic";
 
 const FORMAT_LABEL: Record<EventFormat, string> = {
   physical: "In person",
@@ -276,14 +266,17 @@ async function buildDto(
     (event as { registrationCloseDate?: string }).registrationCloseDate ||
     null;
   const waitlistEnabled = !!(event.access?.waitlistEnabled ?? event.capacity?.waitingListEnabled);
-  const openTracks = tracks.filter((t) =>
-    trackRegistrationOpen(t, {
-      eventRegistrationOpen: presentation.registrationOpen,
-      eventRegistrationCloseDate: eventCloseDate,
-      seatsLeft,
-      waitlistEnabled,
-    }),
-  );
+  const timezone = event.schedule?.timezone || "Asia/Karachi";
+  const registrationEventInput = {
+    status: event.status,
+    requiresRegistration: event.requiresRegistration !== false,
+    registrationOpenDate: event.registration?.registrationOpenDate || "",
+    registrationCloseDate: eventCloseDate,
+    waitlistEnabled,
+    seatsLeft,
+    schedule: event.schedule,
+    hasCompetitions: tracks.length > 0,
+  };
   const showSponsors = !!(event as EventModel & { showSponsors?: boolean }).showSponsors;
   const showCollaborators = !!(event as EventModel & { showCollaborators?: boolean })
     .showCollaborators;
@@ -293,16 +286,20 @@ async function buildDto(
     const sponsor = showSponsors ? trackSponsor(organizations, t.id) : null;
     const kind: HackathonKind = isHackathonKind(t.kind) ? t.kind : "business";
     const prizeRows: TrackPrize[] = prizesByTrack.get(t.id) ?? [];
-    const effectiveClose = effectiveRegistrationClosesAt(t.registrationClosesAt, eventCloseDate);
-    const registerState = competitionRegisterState({
-      effectiveClosesAt: effectiveClose,
-      opensAt: (t as { opensAt?: string }).opensAt || null,
-      trackEnded: String(t.status || "").toLowerCase() === "ended",
-      eventLifecycleActive: presentation.registrationOpen,
-      seatsLeft,
-      waitlistEnabled,
+    const ended = String(t.status || "").toLowerCase() === "ended";
+    const reg = getRegistrationState({
+      event: registrationEventInput,
+      competition: {
+        id: t.id,
+        registrationClosesAt: t.registrationClosesAt || null,
+        ended,
+        seatsLeft,
+        waitlistEnabled,
+      },
+      timezone,
+      preview: opts.preview,
+      eventTitle: event.title,
     });
-    const finalState = registerState;
     return {
       id: t.id,
       name: t.name,
@@ -320,15 +317,20 @@ async function buildDto(
       maxTeamSize: t.maxTeamSize,
       submissionDeadline: t.submissionDeadline || t.submissionDeadlineAt || "",
       registrationClosesAt: t.registrationClosesAt || "",
-      effectiveRegistrationClosesAt: effectiveClose,
+      effectiveRegistrationClosesAt: reg.closesAt,
+      closeInherited: reg.closeInherited,
       prizePool: t.prizePool || "",
       prizes: prizeRows.map((p) => ({
         positionLabel: p.positionLabel,
         amount: p.amount,
         description: p.description,
       })),
-      registerState: finalState,
-      registrationOpen: finalState === "open",
+      registerState: reg.state,
+      registrationMessage: reg.message,
+      registrationCtaLabel: reg.ctaLabel,
+      canRegister: reg.canRegister,
+      registrationOpen:
+        reg.canRegister && reg.state !== "waitlist" ? true : reg.state === "waitlist",
       sponsorLogoUrl: sponsor?.logoUrl || null,
       sponsorName: sponsor?.name || null,
     };
@@ -441,23 +443,21 @@ async function buildDto(
   if (event.category) tags.push(String(event.category));
   if (event.eventType) tags.push(String(event.eventType));
 
-  const registerState = resolveRegisterButtonState({
+  const eventReg = getRegistrationState({
+    event: registrationEventInput,
+    competitions: tracks.map((t) => ({
+      id: t.id,
+      registrationClosesAt: t.registrationClosesAt || null,
+      ended: String(t.status || "").toLowerCase() === "ended",
+      seatsLeft,
+      waitlistEnabled,
+    })),
+    timezone,
     preview: opts.preview,
-    requiresRegistration: event.requiresRegistration !== false,
-    lifecycle: presentation.lifecycle,
-    registrationOpen: presentation.registrationOpen,
-    registrationOpenDate: event.registration?.registrationOpenDate || "",
-    seatsLeft,
-    waitlistEnabled: !!event.access?.waitlistEnabled,
-    hasTracks: tracks.length > 0,
-    openCompetitionCount: openTracks.length,
+    eventTitle: event.title,
   });
-
-  const opens = toDate(event.registration?.registrationOpenDate);
-  let registerOpensAt: string | null = null;
-  if (registerState === "opens_at" && opens) {
-    registerOpensAt = opens.toISOString();
-  }
+  const registerState = eventReg.state;
+  const registerOpensAt = eventReg.state === "not_open" ? eventReg.opensAt : null;
 
   void opts.attempt;
 
@@ -524,6 +524,16 @@ async function buildDto(
     allowTierSelfSelect: !!event.access?.allowTierSelfSelect,
     attendeeTiers: event.access?.attendeeTiers ?? [],
     lockedTiers: opts.lockedTiers,
+    registration: {
+      state: eventReg.state,
+      opensAt: eventReg.opensAt,
+      closesAt: eventReg.closesAt,
+      closeInherited: eventReg.closeInherited,
+      message: eventReg.message,
+      ctaLabel: eventReg.ctaLabel,
+      canRegister: eventReg.canRegister,
+      reminder: eventReg.reminder,
+    },
     registerState,
     registerOpensAt,
     admissionLabel,

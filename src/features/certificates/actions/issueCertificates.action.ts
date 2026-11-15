@@ -17,12 +17,17 @@ const issueSchema = z.object({
   roles: z.record(z.string(), z.string()).optional(),
   /** Default on when Drive connected. */
   archiveToDrive: z.boolean().optional(),
+  clientRequestId: z.string().uuid().optional(),
 });
 
 export const issueCertificatesAction = safeAction({
   input: issueSchema,
   auth: async () => {
     return { label: "issueCertificates" };
+  },
+  idempotency: {
+    scope: "certificate.issue",
+    keyFrom: (input) => input.clientRequestId,
   },
   run: async (input) => {
     const limited = rateLimit(`cert:issue:${input.eventId}`, 10, 60);

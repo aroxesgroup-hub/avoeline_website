@@ -62,9 +62,9 @@ export function EventCard({ event }: { event: EventCardModel }) {
           {event.shortDescription ? (
             <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{event.shortDescription}</p>
           ) : null}
-          <dl className="mt-4 space-y-1.5 text-sm text-ink-soft">
+          <div className="mt-4 space-y-1.5 text-sm text-ink-soft">
             <div className="flex items-center gap-2">
-              <span className="text-2xs uppercase text-ink-faint">When</span>
+              <span className="text-2xs uppercase text-ink-soft">When</span>
               <span className="text-ink">
                 {formatDateMedium(event.schedule?.startDate)}
                 {event.schedule?.startTime ? `, ${formatTime(event.schedule.startTime)}` : ""}
@@ -72,17 +72,17 @@ export function EventCard({ event }: { event: EventCardModel }) {
             </div>
             {venue ? (
               <div className="flex items-center gap-2">
-                <MapPin size={13} className="shrink-0 text-ink-faint" aria-hidden="true" />
+                <MapPin size={13} className="shrink-0 text-ink-soft" aria-hidden="true" />
                 <span className="truncate">{venue}</span>
               </div>
             ) : null}
             {priceText ? (
               <div className="flex items-center gap-2">
-                <span className="text-2xs uppercase text-ink-faint">From</span>
+                <span className="text-2xs uppercase text-ink-soft">From</span>
                 <span className="text-ink">{priceText}</span>
               </div>
             ) : null}
-          </dl>
+          </div>
         </CardBody>
       </Card>
     </Link>

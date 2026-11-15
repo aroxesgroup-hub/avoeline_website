@@ -142,6 +142,17 @@ export async function registerAttendeeAction(
   formData: FormData,
 ): Promise<ActionResult> {
   void prevState;
+  const { withFormClientRequestId } = await import("@/src/lib/formIdempotency");
+  const user = await AuthService.getCurrentUser().catch(() => null);
+  return withFormClientRequestId("registration.submit", formData, user?.userId, () =>
+    registerAttendeeActionImpl(eventId, formData),
+  );
+}
+
+async function registerAttendeeActionImpl(
+  eventId: string,
+  formData: FormData,
+): Promise<ActionResult> {
   try {
     const headerList = await headers();
     const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";

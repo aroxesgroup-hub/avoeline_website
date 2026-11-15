@@ -27,6 +27,7 @@ const BodySchema = z.object({
   entityType: z.string().min(1).max(64).optional(),
   entityId: z.string().min(1).max(80).optional(),
   registrationId: z.string().uuid().optional(),
+  clientRequestId: z.string().uuid().optional(),
   submissionPath: z
     .object({
       competition: z.string().max(80).optional(),
@@ -81,6 +82,25 @@ export async function POST(req: NextRequest) {
     );
   }
   const input = parsed.data;
+  let claimKey: string | null = null;
+  if (input.clientRequestId) {
+    const { claimClientRequestId } = await import("@/src/lib/idempotency");
+    const claim = await claimClientRequestId({
+      scope: "upload.session",
+      key: input.clientRequestId,
+      actorUserId: user.userId,
+    });
+    if (claim.kind === "replay") {
+      return NextResponse.json(claim.response);
+    }
+    if (claim.kind === "inflight") {
+      return NextResponse.json(
+        { ok: false, error: "That upload request is already being processed." },
+        { status: 409 },
+      );
+    }
+    claimKey = input.clientRequestId;
+  }
 
   if (isBlockedExecutable({ name: input.fileName, mime: input.mime })) {
     return NextResponse.json(
@@ -129,8 +149,8 @@ export async function POST(req: NextRequest) {
       origin,
     });
 
-    return NextResponse.json({
-      ok: true,
+    const body = {
+      ok: true as const,
       sessionUrl: session.sessionUrl,
       connectionId: gate.driveConnectionId,
       folderKind,
@@ -143,7 +163,12 @@ export async function POST(req: NextRequest) {
         mime: input.mime,
         size: input.size,
       },
-    });
+    };
+    if (claimKey) {
+      const { completeClientRequestId } = await import("@/src/lib/idempotency");
+      await completeClientRequestId({ scope: "upload.session", key: claimKey, response: body });
+    }
+    return NextResponse.json(body);
   } catch (err) {
     logger.error("[uploads/session]", { err: err instanceof Error ? err.message : "unknown" });
     return NextResponse.json(

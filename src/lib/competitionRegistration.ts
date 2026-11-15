@@ -1,25 +1,39 @@
-import { toDate } from "@/src/lib/datetime";
+/**
+ * Compatibility wrappers around getRegistrationState (docs/24 A1).
+ * Prefer importing getRegistrationState directly for new code.
+ */
+
+import {
+  getRegistrationState,
+  registrationBoundInstant,
+  type RegistrationState,
+} from "@/src/lib/registrationState";
 
 export type CompetitionRegisterState = "not_yet_open" | "open" | "closed" | "full";
 
-/** Prefer competition close; else event close (date-only → end of local day). */
+function mapState(state: RegistrationState): CompetitionRegisterState {
+  if (state === "not_open") return "not_yet_open";
+  if (state === "full") return "full";
+  if (state === "open" || state === "closing_soon" || state === "waitlist") return "open";
+  return "closed";
+}
+
+/** Prefer competition close; else event close (date-only → end of day in event TZ). */
 export function effectiveRegistrationClosesAt(
   trackClosesAt: string | null | undefined,
   eventClosesAt: string | null | undefined,
+  timeZone: string | null | undefined = "UTC",
 ): string | null {
+  const tz = String(timeZone || "").trim() || "UTC";
   const track = String(trackClosesAt || "").trim();
-  if (track) return track;
+  if (track) {
+    const d = registrationBoundInstant(track, "end", tz);
+    return d ? d.toISOString() : track;
+  }
   const eventClose = String(eventClosesAt || "").trim();
   if (!eventClose) return null;
-  const d = toDate(eventClose);
-  if (!d) return eventClose;
-  // Date-only YYYY-MM-DD → end of that local day
-  if (/^\d{4}-\d{2}-\d{2}$/.test(eventClose)) {
-    const end = new Date(d);
-    end.setHours(23, 59, 59, 999);
-    return end.toISOString();
-  }
-  return d.toISOString();
+  const d = registrationBoundInstant(eventClose, "end", tz);
+  return d ? d.toISOString() : eventClose;
 }
 
 export function competitionRegisterState(input: {
@@ -30,19 +44,33 @@ export function competitionRegisterState(input: {
   seatsLeft: number | null;
   waitlistEnabled: boolean;
   now?: Date;
+  /** Event timezone for date-only bounds (defaults UTC). */
+  timezone?: string | null;
+  eventStatus?: string | null;
 }): CompetitionRegisterState {
-  const now = input.now ?? new Date();
   if (!input.eventLifecycleActive || input.trackEnded) return "closed";
-  if (input.opensAt) {
-    const opens = Date.parse(input.opensAt);
-    if (Number.isFinite(opens) && opens > now.getTime()) return "not_yet_open";
-  }
-  if (input.effectiveClosesAt) {
-    const closes = Date.parse(input.effectiveClosesAt);
-    if (Number.isFinite(closes) && closes < now.getTime()) return "closed";
-  }
-  if (input.seatsLeft === 0 && !input.waitlistEnabled) return "full";
-  return "open";
+  const tz = String(input.timezone || "").trim() || "UTC";
+  const result = getRegistrationState({
+    event: {
+      status: input.eventStatus || "published",
+      requiresRegistration: true,
+      registrationOpenDate: input.opensAt || null,
+      registrationCloseDate: input.effectiveClosesAt,
+      waitlistEnabled: input.waitlistEnabled,
+      seatsLeft: input.seatsLeft,
+      schedule: { timezone: tz },
+      hasCompetitions: true,
+    },
+    competition: {
+      registrationClosesAt: input.effectiveClosesAt,
+      ended: !!input.trackEnded,
+      seatsLeft: input.seatsLeft,
+      waitlistEnabled: input.waitlistEnabled,
+    },
+    timezone: tz,
+    now: input.now,
+  });
+  return mapState(result.state);
 }
 
 /** Compatibility boolean used by registration form filters. */

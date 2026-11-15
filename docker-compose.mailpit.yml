@@ -1,7 +1,7 @@
-# Local catch-all SMTP for attendee email QA (N6).
+# Deprecated path — prefer root docker-compose.yml (docs/25 T0).
 # Usage: docker compose -f docker-compose.mailpit.yml up -d
+# Or:    npm run mailpit  (uses docker-compose.yml)
 # UI: http://localhost:8025  SMTP: localhost:1025
-# Set EMAIL_TRANSPORT=mailpit in .env.local (non-production only).
 services:
   mailpit:
     image: axllent/mailpit:latest

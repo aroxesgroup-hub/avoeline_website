@@ -2,6 +2,13 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-15 | [t10-release-readiness](2026-11-15-t10-release-readiness.md) | done | T10 release-readiness NO-GO, CI PR/merge/nightly/prod-smoke, SEC-006 search_path batch. |
+| 2026-11-15 | [t9-plan-isolation](2026-11-15-t9-plan-isolation.md) | done | T9 seed Social Lite/Partial/Full, resolveModuleAccess matrix, vendor_store + booking IDOR gates, authz-tenant + Playwright T9. |
+| 2026-11-14 | [t8-ui-sweep](2026-11-14-t8-ui-sweep.md) | done | T8 double-tap harness, client_request_ids idempotency, axe/visual/crawler specs, PendingButton/SubmitButton guards. |
+| 2026-11-14 | [t7-security](2026-11-14-t7-security.md) | done | T7 security harness, report, UUID 500 fixes, DEFINER revoke, sharp bump; ZAP/osv/gitleaks/staging deferred. |
+| 2026-11-13 | [fix-production-build](2026-11-13-fix-production-build.md) | done | Restored registration state and email test guard so `npm run build` succeeds. |
+| 2026-11-13 | [t6-load-reads](2026-11-13-t6-load-reads.md) | done | T6 group 1: local k6 scripts for public event page and directory. Run not executed (k6 missing). |
+| 2026-11-11 | [registration-state-a1](2026-11-11-registration-state-a1.md) | done | docs/24 A1: getRegistrationState sole window logic; TZ bounds; UI/API wire; tests |
 | 2026-11-11 | [access-certs-public-fixes](2026-11-11-access-certs-public-fixes.md) | done | Access vip_tiered/extra.access + unlock cookie; opens_at CTA; promo visibility; cert Preview/Transformer; public tracks DTO |
 | 2026-11-10 | [n7-connections-redesign](2026-11-10-n7-connections-redesign.md) | done | N7: single Connections page, account + integration cards, OAuth diagnostics, smoke tests |
 | 2026-11-09 | [n6-attendee-emails](2026-11-09-n6-attendee-emails.md) | done | N6: React Email attendee layout, composer parity, CID QRs, Mailpit + snapshots |

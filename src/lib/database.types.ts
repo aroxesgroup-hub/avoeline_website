@@ -1395,6 +1395,161 @@ export type Database = {
           },
         ]
       }
+      discount_offers: {
+        Row: {
+          active: boolean
+          code: string | null
+          created_at: string
+          description: string
+          eligibility_type: string
+          eligibility_value: string | null
+          event_id: string
+          expires_at: string | null
+          id: string
+          kind: string
+          legacy_promo_id: string | null
+          legacy_track_id: string | null
+          name: string
+          per_email_limit: number
+          scope_ids: string[]
+          scope_type: string
+          sort_order: number
+          starts_at: string | null
+          updated_at: string
+          usage_limit: number | null
+          used_count: number
+          value: number
+          visibility: string
+        }
+        Insert: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string
+          eligibility_type?: string
+          eligibility_value?: string | null
+          event_id: string
+          expires_at?: string | null
+          id?: string
+          kind: string
+          legacy_promo_id?: string | null
+          legacy_track_id?: string | null
+          name: string
+          per_email_limit?: number
+          scope_ids?: string[]
+          scope_type?: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          value: number
+          visibility?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string | null
+          created_at?: string
+          description?: string
+          eligibility_type?: string
+          eligibility_value?: string | null
+          event_id?: string
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          legacy_promo_id?: string | null
+          legacy_track_id?: string | null
+          name?: string
+          per_email_limit?: number
+          scope_ids?: string[]
+          scope_type?: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          value?: number
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_offers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_offers_legacy_promo_id_fkey"
+            columns: ["legacy_promo_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_offers_legacy_track_id_fkey"
+            columns: ["legacy_track_id"]
+            isOneToOne: false
+            referencedRelation: "hackathon_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_redemptions: {
+        Row: {
+          created_at: string
+          discount_amount: number
+          group_id: string | null
+          id: string
+          offer_id: string
+          original_amount: number
+          registration_id: string | null
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          discount_amount?: number
+          group_id?: string | null
+          id?: string
+          offer_id: string
+          original_amount?: number
+          registration_id?: string | null
+          total_amount?: number
+        }
+        Update: {
+          created_at?: string
+          discount_amount?: number
+          group_id?: string | null
+          id?: string
+          offer_id?: string
+          original_amount?: number
+          registration_id?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "registration_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "discount_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discount_redemptions_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_limit_overrides: {
         Row: {
           created_at: string
@@ -1440,6 +1595,41 @@ export type Database = {
           {
             foreignKeyName: "email_limit_overrides_set_by_fkey"
             columns: ["set_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_request_ids: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          key: string
+          response: Json | null
+          scope: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          key: string
+          response?: Json | null
+          scope: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          key?: string
+          response?: Json | null
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_request_ids_actor_user_id_fkey"
+            columns: ["actor_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -2200,6 +2390,7 @@ export type Database = {
           tier: string | null
           token: string | null
           updated_at: string | null
+          verified_at: string | null
         }
         Insert: {
           created_at?: string | null
@@ -2217,6 +2408,7 @@ export type Database = {
           tier?: string | null
           token?: string | null
           updated_at?: string | null
+          verified_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -2234,6 +2426,7 @@ export type Database = {
           tier?: string | null
           token?: string | null
           updated_at?: string | null
+          verified_at?: string | null
         }
         Relationships: [
           {
@@ -2553,6 +2746,7 @@ export type Database = {
       events: {
         Row: {
           access_code: string | null
+          access_code_hash: string | null
           address: string | null
           allow_group_registration: boolean
           archived_at: string | null
@@ -2632,6 +2826,7 @@ export type Database = {
         }
         Insert: {
           access_code?: string | null
+          access_code_hash?: string | null
           address?: string | null
           allow_group_registration?: boolean
           archived_at?: string | null
@@ -2711,6 +2906,7 @@ export type Database = {
         }
         Update: {
           access_code?: string | null
+          access_code_hash?: string | null
           address?: string | null
           allow_group_registration?: boolean
           archived_at?: string | null
@@ -6028,6 +6224,11 @@ export type Database = {
           hackathon_access_code_hash: string | null
           id: string
           invite_id: string | null
+          offer_discount: number | null
+          offer_id: string | null
+          offer_name: string | null
+          offer_original: number | null
+          offer_total: number | null
           organizer_id: string | null
           payment_proof_path: string | null
           payment_status: string | null
@@ -6070,6 +6271,11 @@ export type Database = {
           hackathon_access_code_hash?: string | null
           id?: string
           invite_id?: string | null
+          offer_discount?: number | null
+          offer_id?: string | null
+          offer_name?: string | null
+          offer_original?: number | null
+          offer_total?: number | null
           organizer_id?: string | null
           payment_proof_path?: string | null
           payment_status?: string | null
@@ -6112,6 +6318,11 @@ export type Database = {
           hackathon_access_code_hash?: string | null
           id?: string
           invite_id?: string | null
+          offer_discount?: number | null
+          offer_id?: string | null
+          offer_name?: string | null
+          offer_original?: number | null
+          offer_total?: number | null
           organizer_id?: string | null
           payment_proof_path?: string | null
           payment_status?: string | null
@@ -6165,6 +6376,13 @@ export type Database = {
             columns: ["invite_id"]
             isOneToOne: false
             referencedRelation: "event_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "discount_offers"
             referencedColumns: ["id"]
           },
           {
@@ -7797,6 +8015,26 @@ export type Database = {
           teams_count: number
         }[]
       }
+      redeem_discount_offer: {
+        Args: {
+          p_code: string
+          p_email: string
+          p_event_id: string
+          p_group_id: string
+          p_list_price: number
+          p_offer_id: string
+          p_registration_id: string
+          p_tier_id: string
+          p_track_id: string
+        }
+        Returns: {
+          discount_amount: number
+          offer_id: string
+          offer_name: string
+          original_amount: number
+          total_amount: number
+        }[]
+      }
       redeem_promo: {
         Args: {
           p_email: string
@@ -7959,6 +8197,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
-export type UserRow = Database["public"]["Tables"]["users"]["Row"]
-
