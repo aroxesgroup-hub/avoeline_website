@@ -762,6 +762,14 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 
 ## Change log
 
+### 2026-11-16 — Payment screenshot upload false “event not found”
+- What: `/api/uploads/proof` gated via `assertPublicRegistrationEvent`, which selected a non-existent `events.schedule` column (schedule is composed from `start_date`/`end_date`/…). PostgREST errors were mapped to “We couldn't find this event.” Fixed select + outbox worker; payment field pulled from `per_group` so instructions show; narrowed client error mapping so file “not found” ≠ event missing.
+- Files: `src/features/registration/publicRegistrationEligibility.ts`, `registrationErrors.ts`, `RegistrationForm.tsx`, `src/features/connections/server/outboxWorker.service.ts`, tests
+
+### 2026-11-15 — Product & ops shareable guide
+- What: Added full-product briefing covering SaaS owner, department, club, organizer, vendor, attendee/compete — every tab, plans/modules, security (S1–S19), QR/check-in/compete pre-checks, Mermaid flows, and how to run/test. Linked from `docs/00-INDEX.md`.
+- Files: `docs/PRODUCT_AND_OPS_GUIDE.md`, `docs/00-INDEX.md`
+
 ### 2026-11-15 — T10 release readiness + CI
 - What: Honest **NO-GO** gate in `docs/testing/release-readiness.md`. CI: PR Postman/authz after `next start`, merge E2E smoke, nightly security+k6 soft-skip, prod read-only smoke. Batch B: pin `private.gen_registration_short_code` search_path. SEC-005 accepted as tooling-only.
 - Files: `docs/testing/release-readiness.md`, `.github/workflows/{ci,nightly-local,prod-smoke}.yml`, `scripts/ci-start-and-postman.mjs`, `package.json`, `playwright.config.ts`, `supabase/migrations/20261115120000_t10_search_path_short_code.sql`, `plans/2026-11-15-t10-release-readiness.md`

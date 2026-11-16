@@ -40,7 +40,8 @@ export function mapProofUploadClientError(raw: string | undefined | null, status
   if (/does not take registrations/i.test(msg)) {
     return "This event does not take registrations.";
   }
-  if (/not found/i.test(msg) || status === 404) {
+  // Only treat *event* not-found as such — avoid remapping Drive/file "not found".
+  if (status === 404 || /couldn't find this event|event not found|invalid[_ ]?id/i.test(msg)) {
     return "We couldn't find this event. Refresh the page and try again.";
   }
   if (/image or pdf|mime|file type|too large|under \d|empty|dimension/i.test(msg)) {

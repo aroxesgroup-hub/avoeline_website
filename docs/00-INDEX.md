@@ -9,10 +9,15 @@
 - Reuse existing components rather than rebuilding: `<DynamicFieldRenderer />` (dynamic forms — used for category custom fields, recruitment forms, AND now department/club budget request forms), `<InviteByEmail />` (used for department invites, club president invites, AND now organizer/vendor onboarding), the three-tier RLS pattern (`is_platform_admin()` → own-resource → org-membership).
 - Module/plan gating pattern: every paid feature checks a `feature_overrides` or `organizer_profiles.plan_type` before rendering — see `04-organizer.md` for the exact gating table.
 
+## Shareable full-product guide
+
+For a single document covering **every role, tab, flow, plan/module gate, security rule, and pre-use check** (QR once, compete after check-in, etc.) with Mermaid diagrams — share [`PRODUCT_AND_OPS_GUIDE.md`](PRODUCT_AND_OPS_GUIDE.md). Pair with `completeContext.md` + `ENGINEERING_RULES.md` when the reader will edit code.
+
 ## Which doc to open, by task
 
 | Working on... | Open only this file |
 |---|---|
+| Full product/ops briefing (all roles, tabs, security, how-to-run) | `PRODUCT_AND_OPS_GUIDE.md` |
 | SaaS owner subscriptions, tenant approvals, admin-created accounts | `01-saas-owner.md` (+ `/admin/tenants` board: `plans/2026-10-25-admin-tenants-redesign.md`, email rules `16-platform-email.md`) |
 | Department dashboard, club oversight, tenures, budgets | `02-department.md` |
 | Club president portal, club team roles, requests to department | `03-club-president.md` |

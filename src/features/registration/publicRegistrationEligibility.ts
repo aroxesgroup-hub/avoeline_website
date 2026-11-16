@@ -44,16 +44,22 @@ export async function assertPublicRegistrationEvent(
     };
   }
 
+  // events has no `schedule` jsonb — dates live in start_date / end_date / timezone
+  // (EventModel composes schedule the same way). Selecting a missing column made
+  // PostgREST error and the API falsely returned "couldn't find this event".
   const { data: event, error: eventErr } = await supabaseAdmin
     .from(TABLES.EVENTS)
     .select(
-      "id, organizer_id, status, requires_registration, schedule, registration_open_date, registration_close_date, timezone",
+      "id, organizer_id, status, requires_registration, start_date, end_date, start_time, end_time, registration_open_date, registration_close_date, timezone",
     )
     .eq("id", id)
     .maybeSingle();
 
   if (eventErr) {
-    logger.error("[assertPublicRegistrationEvent]", { code: eventErr.code });
+    logger.error("[assertPublicRegistrationEvent]", {
+      code: eventErr.code,
+      message: eventErr.message,
+    });
     return {
       ok: false,
       code: "NOT_FOUND",
@@ -79,15 +85,14 @@ export async function assertPublicRegistrationEvent(
     };
   }
 
-  const schedule = (event.schedule || {}) as {
-    startDate?: string;
-    endDate?: string;
-    timezone?: string;
+  const tz = String(event.timezone || "").trim() || "UTC";
+  const schedule = {
+    startDate: event.start_date ? String(event.start_date) : undefined,
+    endDate: event.end_date ? String(event.end_date) : undefined,
+    startTime: event.start_time ? String(event.start_time) : undefined,
+    endTime: event.end_time ? String(event.end_time) : undefined,
+    timezone: tz,
   };
-  const tz =
-    String(schedule.timezone || "").trim() ||
-    String((event as { timezone?: string | null }).timezone || "").trim() ||
-    "UTC";
 
   const reg = getRegistrationState({
     event: {

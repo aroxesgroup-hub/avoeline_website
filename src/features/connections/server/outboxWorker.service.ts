@@ -123,15 +123,14 @@ async function revalidateRecipient(payload: Record<string, unknown>): Promise<st
   if (isTimeSensitiveKind(kind) && eventId) {
     const { data: event } = await supabaseAdmin
       .from(TABLES.EVENTS)
-      .select("id, status, schedule")
+      .select("id, status, end_date")
       .eq("id", eventId)
       .maybeSingle();
     if (!event) return "event_missing";
     if (String(event.status) === "cancelled" || String(event.status) === "archived") {
       return "event_ended";
     }
-    const schedule = event.schedule as { endDate?: string; end_date?: string } | null;
-    const endAt = schedule?.endDate || schedule?.end_date;
+    const endAt = event.end_date ? String(event.end_date) : "";
     if (endAt && new Date(endAt).getTime() < Date.now()) return "event_ended";
   }
 

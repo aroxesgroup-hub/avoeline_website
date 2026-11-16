@@ -24,6 +24,12 @@ describe("registrationErrors", () => {
   it("maps proof upload not-found and closed to attendee copy", () => {
     assert.match(mapProofUploadClientError("Event not found.", 404), /couldn't find this event/i);
     assert.match(
+      mapProofUploadClientError("We couldn't find this event. Refresh the page and try again."),
+      /couldn't find this event/i,
+    );
+    // Generic file/Drive "not found" must not become a fake event-missing message.
+    assert.doesNotMatch(mapProofUploadClientError("File not found."), /couldn't find this event/i);
+    assert.match(
       mapProofUploadClientError("This event is not open for registration."),
       /not open for registration/i,
     );

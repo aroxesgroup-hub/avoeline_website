@@ -127,12 +127,14 @@ export function RegistrationForm({
     }
     return true;
   });
-  const groupOnlyFields = leadFields.filter((f) => f.scope === "per_group");
+  // payment_screenshot is scoped per_group (once per registration) — pull it out so
+  // instructions + upload sit with lead details, not buried in "team questions".
+  const paymentField = leadFields.find((f) => f.key === "payment_screenshot");
+  const groupOnlyFields = leadFields.filter(
+    (f) => f.scope === "per_group" && f.key !== "payment_screenshot",
+  );
   const memberFields = leadFields.filter((f) => f.scope === "per_member");
-  // Solo: all fields once. Group/hackathon lead: per_member for lead + per_group once.
-  const soloOrLeadMemberFields = memberFields;
-  const paymentField = soloOrLeadMemberFields.find((f) => f.key === "payment_screenshot");
-  const fieldsBeforePayment = soloOrLeadMemberFields.filter((f) => f.key !== "payment_screenshot");
+  const fieldsBeforePayment = memberFields.filter((f) => f.key !== "payment_screenshot");
   const showPaymentInstructions =
     paidNow && !!String(paymentInstructions || "").trim() && !!paymentField;
   const amountLabel = selected
