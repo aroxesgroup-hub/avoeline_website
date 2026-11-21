@@ -3,6 +3,12 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
 import { AuthShell } from "@/src/shared_components/auth/AuthShell";
+import {
+  AUTH_LEFT_STATS,
+  AUTH_TESTIMONIAL,
+} from "@/src/shared_components/auth/authMarketingDefaults";
+import { AuthModeToggle } from "@/src/shared_components/auth/AuthModeToggle";
+import { AuthEmailDivider } from "@/src/shared_components/auth/AuthEmailDivider";
 import { PasswordField } from "@/src/shared_components/ui/PasswordField";
 import { Button, Input } from "@/components/ui";
 import { GoogleAuthButton } from "@/src/features/auth/components/GoogleAuthButton";
@@ -43,15 +49,22 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
       eyebrow="Welcome back"
       headline="Pick up where the event left off."
       copy="Quotes, bookings, and analytics — one sign-in, whichever role you hold."
+      stats={[...AUTH_LEFT_STATS]}
+      testimonial={AUTH_TESTIMONIAL}
+      heroBadge="99.9% uptime"
     >
+      <AuthModeToggle mode="signin" />
+
       <div className="space-y-1">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-ink">Sign in</h1>
-        <p className="text-sm text-ink-soft">Use the email on your Avoeline account.</p>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--mkt-ink)]">
+          Sign in
+        </h1>
+        <p className="text-sm text-[var(--mkt-muted)]">Use the email on your Avoeline account.</p>
       </div>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-6 space-y-4">
         <GoogleAuthButton label="Continue with Google" />
-        <p className="text-center text-xs uppercase tracking-wider text-ink-soft">or use email</p>
+        <AuthEmailDivider />
       </div>
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -71,18 +84,39 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
           required
         />
 
-        <PasswordField
-          id="signin-password"
-          label="Password"
-          autoComplete="current-password"
-          placeholder="Your password"
-          value={password}
-          onChange={(value) => {
-            setPassword(value);
-            if (error) setError(null);
-          }}
-          required
-        />
+        <div className="space-y-1">
+          <div className="flex items-end justify-between gap-2">
+            <span className="sr-only">Password</span>
+            <Link
+              href="/auth/forgot-password"
+              className="ml-auto text-xs font-semibold text-[var(--mkt-accent-deep)] underline-offset-2 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <PasswordField
+            id="signin-password"
+            label="Password"
+            autoComplete="current-password"
+            placeholder="Your password"
+            value={password}
+            onChange={(value) => {
+              setPassword(value);
+              if (error) setError(null);
+            }}
+            required
+          />
+        </div>
+
+        <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-accent-tint)] px-3 py-2.5 text-xs text-[var(--mkt-muted)]">
+          Attendee with a ticket or certificate?{" "}
+          <Link
+            href="/verify"
+            className="font-semibold text-[var(--mkt-accent-deep)] underline-offset-2 hover:underline"
+          >
+            Verify your pass
+          </Link>
+        </p>
 
         <Button
           type="submit"
@@ -95,16 +129,6 @@ export default function SignInClient({ handleEmailLogin }: SignInClientProps) {
           Sign in
         </Button>
       </form>
-
-      <p className="mt-8 text-center sm:text-left text-sm text-ink-soft">
-        Don&apos;t have an account?{" "}
-        <Link
-          href="/auth/signup"
-          className="font-semibold text-primary underline-offset-4 hover:underline"
-        >
-          Sign up
-        </Link>
-      </p>
     </AuthShell>
   );
 }

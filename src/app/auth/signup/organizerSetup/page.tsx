@@ -10,6 +10,7 @@ import {
 import { getUserOnboarding } from "@/src/features/onboarding/onboarding.service";
 import { logger } from "@/src/lib/logger";
 import { ConsentFlushClient } from "@/src/features/website/components/ConsentFlushClient";
+import { readSignupIntent } from "@/src/features/auth/signupIntent";
 
 export default async function SignUpOrganizerPage() {
   const user = await AuthService.getCurrentUser();
@@ -40,10 +41,16 @@ export default async function SignUpOrganizerPage() {
   }
 
   const { verified: initialVerified } = await AuthService.getEmailVerificationStatus();
-  const [plans, billing] = await Promise.all([
+  const [plans, billing, signupIntent] = await Promise.all([
     listPlansForAudience("organizer"),
     getPlatformBillingSettings(),
+    readSignupIntent(),
   ]);
+  const initialPlanKey =
+    signupIntent?.plan && plans.some((p) => p.key === signupIntent.plan)
+      ? signupIntent.plan
+      : undefined;
+  const billingPeriod = signupIntent?.billing === "year" ? "year" : "month";
 
   const handleCheckVerification = async () => {
     "use server";
@@ -115,6 +122,8 @@ export default async function SignUpOrganizerPage() {
         onSaveProfile={handleSaveProfile}
         onSelectFreePlan={handleSelectFree}
         onSubmitPaidPlan={handleSubmitPaid}
+        initialPlanKey={initialPlanKey}
+        billingPeriod={billingPeriod}
       />
     </>
   );

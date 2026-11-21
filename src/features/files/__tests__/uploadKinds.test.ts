@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ASSET_SPEC,
+  MEDIA_BUDGETS,
+  MEDIA_HARD_MAX,
   getUploadKindConfig,
   isUploadKind,
   mimeAllowedForKind,
   pathForUploadKind,
+  softDimensionWarnings,
   UPLOAD_KINDS,
 } from "../uploadKinds";
 
@@ -41,6 +45,25 @@ describe("uploadKinds", () => {
     assert.equal(mimeAllowedForKind("event_gallery", "video/mp4"), false);
     assert.equal(mimeAllowedForKind("event_banner", "image/jpeg"), true);
     assert.equal(mimeAllowedForKind("payment_proof", "application/pdf"), true);
+  });
+
+  it("allows SVG only on logo kinds", () => {
+    assert.equal(mimeAllowedForKind("sponsor_logo", "image/svg+xml"), true);
+    assert.equal(mimeAllowedForKind("event_banner", "image/svg+xml"), false);
+  });
+
+  it("uses landscape media matrix budgets and hard max", () => {
+    assert.equal(getUploadKindConfig("event_banner").budgetBytes, MEDIA_BUDGETS.event_banner);
+    assert.equal(getUploadKindConfig("event_banner").hardMaxBytes, MEDIA_HARD_MAX.event_banner);
+    assert.equal(getUploadKindConfig("event_gallery").hardMaxBytes, MEDIA_HARD_MAX.event_gallery);
+    assert.equal(getUploadKindConfig("sponsor_logo").hardMaxBytes, MEDIA_HARD_MAX.logo);
+    assert.equal(getUploadKindConfig("speaker_photo").budgetBytes, MEDIA_BUDGETS.speaker_photo);
+    assert.ok(ASSET_SPEC.event_banner.recommended.includes("1920"));
+  });
+
+  it("soft-warns on non-landscape banners", () => {
+    const warnings = softDimensionWarnings("event_banner", 1080, 1350);
+    assert.ok(warnings.some((w) => /aspect|landscape/i.test(w)));
   });
 
   it("builds stable paths per kind", () => {

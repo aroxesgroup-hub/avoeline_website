@@ -4,6 +4,7 @@ export const MARKETING_SITEMAP_PATHS = [
   "/about",
   "/partners",
   "/contact",
+  "/legal",
   "/privacy",
   "/terms",
   "/organizer-agreement",

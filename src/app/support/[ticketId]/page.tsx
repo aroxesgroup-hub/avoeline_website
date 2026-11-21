@@ -30,7 +30,7 @@ export default async function SupportTicketPage({
         href="/support"
         className="mb-8 inline-flex items-center gap-2 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        <BrandMark className="h-7 w-7" />
+        <BrandMark className="h-7 w-auto" />
         <span className="text-2xs font-medium uppercase tracking-wider text-ink-soft">
           Back to support
         </span>

@@ -103,7 +103,7 @@ export function AdminRail({ items }: { items: AdminRailItem[] }) {
     <>
       <aside className="on-ink fixed inset-y-0 left-0 z-30 hidden w-48 flex-col bg-gradient-to-b from-gray-900 to-gray-950 text-white shadow-[inset_-1px_0_0_rgba(255,255,255,0.07)] md:flex">
         <Link href="/admin" className="flex h-12 shrink-0 items-center gap-2 px-3">
-          <BrandMark inverted className="h-6 w-6 shrink-0" />
+          <BrandMark inverted className="h-6 w-auto shrink-0" />
           <span className="font-display text-sm tracking-tight">Admin</span>
         </Link>
         <p className="px-3 pb-1 text-2xs font-medium uppercase tracking-wider text-white/40">

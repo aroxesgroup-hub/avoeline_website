@@ -2,6 +2,17 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-21 | [event-media-hackathon-detail](2026-11-21-event-media-hackathon-detail.md) | done | Landscape media matrix + public hackathon track switcher / gallery / hero CTAs. |
+| 2026-11-21 | [legal-compliance-suite](2026-11-21-legal-compliance-suite.md) | done | `/legal` Compliance Suite hub; editable chrome + legal CMS bodies; callouts. |
+| 2026-11-21 | [public-event-details-mock](2026-11-21-public-event-details-mock.md) | done | Public event mock: quick bar, Reserve seat tiers, contain media, section reorder. |
+| 2026-11-21 | [contact-auth-onboarding](2026-11-21-contact-auth-onboarding.md) | done | Contact CMS desk + themed auth wizard, plan deep-links, forgot/set password. |
+| 2026-11-21 | [about-page-cms](2026-11-21-about-page-cms.md) | done | About mock CMS: comparison + lineage blocks, seeded content, revalidate=60. |
+| 2026-11-21 | [partners-page-cms](2026-11-21-partners-page-cms.md) | done | Partners CMS mock, logo picker, application → info@aroxes.com. |
+| 2026-11-21 | [events-directory-annual](2026-11-21-events-directory-annual.md) | done | Events discovery mock + filters; marketing nav on `/events`; plans annual polish. |
+| 2026-11-21 | [plans-page-mock](2026-11-21-plans-page-mock.md) | done | `/plans` pricing mock UI; live catalog + FAQs; light/dark mint+emerald. |
+| 2026-11-21 | [homepage-mock-cms](2026-11-21-homepage-mock-cms.md) | done | Homepage mock UI + CMS seed; live events/plans hydrate; stats merge CMS+DB. |
+| 2026-11-17 | [stitch-cms-exact-screens](2026-11-17-stitch-cms-exact-screens.md) | done | Stitch copy into CMS + Live Event Command hero schema; home/about/partners/contact seeded; live stats/plans/events hydrate. |
+| 2026-11-17 | [stitch-public-site-redesign](2026-11-17-stitch-public-site-redesign.md) | done | Stitch dual-theme public redesign: marketing pages, events browse/detail shell, auth shell; CMS/plans/events stay live. |
 | 2026-11-15 | [t10-release-readiness](2026-11-15-t10-release-readiness.md) | done | T10 release-readiness NO-GO, CI PR/merge/nightly/prod-smoke, SEC-006 search_path batch. |
 | 2026-11-15 | [t9-plan-isolation](2026-11-15-t9-plan-isolation.md) | done | T9 seed Social Lite/Partial/Full, resolveModuleAccess matrix, vendor_store + booking IDOR gates, authz-tenant + Playwright T9. |
 | 2026-11-14 | [t8-ui-sweep](2026-11-14-t8-ui-sweep.md) | done | T8 double-tap harness, client_request_ids idempotency, axe/visual/crawler specs, PendingButton/SubmitButton guards. |

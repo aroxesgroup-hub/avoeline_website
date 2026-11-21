@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   extractLegalToc,
+  parseLegalSegments,
   prepareLegalMarkdown,
   sanitizeLegalMarkdown,
   slugifyHeading,
@@ -39,5 +40,42 @@ describe("prepareLegalMarkdown", () => {
     const { body, toc } = prepareLegalMarkdown("## One\n\n<script>x</script>\n\nBody");
     assert.equal(toc.length, 1);
     assert.equal(body.includes("<script"), false);
+  });
+});
+
+describe("parseLegalSegments", () => {
+  it("extracts NOTE and SPLIT callouts", () => {
+    const md = [
+      "Intro paragraph.",
+      "",
+      "> [!NOTE]",
+      "> Hello **world**",
+      "",
+      "Middle",
+      "",
+      "> [!SPLIT]",
+      "> Left side",
+      "> ---",
+      "> Right side",
+      "",
+      "End",
+    ].join("\n");
+    const segs = parseLegalSegments(md);
+    assert.equal(segs[0]?.type, "markdown");
+    assert.equal(segs[1]?.type, "callout");
+    if (segs[1]?.type === "callout" && segs[1].kind !== "SPLIT") {
+      assert.equal(segs[1].kind, "NOTE");
+      assert.match(segs[1].content, /Hello/);
+    } else {
+      assert.fail("expected NOTE callout");
+    }
+    assert.equal(segs[2]?.type, "markdown");
+    assert.equal(segs[3]?.type, "callout");
+    if (segs[3]?.type === "callout" && segs[3].kind === "SPLIT") {
+      assert.match(segs[3].left, /Left/);
+      assert.match(segs[3].right, /Right/);
+    } else {
+      assert.fail("expected SPLIT callout");
+    }
   });
 });

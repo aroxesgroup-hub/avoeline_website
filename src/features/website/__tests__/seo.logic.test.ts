@@ -54,7 +54,7 @@ describe("sitemap + robots", () => {
       false,
     );
     assert.equal(
-      urls.some((u) => u.includes("/organizer")),
+      urls.some((u) => /\/organizer(\/|$)/.test(u) && !u.includes("/organizer-agreement")),
       false,
     );
     assert.equal(

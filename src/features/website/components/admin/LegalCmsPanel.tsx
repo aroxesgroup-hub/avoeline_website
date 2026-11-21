@@ -9,6 +9,8 @@ import { Modal } from "@/src/components/ui/Modal";
 import { publishLegalVersionAction } from "../../actions/legal.action";
 import { diffLines } from "../../cms.logic";
 import { sanitizeLegalMarkdown } from "../../legalMarkdown";
+import type { LegalSuiteSettings } from "../../legalSuite.logic";
+import { LegalSuiteChromePanel } from "./LegalSuiteChromePanel";
 
 export type LegalDocAdmin = {
   id: string;
@@ -25,7 +27,13 @@ export type LegalDocAdmin = {
   }>;
 };
 
-export function LegalCmsPanel({ documents }: { documents: LegalDocAdmin[] }) {
+export function LegalCmsPanel({
+  documents,
+  suiteSettings,
+}: {
+  documents: LegalDocAdmin[];
+  suiteSettings: LegalSuiteSettings;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [docId, setDocId] = useState(documents[0]?.id ?? "");
@@ -56,164 +64,179 @@ export function LegalCmsPanel({ documents }: { documents: LegalDocAdmin[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-3">
-        <div>
-          <label className={labelClass} htmlFor="legal-doc">
-            Document
-          </label>
-          <select
-            id="legal-doc"
-            className={fieldClass}
-            value={doc?.id}
-            onChange={(e) => switchDoc(e.target.value)}
-          >
-            {documents.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          type="button"
-          className={buttonClass("secondary", "md")}
-          onClick={() => setHistoryOpen(true)}
-        >
-          Version history
-        </button>
-      </div>
+    <div className="space-y-6">
+      <LegalSuiteChromePanel initial={suiteSettings} />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-3">
-          <label className={labelClass} htmlFor="legal-body">
-            Markdown
-          </label>
-          <textarea
-            id="legal-body"
-            className={`${fieldClass} min-h-[28rem] font-mono text-sm`}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
+      <div className="space-y-4">
+        <p className="text-sm text-ink-soft">
+          Callouts in markdown: <code className="rounded bg-muted px-1 text-xs">{"> [!NOTE]"}</code>
+          , <code className="rounded bg-muted px-1 text-xs">{"> [!WARNING]"}</code>,{" "}
+          <code className="rounded bg-muted px-1 text-xs">{"> [!GUARANTEE]"}</code>,{" "}
+          <code className="rounded bg-muted px-1 text-xs">{"> [!SPLIT]"}</code> with{" "}
+          <code className="rounded bg-muted px-1 text-xs">---</code> between columns.
+        </p>
+        <div className="flex flex-wrap gap-3">
           <div>
-            <label className={labelClass}>Change summary</label>
-            <input
+            <label className={labelClass} htmlFor="legal-doc">
+              Document
+            </label>
+            <select
+              id="legal-doc"
               className={fieldClass}
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="What changed?"
-            />
+              value={doc?.id}
+              onChange={(e) => switchDoc(e.target.value)}
+            >
+              {documents.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.title}
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className={labelClass}>Effective date</label>
-            <input
-              className={fieldClass}
-              type="date"
-              value={effectiveDate}
-              onChange={(e) => setEffectiveDate(e.target.value)}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} />
-            Notify organizers and vendors (email + in-app, capped)
-          </label>
-          {error ? <p className="text-sm text-danger">{error}</p> : null}
           <button
             type="button"
-            className={buttonClass("primary", "md")}
-            disabled={pending || !summary.trim()}
-            onClick={() => setPublishOpen(true)}
+            className={buttonClass("secondary", "md")}
+            onClick={() => setHistoryOpen(true)}
           >
-            Publish new version
+            Version history
           </button>
         </div>
-        <div className="rounded-2xl border border-line p-4">
-          <p className={labelClass}>Preview</p>
-          <article className="prose prose-sm max-w-none text-ink">
-            <ReactMarkdown skipHtml>{preview}</ReactMarkdown>
-          </article>
-        </div>
-      </div>
 
-      <ConfirmDialog
-        open={publishOpen}
-        title="Publish legal version?"
-        description="Creates an immutable version. Previous versions stay in history."
-        confirmLabel="Publish"
-        busy={pending}
-        onCancel={() => setPublishOpen(false)}
-        onConfirm={() =>
-          startTransition(async () => {
-            if (!doc) return;
-            const res = await publishLegalVersionAction({
-              documentId: doc.id,
-              bodyMd: body,
-              changeSummary: summary,
-              effectiveDate,
-              notifyTenants: notify,
-            });
-            setPublishOpen(false);
-            if (!res.ok) setError(res.error.message);
-            else {
-              setError(null);
-              setSummary("");
-              router.refresh();
-            }
-          })
-        }
-      />
-
-      <Modal
-        open={historyOpen}
-        onClose={() => {
-          setHistoryOpen(false);
-          setDiffVersionId(null);
-        }}
-        title="Legal versions"
-        maxWidth="2xl"
-      >
-        <ul className="mb-4 space-y-2">
-          {(doc?.versions ?? []).map((v) => (
-            <li
-              key={v.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line px-3 py-2"
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-3">
+            <label className={labelClass} htmlFor="legal-body">
+              Markdown
+            </label>
+            <textarea
+              id="legal-body"
+              className={`${fieldClass} min-h-[28rem] font-mono text-sm`}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <div>
+              <label className={labelClass}>Change summary</label>
+              <input
+                className={fieldClass}
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                placeholder="What changed?"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Effective date</label>
+              <input
+                className={fieldClass}
+                type="date"
+                value={effectiveDate}
+                onChange={(e) => setEffectiveDate(e.target.value)}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={notify}
+                onChange={(e) => setNotify(e.target.checked)}
+              />
+              Notify organizers and vendors (email + in-app, capped)
+            </label>
+            {error ? <p className="text-sm text-danger">{error}</p> : null}
+            <button
+              type="button"
+              className={buttonClass("primary", "md")}
+              disabled={pending || !summary.trim()}
+              onClick={() => setPublishOpen(true)}
             >
-              <div className="text-sm">
-                <p className="font-medium">v{v.version}</p>
-                <p className="text-ink-soft">
-                  {v.effective_date || "—"} · {v.change_summary || "No summary"}
-                </p>
-              </div>
-              <button
-                type="button"
-                className={buttonClass("ghost", "sm")}
-                onClick={() => setDiffVersionId(v.id)}
+              Publish new version
+            </button>
+          </div>
+          <div className="rounded-2xl border border-line p-4">
+            <p className={labelClass}>Preview</p>
+            <article className="prose prose-sm max-w-none text-ink">
+              <ReactMarkdown skipHtml>{preview}</ReactMarkdown>
+            </article>
+          </div>
+        </div>
+
+        <ConfirmDialog
+          open={publishOpen}
+          title="Publish legal version?"
+          description="Creates an immutable version. Previous versions stay in history."
+          confirmLabel="Publish"
+          busy={pending}
+          onCancel={() => setPublishOpen(false)}
+          onConfirm={() =>
+            startTransition(async () => {
+              if (!doc) return;
+              const res = await publishLegalVersionAction({
+                documentId: doc.id,
+                bodyMd: body,
+                changeSummary: summary,
+                effectiveDate,
+                notifyTenants: notify,
+              });
+              setPublishOpen(false);
+              if (!res.ok) setError(res.error.message);
+              else {
+                setError(null);
+                setSummary("");
+                router.refresh();
+              }
+            })
+          }
+        />
+
+        <Modal
+          open={historyOpen}
+          onClose={() => {
+            setHistoryOpen(false);
+            setDiffVersionId(null);
+          }}
+          title="Legal versions"
+          maxWidth="2xl"
+        >
+          <ul className="mb-4 space-y-2">
+            {(doc?.versions ?? []).map((v) => (
+              <li
+                key={v.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line px-3 py-2"
               >
-                Diff
-              </button>
-            </li>
-          ))}
-        </ul>
-        {diffVersionId ? (
-          <pre className="max-h-80 overflow-auto rounded-xl bg-muted p-3 font-mono text-xs">
-            {diffOps.map((op, i) => (
-              <div
-                key={`${op.type}-${i}`}
-                className={
-                  op.type === "add"
-                    ? "text-success"
-                    : op.type === "remove"
-                      ? "text-danger"
-                      : "text-ink-soft"
-                }
-              >
-                {op.type === "add" ? "+" : op.type === "remove" ? "-" : " "}
-                {op.line}
-              </div>
+                <div className="text-sm">
+                  <p className="font-medium">v{v.version}</p>
+                  <p className="text-ink-soft">
+                    {v.effective_date || "—"} · {v.change_summary || "No summary"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className={buttonClass("ghost", "sm")}
+                  onClick={() => setDiffVersionId(v.id)}
+                >
+                  Diff
+                </button>
+              </li>
             ))}
-          </pre>
-        ) : null}
-      </Modal>
+          </ul>
+          {diffVersionId ? (
+            <pre className="max-h-80 overflow-auto rounded-xl bg-muted p-3 font-mono text-xs">
+              {diffOps.map((op, i) => (
+                <div
+                  key={`${op.type}-${i}`}
+                  className={
+                    op.type === "add"
+                      ? "text-success"
+                      : op.type === "remove"
+                        ? "text-danger"
+                        : "text-ink-soft"
+                  }
+                >
+                  {op.type === "add" ? "+" : op.type === "remove" ? "-" : " "}
+                  {op.line}
+                </div>
+              ))}
+            </pre>
+          ) : null}
+        </Modal>
+      </div>
     </div>
   );
 }

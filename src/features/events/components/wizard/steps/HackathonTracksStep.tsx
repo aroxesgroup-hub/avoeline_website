@@ -2,6 +2,7 @@
 
 import type { EventFormData, WizardTrackDraft } from "@/src/services/models/event.model";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
+import { AssetSpecGuide } from "@/src/features/media/AssetSpecGuide";
 import { DateField } from "@/src/shared_components/DateField";
 import { emptyTrack } from "../wizardUtils";
 import type { HackathonKind } from "@/src/features/hackathon/kinds";
@@ -25,10 +26,11 @@ export function HackathonTracksStep({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-ink">Competitions</h3>
-        <p className="text-sm text-ink-soft">
+        <p className="mb-3 text-sm text-ink-soft">
           One hackathon event can run a single competition or several tracks, each with its own fee,
           media, and rules.
         </p>
+        <AssetSpecGuide variant="compact" />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -102,9 +104,9 @@ export function HackathonTracksStep({
             kind="competition_image"
             accept="image/*"
             value={track.imageUrl}
-            label="Competition image (4:5 Instagram portrait)"
+            label="Track image (16:9 landscape)"
             onUploaded={(url) => patch(track.id, { imageUrl: url })}
-            buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
+            buttonClassName="relative mx-auto flex aspect-video w-full max-w-md flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
           />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <LabeledNumber

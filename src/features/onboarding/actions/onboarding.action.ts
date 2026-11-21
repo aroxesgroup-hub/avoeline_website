@@ -13,6 +13,7 @@ import { PAYMENT_SCREENSHOTS_BUCKET, supabaseAdmin } from "@/data/supabase";
 import { rateLimit } from "@/src/lib/rateLimit";
 import { logger } from "@/src/lib/logger";
 import { safeAction, safeFail, toLegacyResult } from "@/src/lib/safeAction";
+import { readSignupIntent } from "@/src/features/auth/signupIntent";
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 const EXT_FOR_MIME: Record<string, string> = {
@@ -113,11 +114,15 @@ export async function submitPaidPlanAction(
     return { success: false, error: "Could not upload the screenshot." };
   }
 
+  const intent = await readSignupIntent();
+  const billing = intent?.billing === "year" ? "year" : "month";
+
   const result = await submitPaidPlanScreenshot({
     userId: user.userId,
     audience: audienceParsed.data,
     planKey: planParsed.data,
     screenshotPath: path,
+    billing,
   });
   if (!result.ok) return { success: false, error: result.error };
   redirect("/auth/signup/awaiting-approval");

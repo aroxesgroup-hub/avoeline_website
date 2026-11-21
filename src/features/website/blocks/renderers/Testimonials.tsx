@@ -10,7 +10,10 @@ export function TestimonialsRenderer({ data }: { data: BlockDataMap["testimonial
       <SectionTitle title={data.title} />
       <ul className="grid gap-6 lg:grid-cols-2">
         {items.map((item, i) => (
-          <li key={`${item.name}-${i}`} className="rounded-2xl border border-[var(--mkt-line)] p-6">
+          <li
+            key={`${item.name}-${i}`}
+            className="rounded-2xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)] p-6"
+          >
             <blockquote className="text-base leading-relaxed text-[var(--mkt-text)]">
               {item.quote.trim()}
             </blockquote>

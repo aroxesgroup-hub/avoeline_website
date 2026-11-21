@@ -22,7 +22,8 @@ import { processPublicDisplayImage } from "./publicMediaProcess";
 import { assertMediaQuota, recordMediaUsage } from "./mediaQuota.service";
 
 export type UploadResult =
-  { success: true; url: string; path: string } | { success: false; error: string };
+  | { success: true; url: string; path: string; warnings?: string[] }
+  | { success: false; error: string };
 
 function safeName(name: string): string {
   return (
@@ -129,12 +130,13 @@ export async function uploadMedia(formData: FormData): Promise<UploadResult> {
 
     await recordMediaUsage({ organizerId, addBytes: processed.bytes.length });
 
+    const warnings = processed.warnings;
     if (PUBLIC_STORAGE_BUCKETS.has(bucket)) {
       const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(key);
-      return { success: true, url: data.publicUrl, path: key };
+      return { success: true, url: data.publicUrl, path: key, warnings };
     }
     const signed = await getSignedUrl(bucket, key);
-    return { success: true, url: signed, path: key };
+    return { success: true, url: signed, path: key, warnings };
   } catch (err: unknown) {
     logger.error("[uploadMedia]", { err: err instanceof Error ? err.message : "unknown" });
     return { success: false, error: "Upload failed. Please try again." };

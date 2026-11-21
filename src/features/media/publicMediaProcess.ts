@@ -1,6 +1,11 @@
 import sharp from "sharp";
 import type { UploadKind } from "@/src/features/files/uploadKinds";
-import { getUploadKindConfig, mimeAllowedForKind } from "@/src/features/files/uploadKinds";
+import {
+  getUploadKindConfig,
+  isLogoKind,
+  mimeAllowedForKind,
+  softDimensionWarnings,
+} from "@/src/features/files/uploadKinds";
 import { sha256Hex, safeRandomName } from "@/src/features/files/validateUpload";
 
 export type PublicMediaOk = {
@@ -9,12 +14,20 @@ export type PublicMediaOk = {
   mime: string;
   checksum: string;
   name: string;
+  warnings?: string[];
 };
 
 export type PublicMediaFail = { ok: false; error: string; code: string };
 
+function looksLikeSvg(raw: Buffer, mime: string, fileName: string): boolean {
+  if (mime === "image/svg+xml" || /\.svg$/i.test(fileName)) return true;
+  const head = raw.subarray(0, Math.min(raw.length, 256)).toString("utf8").trimStart();
+  return head.startsWith("<?xml") || head.startsWith("<svg") || head.includes("<svg");
+}
+
 /**
  * Re-encode public display images to WebP within kind budget; strip EXIF; discard original.
+ * Logo kinds may store SVG as-is (size-capped). Soft dimension warnings never fail the upload.
  */
 export async function processPublicDisplayImage(opts: {
   kind: UploadKind;
@@ -30,10 +43,14 @@ export async function processPublicDisplayImage(opts: {
   const raw = Buffer.isBuffer(opts.bytes) ? opts.bytes : Buffer.from(opts.bytes);
   if (!raw.length) return { ok: false, code: "EMPTY", error: "File is empty." };
   if (raw.length > cfg.hardMaxBytes) {
+    const mb = cfg.hardMaxBytes >= 1024 * 1024;
+    const label = mb
+      ? `${(cfg.hardMaxBytes / (1024 * 1024)).toFixed(1)}MB`
+      : `${Math.floor(cfg.hardMaxBytes / 1024)}KB`;
     return {
       ok: false,
       code: "TOO_LARGE",
-      error: `That file is too large (max ${Math.floor(cfg.hardMaxBytes / (1024 * 1024))}MB).`,
+      error: `That file is too large (max ${label}).`,
     };
   }
 
@@ -46,7 +63,26 @@ export async function processPublicDisplayImage(opts: {
     };
   }
   if (!mimeAllowedForKind(opts.kind, declared || "image/jpeg")) {
-    return { ok: false, code: "MIME", error: "Use an image file (JPEG, PNG, or WebP)." };
+    return {
+      ok: false,
+      code: "MIME",
+      error: isLogoKind(opts.kind)
+        ? "Use an image or SVG logo (JPEG, PNG, WebP, or SVG)."
+        : "Use an image file (JPEG, PNG, or WebP).",
+    };
+  }
+
+  // SVG logos: store as-is (no Sharp).
+  if (isLogoKind(opts.kind) && looksLikeSvg(raw, declared, opts.fileName)) {
+    const name = safeRandomName(opts.fileName.replace(/\.[^.]+$/, "") + ".svg", "image/svg+xml");
+    return {
+      ok: true,
+      bytes: raw,
+      mime: "image/svg+xml",
+      checksum: sha256Hex(raw),
+      name,
+      warnings: undefined,
+    };
   }
 
   const budget = cfg.budgetBytes ?? cfg.maxBytes;
@@ -57,6 +93,8 @@ export async function processPublicDisplayImage(opts: {
     const meta = await img.metadata();
     const w = meta.width || 0;
     const h = meta.height || 0;
+    const warnings = softDimensionWarnings(opts.kind, w, h);
+
     if (w > maxDim || h > maxDim) {
       img = img.resize({
         width: w >= h ? maxDim : undefined,
@@ -82,7 +120,6 @@ export async function processPublicDisplayImage(opts: {
         .toBuffer();
     }
     if (out.length > budget * 1.15) {
-      // Last resort: shrink dimensions further
       const shrink = Math.max(800, Math.floor(maxDim * 0.7));
       out = await sharp(raw, { failOn: "none" })
         .rotate()
@@ -93,7 +130,14 @@ export async function processPublicDisplayImage(opts: {
 
     const mime = "image/webp";
     const name = safeRandomName(opts.fileName.replace(/\.[^.]+$/, "") + ".webp", mime);
-    return { ok: true, bytes: out, mime, checksum: sha256Hex(out), name };
+    return {
+      ok: true,
+      bytes: out,
+      mime,
+      checksum: sha256Hex(out),
+      name,
+      warnings: warnings.length ? warnings : undefined,
+    };
   } catch {
     return { ok: false, code: "DECODE", error: "Could not process that image." };
   }

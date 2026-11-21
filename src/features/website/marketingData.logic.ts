@@ -67,3 +67,70 @@ export function sortPublicPlans<T extends SortablePublicPlan>(plans: T[]): T[] {
 export function shouldHideEmptySection(items: unknown[] | null | undefined): boolean {
   return !Array.isArray(items) || items.length === 0;
 }
+
+export type PlanBillingPeriod = "month" | "year";
+
+export type PlanPriceFields = {
+  currency?: string | null;
+  price_monthly?: number | string | null;
+  price_yearly?: number | string | null;
+};
+
+function formatMoneyAmount(currency: string, amount: number): string {
+  try {
+    return new Intl.NumberFormat("en", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount}`;
+  }
+}
+
+export function formatPlanPrice(
+  plan: PlanPriceFields,
+  period: PlanBillingPeriod = "month",
+): string {
+  const currency = (plan.currency || "PKR").toUpperCase();
+  const amount = period === "year" ? plan.price_yearly : plan.price_monthly;
+  if (amount == null) return "Custom Quote";
+  if (Number(amount) === 0) return period === "year" ? "PKR 0 /year" : "PKR 0 /month";
+  const formatted = formatMoneyAmount(currency, Number(amount));
+  return `${formatted} /${period === "year" ? "year" : "month"}`;
+}
+
+/** Effective monthly when paying yearly — muted subline under the annual total. */
+export function formatAnnualEffectiveMonthly(plan: PlanPriceFields): string | null {
+  const currency = (plan.currency || "PKR").toUpperCase();
+  const yearly = Number(plan.price_yearly);
+  if (!Number.isFinite(yearly) || yearly <= 0) return null;
+  const monthly = Math.round(yearly / 12);
+  return `≈ ${formatMoneyAmount(currency, monthly)} /month billed annually`;
+}
+
+/** True when yearly price is at least 15% below 12× monthly (for “Save” badge). */
+export function planHasAnnualSavings(plan: PlanPriceFields): boolean {
+  const monthly = Number(plan.price_monthly);
+  const yearly = Number(plan.price_yearly);
+  if (!Number.isFinite(monthly) || !Number.isFinite(yearly) || monthly <= 0 || yearly <= 0) {
+    return false;
+  }
+  return yearly <= monthly * 12 * 0.85;
+}
+
+/** Append or replace `billing=month|year` on signup/plan CTAs; default role=Organizer for /plans. */
+export function withBillingPeriod(href: string, period: PlanBillingPeriod): string {
+  const raw = String(href || "").trim();
+  if (!raw || raw.startsWith("/contact")) return raw;
+  try {
+    const url = new URL(raw, "https://avoeline.local");
+    url.searchParams.set("billing", period === "year" ? "year" : "month");
+    if (url.pathname.startsWith("/auth/signup") && !url.searchParams.get("role")) {
+      url.searchParams.set("role", "Organizer");
+    }
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return raw;
+  }
+}

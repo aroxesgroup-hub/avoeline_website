@@ -81,6 +81,23 @@ export function showSeatsFact(seats: { total: number; left: number | null }): bo
   return seats.left !== null;
 }
 
+/** Booked percentage when total seats are known; null when unlimited / unknown. */
+export function capacityPercent(seats: {
+  total: number;
+  taken?: number;
+  left: number | null;
+}): number | null {
+  if (!showSeatsFact(seats) || !seats.total || seats.total <= 0) return null;
+  const taken =
+    typeof seats.taken === "number" && Number.isFinite(seats.taken)
+      ? seats.taken
+      : seats.left != null
+        ? Math.max(0, seats.total - seats.left)
+        : null;
+  if (taken == null) return null;
+  return Math.min(100, Math.max(0, Math.round((taken / seats.total) * 100)));
+}
+
 /** Payment instructions only for paid events with non-empty text. */
 export function publicPaymentInstructions(
   isFree: boolean,

@@ -7,6 +7,10 @@ import type { Database } from "@/src/lib/database.types";
 import { SITE_ALL, SITE_EVENTS, SITE_PLANS, SITE_STATS } from "./cacheTags";
 import {
   filterStatsByThreshold,
+  formatAnnualEffectiveMonthly,
+  formatPlanPrice,
+  planHasAnnualSavings,
+  withBillingPeriod,
   sortPublicPlans,
   type FilteredStatItem,
 } from "./marketingData.logic";
@@ -48,22 +52,6 @@ async function mediaUrlByIds(ids: string[]): Promise<Map<string, { url: string; 
     map.set(row.id, { url: publicStorageUrl(row.path), alt: row.alt ?? "" });
   }
   return map;
-}
-
-function formatPlanPrice(plan: PlanRow): string {
-  const amount = plan.price_monthly;
-  const currency = (plan.currency || "PKR").toUpperCase();
-  if (amount == null) return "";
-  if (Number(amount) === 0) return "Free";
-  try {
-    return `${new Intl.NumberFormat("en", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(Number(amount))}/mo`;
-  } catch {
-    return `${currency} ${amount}/mo`;
-  }
 }
 
 // ── Stats strip ──────────────────────────────────────────────────────────────
@@ -238,6 +226,8 @@ export type MarketingEvent = {
   imageUrl: string;
   imageAlt: string;
   meta: string;
+  location: string;
+  dateLabel: string;
   startDate: string | null;
   websiteFeatured: boolean;
 };
@@ -291,16 +281,15 @@ async function fetchMarketingEvents(limit: number): Promise<MarketingEvent[]> {
       const startDate = row.start_date ? String(row.start_date) : null;
       const city = row.city ? String(row.city) : "";
       const venue = row.venue_name ? String(row.venue_name) : "";
-      const metaParts = [
-        startDate
-          ? new Date(`${startDate}T00:00:00`).toLocaleDateString("en", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
-          : "",
-        city || venue,
-      ].filter(Boolean);
+      const location = [venue, city].filter(Boolean).join(", ");
+      const dateLabel = startDate
+        ? new Date(`${startDate}T00:00:00`).toLocaleDateString("en", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "";
+      const metaParts = [dateLabel, location].filter(Boolean);
       return {
         id: String(row.id),
         title: String(row.title ?? ""),
@@ -308,6 +297,8 @@ async function fetchMarketingEvents(limit: number): Promise<MarketingEvent[]> {
         imageUrl: publicStorageUrl(row.banner_image as string | null),
         imageAlt: String(row.title ?? ""),
         meta: metaParts.join(" · "),
+        location,
+        dateLabel,
         startDate,
         websiteFeatured: withFeatured ? Boolean(row.website_featured) : false,
       } satisfies MarketingEvent;
@@ -395,6 +386,7 @@ export function listGrantedPartners(category?: string): Promise<MarketingPartner
   const key = category ?? "all";
   return unstable_cache(() => fetchGrantedPartners(category), ["site-partners", key], {
     tags: [SITE_ALL],
+    revalidate: 60,
   })();
 }
 
@@ -553,4 +545,65 @@ export function getLegalDocument(slug: string): Promise<LegalDocumentView | null
   })();
 }
 
-export { formatPlanPrice };
+async function fetchLegalSuiteDocuments(slugs: string[]): Promise<LegalDocumentView[]> {
+  const wanted = slugs.length ? slugs : [];
+  if (!wanted.length) return [];
+  try {
+    const { data: docs, error } = await supabaseAdmin
+      .from(TABLES.LEGAL_DOCUMENTS)
+      .select("id, slug, title, current_version_id")
+      .in("slug", wanted);
+
+    if (error) {
+      console.error("[getLegalSuiteDocuments]", error.message);
+      return [];
+    }
+
+    const versionIds = (docs ?? [])
+      .map((d) => d.current_version_id)
+      .filter((id): id is string => !!id);
+    if (!versionIds.length) return [];
+
+    const { data: versions, error: verErr } = await supabaseAdmin
+      .from(TABLES.LEGAL_DOCUMENT_VERSIONS)
+      .select("id, version, body_md, published_at, effective_date, change_summary")
+      .in("id", versionIds);
+
+    if (verErr) {
+      console.error("[getLegalSuiteDocuments] versions", verErr.message);
+      return [];
+    }
+
+    const byId = new Map((versions ?? []).map((v) => [v.id, v]));
+    const bySlug = new Map<string, LegalDocumentView>();
+    for (const doc of docs ?? []) {
+      if (!doc.current_version_id) continue;
+      const ver = byId.get(doc.current_version_id);
+      if (!ver) continue;
+      bySlug.set(doc.slug, {
+        slug: doc.slug,
+        title: doc.title,
+        version: ver.version,
+        bodyMd: ver.body_md ?? "",
+        publishedAt: ver.published_at,
+        effectiveDate: ver.effective_date,
+        changeSummary: ver.change_summary,
+      });
+    }
+    return wanted.map((slug) => bySlug.get(slug)).filter((d): d is LegalDocumentView => !!d);
+  } catch (err) {
+    console.error("[getLegalSuiteDocuments]", err);
+    return [];
+  }
+}
+
+export function getLegalSuiteDocuments(slugs: string[]): Promise<LegalDocumentView[]> {
+  const key = [...slugs].sort().join(",");
+  return unstable_cache(() => fetchLegalSuiteDocuments(slugs), ["site-legal-suite", key], {
+    tags: [SITE_ALL],
+    revalidate: 60,
+  })();
+}
+
+export { formatAnnualEffectiveMonthly, formatPlanPrice, planHasAnnualSavings, withBillingPeriod };
+export type { PlanBillingPeriod } from "./marketingData.logic";

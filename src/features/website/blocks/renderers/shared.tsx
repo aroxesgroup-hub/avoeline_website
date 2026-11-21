@@ -1,25 +1,27 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { buttonClass } from "@/src/lib/ui";
 
 export function SectionShell({
   children,
   dark,
   className = "",
+  id,
 }: {
   children: ReactNode;
   dark?: boolean;
   className?: string;
+  id?: string;
 }) {
   return (
     <section
+      id={id}
       className={
         dark
-          ? `ink-panel on-ink relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 ${className}`
-          : `px-4 py-14 sm:px-6 sm:py-16 lg:px-8 ${className}`
+          ? `relative overflow-hidden bg-[var(--mkt-accent-deep)] px-6 py-16 text-white sm:py-20 lg:px-10 ${className}`
+          : `px-6 py-14 sm:py-16 lg:px-10 ${className}`
       }
     >
-      <div className="relative mx-auto max-w-[1200px]">{children}</div>
+      <div className="relative mx-auto max-w-[var(--mkt-max,80rem)]">{children}</div>
     </section>
   );
 }
@@ -35,10 +37,10 @@ export function SectionTitle({
 }) {
   if (!title?.trim() && !body?.trim()) return null;
   return (
-    <div className="mb-8 max-w-2xl">
+    <div className="mb-10 max-w-2xl">
       {title?.trim() ? (
         <h2
-          className={`font-display text-3xl tracking-tight sm:text-4xl ${
+          className={`font-display text-3xl font-semibold tracking-tight sm:text-4xl ${
             dark ? "text-white" : "text-[var(--mkt-ink)]"
           }`}
         >
@@ -47,7 +49,9 @@ export function SectionTitle({
       ) : null}
       {body?.trim() ? (
         <p
-          className={`mt-3 text-base leading-relaxed ${dark ? "text-white/65" : "text-[var(--mkt-muted)]"}`}
+          className={`mt-3 text-[15px] leading-relaxed sm:text-base ${
+            dark ? "text-white/70" : "text-[var(--mkt-muted)]"
+          }`}
         >
           {body.trim()}
         </p>
@@ -78,12 +82,8 @@ export function CtaButtons({
           href={pHref}
           className={
             dark
-              ? buttonClass(
-                  "primary",
-                  "lg",
-                  "bg-white text-gray-950 border-white hover:bg-white/90 hover:border-white",
-                )
-              : buttonClass("primary", "lg")
+              ? "inline-flex h-11 items-center rounded-xl bg-white px-5 text-sm font-semibold text-[var(--mkt-accent-deep)] transition hover:bg-white/90"
+              : "mkt-btn inline-flex h-11 items-center rounded-xl px-5 text-sm font-semibold transition"
           }
         >
           {pLabel}
@@ -94,8 +94,8 @@ export function CtaButtons({
           href={sHref}
           className={
             dark
-              ? "inline-flex h-11 items-center rounded-xl border border-white/25 px-5 text-sm font-medium text-white transition hover:border-white hover:bg-white/10"
-              : buttonClass("secondary", "lg")
+              ? "inline-flex h-11 items-center rounded-xl border border-white/30 px-5 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
+              : "inline-flex h-11 items-center rounded-xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)] px-5 text-sm font-semibold text-[var(--mkt-ink)] transition hover:border-[var(--mkt-accent)]"
           }
         >
           {sLabel}

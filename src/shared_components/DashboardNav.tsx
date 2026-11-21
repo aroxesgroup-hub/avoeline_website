@@ -157,7 +157,7 @@ export function DashboardNav({
         >
           <BrandMark
             inverted
-            className="h-6 w-6 shrink-0 transition group-hover/brand:opacity-80"
+            className="h-6 w-auto shrink-0 transition group-hover/brand:opacity-80"
           />
           <span className="font-display text-sm tracking-tight">Avoeline</span>
         </Link>

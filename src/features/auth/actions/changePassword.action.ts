@@ -22,6 +22,27 @@ export async function completeForcedPasswordChange(formData: FormData): Promise<
   const { error } = await supabase.auth.updateUser({ password });
   if (error) finishForm(formData, back, fail(error.message));
 
-  await supabaseAdmin.from(TABLES.USERS).update({ must_reset_password: false }).eq("id", current.userId);
+  await supabaseAdmin
+    .from(TABLES.USERS)
+    .update({ must_reset_password: false })
+    .eq("id", current.userId);
+  redirect(landingPathFor(await UserService.getUserById(current.userId)));
+}
+
+/** Logged-in users (e.g. Google-only) can add a password for email sign-in later. */
+export async function completeOptionalPasswordChange(formData: FormData): Promise<void> {
+  const back = "/auth/change-password?optional=1";
+  const current = await AuthService.getCurrentUser();
+  if (!current?.userId) redirect("/auth/signin");
+
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) finishForm(formData, back, fail("Use at least 8 characters."));
+  if (password !== confirm) finishForm(formData, back, fail("The two passwords do not match."));
+
+  const supabase = await createSupabaseServer();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) finishForm(formData, back, fail(error.message));
+
   redirect(landingPathFor(await UserService.getUserById(current.userId)));
 }

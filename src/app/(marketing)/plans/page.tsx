@@ -14,7 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await getPublishedPage("plans");
   return buildPageMetadata(page?.seo, {
     title: "Plans — Avoeline",
-    description: "Public Avoeline plans, module comparison, and enterprise options.",
+    description:
+      "Simple plans for every event size — Free, Pro, and Enterprise from the live catalog, with module comparison and FAQs.",
     path: "/plans",
   });
 }

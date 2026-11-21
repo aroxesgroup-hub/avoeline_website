@@ -1,19 +1,27 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { PlanRow } from "@/src/features/saas/saas.service";
 import type { PlatformBillingSettings } from "@/src/features/billing/billing.service";
-import { formatCurrency } from "@/src/lib/money";
 import { planIsFree } from "@/src/features/onboarding/planHelpers";
+import {
+  formatAnnualEffectiveMonthly,
+  formatPlanPrice,
+  type PlanBillingPeriod,
+} from "@/src/features/website/marketingData.logic";
 
 export function PlanSelectStep({
   plans,
   billing,
+  billingPeriod = "month",
+  initialPlanKey,
   onSelectFree,
   onSubmitPaid,
 }: {
   plans: PlanRow[];
   billing: PlatformBillingSettings;
+  billingPeriod?: PlanBillingPeriod;
+  initialPlanKey?: string;
   onSelectFree: (planKey: string) => Promise<{ success: boolean; error?: string } | void>;
   onSubmitPaid: (input: {
     planKey: string;
@@ -24,39 +32,68 @@ export function PlanSelectStep({
   const [error, setError] = useState<string | null>(null);
   const [paidKey, setPaidKey] = useState<string | null>(null);
   const paidPlan = plans.find((p) => p.key === paidKey) || null;
+  const period: PlanBillingPeriod = billingPeriod === "year" ? "year" : "month";
+
+  useEffect(() => {
+    if (!initialPlanKey) return;
+    const match = plans.find((p) => p.key === initialPlanKey);
+    if (!match) return;
+    if (planIsFree(match)) return;
+    setPaidKey(initialPlanKey);
+  }, [initialPlanKey, plans]);
 
   return (
-    <div className="w-full max-w-2xl space-y-6 rounded-2xl border border-line bg-paper p-6">
+    <div className="mkt-card w-full max-w-2xl space-y-6 rounded-2xl p-6 sm:p-8">
       <div>
-        <h2 className="font-display text-xl text-ink">Choose a plan</h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          Free plans open your dashboard immediately. Paid plans need a bank transfer and platform
-          approval.
+        <h2 className="font-display text-xl font-semibold text-[var(--mkt-ink)]">Choose a plan</h2>
+        <p className="mt-1 text-sm text-[var(--mkt-muted)]">
+          Free plans open your dashboard after profile review. Paid plans need a bank transfer and
+          platform approval.
         </p>
+        {period === "year" ? (
+          <p className="mt-2 text-xs font-medium text-[var(--mkt-accent-deep)]">
+            Showing annual billing from your signup link.
+          </p>
+        ) : null}
       </div>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       {!paidPlan ? (
-        <ul className="space-y-3">
+        <ul className="grid gap-4 sm:grid-cols-1">
           {plans.map((plan) => {
             const free = planIsFree(plan);
-            const price = Number(plan.price_monthly ?? 0);
+            const recommended = plan.key === "pro" || plan.key === "organizer_pro";
+            const priceLabel = free ? "Free" : formatPlanPrice(plan, period);
+            const annualSub =
+              !free && period === "year" ? formatAnnualEffectiveMonthly(plan) : null;
+            const highlighted = initialPlanKey === plan.key;
+
             return (
-              <li key={plan.key} className="rounded-xl border border-line px-4 py-3">
+              <li
+                key={plan.key}
+                className={`rounded-2xl border p-5 transition ${
+                  highlighted || recommended
+                    ? "border-[var(--mkt-accent)] bg-[var(--mkt-accent-tint)] shadow-[var(--mkt-card-shadow)]"
+                    : "border-[var(--mkt-line)] bg-[var(--mkt-panel)]"
+                }`}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-ink">{plan.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <PlanTitleRow recommended={recommended} plan={plan} />
                     {plan.description ? (
-                      <p className="text-sm text-ink-soft">{plan.description}</p>
+                      <p className="mt-1 text-sm text-[var(--mkt-muted)]">{plan.description}</p>
                     ) : null}
-                    <p className="mt-1 text-sm tabular-nums text-ink">
-                      {free ? "Free" : `${formatCurrency(price, plan.currency || "PKR")} / month`}
+                    <p className="mt-3 font-display text-lg font-semibold tabular-nums text-[var(--mkt-ink)]">
+                      {priceLabel}
                     </p>
+                    {annualSub ? (
+                      <p className="text-xs text-[var(--mkt-muted)]">{annualSub}</p>
+                    ) : null}
                   </div>
                   <button
                     type="button"
                     disabled={pending}
-                    className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-paper disabled:opacity-50"
+                    className="mkt-btn shrink-0 rounded-xl px-4 py-2 text-xs font-semibold disabled:opacity-50"
                     onClick={() =>
                       start(async () => {
                         setError(null);
@@ -80,24 +117,21 @@ export function PlanSelectStep({
         <div className="space-y-4">
           <button
             type="button"
-            className="text-xs text-ink-soft underline"
+            className="text-xs font-semibold text-[var(--mkt-muted)] underline"
             onClick={() => setPaidKey(null)}
           >
             ← Back to plans
           </button>
-          <h3 className="font-medium text-ink">Pay for {paidPlan.name}</h3>
-          <p className="text-sm text-ink-soft">
+          <h3 className="font-display font-semibold text-[var(--mkt-ink)]">
+            Pay for {paidPlan.name}
+          </h3>
+          <p className="text-sm text-[var(--mkt-muted)]">
             Amount:{" "}
-            <strong className="text-ink">
-              {formatCurrency(
-                Number(paidPlan.price_monthly ?? 0),
-                paidPlan.currency || billing.currency,
-              )}
-            </strong>
+            <strong className="text-[var(--mkt-ink)]">{formatPlanPrice(paidPlan, period)}</strong>
           </p>
-          <div className="rounded-xl border border-line bg-canvas/50 px-4 py-3 text-sm text-ink">
+          <div className="rounded-xl border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-4 py-3 text-sm text-[var(--mkt-ink)]">
             <p className="font-medium">Transfer to</p>
-            <ul className="mt-2 space-y-1 text-ink-soft">
+            <ul className="mt-2 space-y-1 text-[var(--mkt-muted)]">
               {billing.bankName ? <li>Bank: {billing.bankName}</li> : null}
               {billing.accountTitle ? <li>Title: {billing.accountTitle}</li> : null}
               {billing.accountNumber ? <li>Account: {billing.accountNumber}</li> : null}
@@ -107,7 +141,7 @@ export function PlanSelectStep({
               {billing.easypaisa ? <li>EasyPaisa: {billing.easypaisa}</li> : null}
             </ul>
             {billing.instructions ? (
-              <p className="mt-3 text-ink-soft">{billing.instructions}</p>
+              <p className="mt-3 text-[var(--mkt-muted)]">{billing.instructions}</p>
             ) : null}
             {!billing.bankName && !billing.accountNumber && !billing.iban ? (
               <p className="mt-2 text-amber-800">
@@ -133,7 +167,7 @@ export function PlanSelectStep({
               });
             }}
           >
-            <label className="block text-sm text-ink">
+            <label className="block text-sm text-[var(--mkt-ink)]">
               Payment screenshot
               <input
                 name="screenshot"
@@ -146,13 +180,26 @@ export function PlanSelectStep({
             <button
               type="submit"
               disabled={pending}
-              className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper disabled:opacity-50"
+              className="mkt-btn rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
             >
               {pending ? "Uploading…" : "Submit for approval"}
             </button>
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+function PlanTitleRow({ recommended, plan }: { recommended: boolean; plan: PlanRow }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <p className="font-semibold text-[var(--mkt-ink)]">{plan.name}</p>
+      {recommended ? (
+        <span className="rounded-full bg-[var(--mkt-accent-deep)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          Popular
+        </span>
+      ) : null}
     </div>
   );
 }

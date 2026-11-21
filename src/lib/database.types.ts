@@ -1217,11 +1217,13 @@ export type Database = {
           assigned_to: string | null
           created_at: string
           email: string
+          expedited: boolean
           id: string
           ip_hash: string | null
           message: string
           name: string
           notes: string | null
+          organization: string | null
           spam_score: number | null
           status: string
           topic: string
@@ -1230,11 +1232,13 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           email: string
+          expedited?: boolean
           id?: string
           ip_hash?: string | null
           message: string
           name: string
           notes?: string | null
+          organization?: string | null
           spam_score?: number | null
           status?: string
           topic?: string
@@ -1243,11 +1247,13 @@ export type Database = {
           assigned_to?: string | null
           created_at?: string
           email?: string
+          expedited?: boolean
           id?: string
           ip_hash?: string | null
           message?: string
           name?: string
           notes?: string | null
+          organization?: string | null
           spam_score?: number | null
           status?: string
           topic?: string

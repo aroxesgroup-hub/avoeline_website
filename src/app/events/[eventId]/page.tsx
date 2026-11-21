@@ -10,15 +10,17 @@ import { AuthService } from "@/src/features/auth/authService";
 import { getPublicEventMeta, getPublicEventView } from "@/src/features/events/publicEvent.service";
 import { PublicAbout } from "@/src/features/events/components/public/PublicAbout";
 import { PublicAgenda } from "@/src/features/events/components/public/PublicAgenda";
-import { PublicCompetitions } from "@/src/features/events/components/public/PublicCompetitions";
 import { PublicEventFacts } from "@/src/features/events/components/public/PublicEventFacts";
 import { PublicEventHero } from "@/src/features/events/components/public/PublicEventHero";
+import { PublicEventQuickBar } from "@/src/features/events/components/public/PublicEventQuickBar";
 import { PublicMedia } from "@/src/features/events/components/public/PublicMedia";
+import { PublicMediaGuidelineStrip } from "@/src/features/events/components/public/PublicMediaGuidelineStrip";
 import { PublicOrganizerCard } from "@/src/features/events/components/public/PublicOrganizerCard";
 import { PublicRegisterCard } from "@/src/features/events/components/public/PublicRegisterCard";
 import { PublicSpeakers } from "@/src/features/events/components/public/PublicSpeakers";
 import { PublicSponsorsStrip } from "@/src/features/events/components/public/PublicSponsorsStrip";
 import { PublicTiersAndDiscounts } from "@/src/features/events/components/public/PublicTiersAndDiscounts";
+import { PublicTrackSwitcher } from "@/src/features/events/components/public/PublicTrackSwitcher";
 import { absoluteUrl } from "@/src/lib/appUrl";
 
 export const revalidate = 60;
@@ -91,7 +93,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
   if (view.kind === "gated") {
     return (
       <main className="mx-auto w-full max-w-md px-4 py-16 sm:px-6">
-        <p className="mb-6 text-center font-display text-xl text-ink">{view.title}</p>
+        <p className="mb-6 text-center font-display text-xl text-[var(--mkt-ink)]">{view.title}</p>
         <AccessGate
           eventId={view.eventId}
           inviteToken={view.inviteToken ?? invite ?? null}
@@ -101,7 +103,7 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
           }
         />
         {view.reason === "rate_limited" ? (
-          <p className="mt-4 text-center text-sm text-ink-soft">
+          <p className="mt-4 text-center text-sm text-[var(--mkt-muted)]">
             Too many attempts. Please wait a minute and try again.
           </p>
         ) : null}
@@ -115,7 +117,6 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
     await markInviteOpenedAction(invite);
   }
 
-  // Prefer invite in share links; unlock cookie covers access code after first entry.
   const qs = [invite ? `invite=${encodeURIComponent(invite)}` : ""].filter(Boolean).join("&");
   const qsSuffix = qs ? `?${qs}` : "";
 
@@ -171,20 +172,21 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
       {preview ? (
         <p
           role="status"
-          className="border-b border-warning-line bg-warning-soft px-4 py-3 text-center text-sm font-medium text-ink"
+          className="border-b border-warning-line bg-warning-soft px-4 py-3 text-center text-sm font-medium text-[var(--mkt-ink)]"
         >
           Admin preview — this event is not published publicly.
         </p>
       ) : null}
 
       <PublicEventHero dto={dto} preview={preview} />
+      <PublicMediaGuidelineStrip />
+      <PublicEventQuickBar dto={dto} />
 
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-        {/* Mobile: register first. Desktop: content | sticky register */}
-        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+      <div className="mx-auto w-full max-w-[var(--mkt-max,80rem)] px-6 py-10 sm:py-14 lg:px-10">
+        <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)] lg:gap-12">
           <aside
             id="register"
-            className="order-1 scroll-mt-24 lg:order-2 lg:sticky lg:top-10 lg:h-fit"
+            className="order-1 scroll-mt-24 lg:order-2 lg:sticky lg:top-24 lg:h-fit"
           >
             <PublicRegisterCard
               dto={dto}
@@ -199,25 +201,26 @@ export default async function PublicEventPage({ params, searchParams }: PageProp
           </aside>
 
           <div className="order-2 space-y-12 lg:order-1">
-            <PublicEventFacts dto={dto} />
+            {dto.isHackathon ? (
+              <PublicTrackSwitcher
+                eventId={dto.id}
+                competitions={dto.competitions}
+                qsSuffix={qsSuffix}
+                initialTrackId={track ?? null}
+              />
+            ) : null}
             <PublicMedia dto={dto} />
             <PublicAbout dto={dto} />
             <PublicTiersAndDiscounts dto={dto} />
             <PublicAgenda items={dto.agenda} />
-            <PublicSpeakers speakers={dto.speakers} />
-            {dto.isHackathon ? (
-              <PublicCompetitions
-                eventId={dto.id}
-                competitions={dto.competitions}
-                qsSuffix={qsSuffix}
-              />
-            ) : null}
+            <PublicSpeakers speakers={dto.speakers} isHackathon={dto.isHackathon} />
             <PublicSponsorsStrip
               sponsors={dto.sponsors}
               collaborators={dto.collaborators}
               partners={dto.partners}
               sponsorTiers={dto.sponsorTiers}
             />
+            <PublicEventFacts dto={dto} />
             <PublicOrganizerCard dto={dto} />
             <ReportEvent action={reportEvent.bind(null, dto.id)} />
           </div>

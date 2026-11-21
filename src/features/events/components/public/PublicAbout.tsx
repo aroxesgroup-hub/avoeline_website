@@ -7,7 +7,7 @@ export function PublicAbout({ dto }: { dto: PublicEventDto }) {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-lg text-ink">About this event</h2>
+      <h2 className="font-display text-lg text-[var(--mkt-ink)]">About this event</h2>
       <RichDescription html={dto.description} className="mt-1 break-words" />
     </section>
   );

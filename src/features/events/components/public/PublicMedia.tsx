@@ -73,20 +73,34 @@ export function PublicMedia({ dto }: { dto: PublicEventDto }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [lightbox, items.length]);
 
-  if (!items.length && !promo) return null;
-
   const yt = promo ? youtubeEmbed(promo) : null;
   const vim = promo && !yt ? vimeoEmbed(promo) : null;
 
+  // Gallery only — banner already shown in hero; avoid double-crop as a square thumb.
+  const galleryItems = items.filter((i) => i.kind === "gallery");
+  if (!galleryItems.length && !promo) return null;
+
   return (
-    <section className="space-y-6">
-      <h2 className="font-display text-lg text-ink">Media</h2>
+    <section id="gallery" className="scroll-mt-24 space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg text-[var(--mkt-ink)]">
+            Event atmosphere &amp; past highlights
+          </h2>
+          {galleryItems.length ? (
+            <p className="mt-1 text-xs text-[var(--mkt-muted)]">
+              {galleryItems.length} photo{galleryItems.length === 1 ? "" : "s"} · Recommended
+              1200×800 (3:2) WebP under 800KB
+            </p>
+          ) : null}
+        </div>
+      </div>
 
       {promo ? (
-        <div className="overflow-hidden rounded-2xl border border-line bg-muted">
+        <div className="overflow-hidden rounded-2xl border border-[var(--mkt-line)] bg-[var(--mkt-surface-low)]">
           {isVideoUrl(promo) ? (
             <VideoPreview src={promo} title={dto.title} className="w-full">
-              <video src={promo} muted className="aspect-video w-full object-cover" />
+              <video src={promo} muted className="aspect-video w-full object-contain" />
             </VideoPreview>
           ) : yt || vim ? (
             <iframe
@@ -102,7 +116,7 @@ export function PublicMedia({ dto }: { dto: PublicEventDto }) {
               href={promo}
               target="_blank"
               rel="noopener noreferrer"
-              className="block px-4 py-6 text-sm font-medium text-ink underline"
+              className="block px-4 py-6 text-sm font-medium text-[var(--mkt-ink)] underline"
             >
               Watch promo video
             </a>
@@ -110,27 +124,33 @@ export function PublicMedia({ dto }: { dto: PublicEventDto }) {
         </div>
       ) : null}
 
-      {items.length ? (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {items.map((item, index) => (
-            <li key={`${item.kind}-${item.src}`}>
-              <button
-                type="button"
-                className="relative block aspect-square w-full overflow-hidden rounded-xl bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-                onClick={() => setLightbox(index)}
-                aria-label={`Open image ${index + 1}`}
-              >
-                <Image
-                  src={item.src}
-                  alt={item.kind === "banner" ? `${dto.title} banner` : `${dto.title} gallery`}
-                  fill
-                  sizes="(max-width: 640px) 50vw, 33vw"
-                  className="object-cover"
-                  loading={index === 0 ? "eager" : "lazy"}
-                />
-              </button>
-            </li>
-          ))}
+      {galleryItems.length ? (
+        <ul className="columns-2 gap-3 sm:columns-3">
+          {galleryItems.map((item, index) => {
+            const fullIndex = items.findIndex((x) => x.src === item.src);
+            const tall = index % 5 === 1 || index % 5 === 4;
+            return (
+              <li key={`${item.kind}-${item.src}`} className="mb-3 break-inside-avoid">
+                <button
+                  type="button"
+                  className={`relative block w-full overflow-hidden rounded-xl bg-[var(--mkt-surface-low)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mkt-accent)] ${
+                    tall ? "aspect-[3/4]" : "aspect-[4/3]"
+                  }`}
+                  onClick={() => setLightbox(fullIndex >= 0 ? fullIndex : index)}
+                  aria-label={`Open image ${index + 1}`}
+                >
+                  <Image
+                    src={item.src}
+                    alt={`${dto.title} gallery`}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    className="object-contain object-center p-1"
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                </button>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
 
@@ -139,12 +159,12 @@ export function PublicMedia({ dto }: { dto: PublicEventDto }) {
           role="dialog"
           aria-modal="true"
           aria-label="Image lightbox"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mkt-ink)]/80 p-4"
           onClick={() => setLightbox(null)}
         >
           <button
             type="button"
-            className="absolute right-4 top-4 rounded-lg border border-white/30 bg-ink/50 px-3 py-1.5 text-sm text-white"
+            className="absolute right-4 top-4 rounded-lg border border-white/30 bg-black/50 px-3 py-1.5 text-sm text-white"
             onClick={() => setLightbox(null)}
           >
             Close

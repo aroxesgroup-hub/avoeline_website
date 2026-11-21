@@ -751,25 +751,98 @@ body::after {
   }
 }
 
-/* Marketing site tokens (docs/19 §2) — aliases scoped to the marketing shell. */
-.marketing-shell {
-  --mkt-ink: #0b1020;
-  --mkt-accent: #4f46e5;
-  --mkt-accent-soft: #c7cbff;
-  --mkt-accent-tint: #eef0ff;
-  --mkt-text: #1f2937;
-  --mkt-muted: #4b5563; /* AA on white for small marketing labels */
-  --mkt-line: #d9dce8;
+/*
+ * Public / marketing shell — white + emerald dual theme (mock-aligned).
+ * Light: white panels, mint washes, deep emerald CTAs.
+ * Dark: deep forest canvas, elevated panels, mint accents; buttons stay
+ * deep emerald with light text so contrast never flips.
+ * Alias `.public-shell` for /events + /auth. Dashboards keep product tokens.
+ */
+.marketing-shell,
+.public-shell {
+  --font-heading: var(--font-mkt-heading), var(--font-body), system-ui, sans-serif;
+  --mkt-ink: #064e3b;
+  --mkt-ink-deep: #022c22;
+  --mkt-accent: #059669;
+  --mkt-accent-deep: #064e3b;
+  --mkt-accent-soft: #6ee7b7;
+  --mkt-accent-tint: #ecfdf5;
+  --mkt-secondary: #047857;
+  --mkt-text: #064e3b;
+  --mkt-muted: #4d7c6f;
+  --mkt-line: #d1e7df;
+  --mkt-canvas: #ffffff;
+  --mkt-surface: #e6fffa;
+  --mkt-surface-low: #f0fdfa;
+  --mkt-panel: #ffffff;
+  --mkt-btn: #064e3b;
+  --mkt-btn-fg: #ffffff;
+  --mkt-btn-hover: #047857;
+  --mkt-card-shadow: 0 12px 40px -24px rgba(6, 78, 59, 0.28);
+  --mkt-max: 80rem; /* 1280px */
+  background-color: var(--mkt-canvas);
+  color: var(--mkt-text);
+}
+
+.marketing-shell .font-display,
+.public-shell .font-display {
+  font-family: var(--font-mkt-heading), var(--font-body), system-ui, sans-serif;
+}
+
+.marketing-shell .mkt-btn,
+.public-shell .mkt-btn {
+  background-color: var(--mkt-btn);
+  color: var(--mkt-btn-fg);
+}
+
+.marketing-shell .mkt-btn:hover,
+.public-shell .mkt-btn:hover {
+  background-color: var(--mkt-btn-hover);
+}
+
+.marketing-shell .mkt-card,
+.public-shell .mkt-card {
+  background-color: var(--mkt-panel);
+  border: 1px solid var(--mkt-line);
+  box-shadow: var(--mkt-card-shadow);
+}
+
+:root[data-theme="dark"] .marketing-shell,
+:root[data-theme="dark"] .public-shell {
+  --mkt-ink: #ecfdf8;
+  --mkt-ink-deep: #a7f3d0;
+  --mkt-accent: #34d399;
+  --mkt-accent-deep: #064e3b;
+  --mkt-accent-soft: #6ee7b7;
+  --mkt-accent-tint: #134e4a;
+  --mkt-secondary: #6ee7b7;
+  --mkt-text: #ecfdf8;
+  --mkt-muted: #8fb5ab;
+  --mkt-line: #2a4a42;
+  --mkt-canvas: #071412;
+  --mkt-surface: #0f221e;
+  --mkt-surface-low: #132a25;
+  --mkt-panel: #17332d;
+  --mkt-btn: #059669;
+  --mkt-btn-fg: #ffffff;
+  --mkt-btn-hover: #047857;
+  --mkt-card-shadow: 0 16px 48px -28px rgba(0, 0, 0, 0.55);
+  background-color: var(--mkt-canvas);
+  color: var(--mkt-text);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .marketing-shell .lift,
   .marketing-shell .lift:hover,
-  .marketing-shell .lift:active {
+  .marketing-shell .lift:active,
+  .public-shell .lift,
+  .public-shell .lift:hover,
+  .public-shell .lift:active {
     transition: none;
     transform: none;
   }
-  .marketing-shell .animate-marquee {
+  .marketing-shell .animate-marquee,
+  .public-shell .animate-marquee {
     animation: none;
   }
 }

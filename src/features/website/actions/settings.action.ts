@@ -21,7 +21,16 @@ const jsonValue: z.ZodType<unknown> = z.lazy(() =>
 
 export const upsertSiteSettingAction = safeAction({
   input: z.object({
-    key: z.enum(["nav", "footer", "social", "contact", "announcement", "seo_defaults", "stats"]),
+    key: z.enum([
+      "nav",
+      "footer",
+      "social",
+      "contact",
+      "announcement",
+      "seo_defaults",
+      "stats",
+      "legal_suite",
+    ]),
     value: jsonValue,
   }),
   auth: () => requireWebsiteCap("website:edit"),

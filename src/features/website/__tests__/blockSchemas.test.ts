@@ -17,6 +17,35 @@ describe("parseBlockDraft", () => {
     assert.equal(result.data.primaryCta?.label, "Get started free");
   });
 
+  it("parses hero command panel + trust logos", () => {
+    const result = parseBlockDraft("hero", {
+      headline: "Run every event from one place.",
+      eyebrow: "EVENT OPERATIONS PLATFORM — NEW RELEASE",
+      tertiaryCta: { label: "Browse events", href: "/events" },
+      trustTitle: "Trusted by university clubs",
+      trustLogos: [{ name: "NUST Computing", icon: "hub" }],
+      command: {
+        title: "Live Event Command",
+        eventName: "Web 3.0 Conference 2026",
+        badge: "ACTIVE GATE",
+        stats: [{ label: "Registrations", value: "1,240", hint: "+18 today" }],
+        capacityLabel: "Gate Capacity (Main Hall A)",
+        capacityValue: "1,141 / 1,240 Check-ins",
+        capacityPercent: 92,
+        activity: [{ text: "Hamza Tariq (VIP Pass)", time: "Just now", kind: "scan" }],
+        footerNote: "Organizer Operations Hub — Live Event Command",
+        alertLabel: "Send Alert",
+        exportLabel: "Export CSV",
+      },
+    });
+    assert.equal(result.ok, true);
+    if (!result.ok || result.type !== "hero") return;
+    assert.equal(result.data.command?.eventName, "Web 3.0 Conference 2026");
+    assert.equal(result.data.command?.capacityPercent, 92);
+    assert.equal(result.data.trustLogos?.[0]?.name, "NUST Computing");
+    assert.equal(result.data.tertiaryCta?.href, "/events");
+  });
+
   it("rejects unknown fields on hero", () => {
     const result = parseBlockDraft("hero", {
       headline: "Hello",

@@ -10,6 +10,7 @@ import type {
 } from "@/src/features/taxonomy/categoryEngine.types";
 import type { EventFormData } from "@/src/services/models/event.model";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
+import { AssetSpecGuide } from "@/src/features/media/AssetSpecGuide";
 import { isVideoUrl } from "@/src/features/media/media.utils";
 import { DescriptionEditor } from "@/src/features/events/components/wizard/DescriptionEditor";
 
@@ -198,6 +199,7 @@ export function BasicStep({
           <div>
             <h3 className="mb-1 text-lg font-bold text-ink">Media Assets</h3>
             <p className="mb-4 text-sm text-ink-soft">High-quality visuals increase engagement.</p>
+            <AssetSpecGuide className="mb-4" />
           </div>
           <MediaUpload
             kind="event_banner"
@@ -205,9 +207,8 @@ export function BasicStep({
             value={formData.bannerImage ?? ""}
             label="Upload Event Banner"
             onUploaded={(url) => updateForm("bannerImage", url)}
-            buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
+            buttonClassName="relative mx-auto flex aspect-video w-full max-w-xl flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
           />
-          <p className="text-xs text-ink-soft">1080 × 1350px (4:5) recommended (JPG, PNG)</p>
           <div>
             <label className="mb-2 block text-2xs font-bold uppercase tracking-wider text-ink-soft">
               Gallery

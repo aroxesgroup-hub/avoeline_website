@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DescriptionEditor } from "@/src/features/events/components/wizard/DescriptionEditor";
 import { MediaUpload } from "@/src/features/media/MediaUpload";
+import { AssetSpecGuide } from "@/src/features/media/AssetSpecGuide";
 import { isVideoUrl } from "@/src/features/media/media.utils";
 import { updateEventBasics } from "@/src/features/events/actions/updateEventBasics.action";
 import { CalendarSyncControls } from "@/src/features/connections/components/CalendarSyncControls";
@@ -186,19 +187,16 @@ export function EditBasicsForm({ initial }: { initial: EditBasicsInitial }) {
 
       <section className="space-y-4">
         <h2 className="font-display text-lg text-ink">Media</h2>
+        <AssetSpecGuide />
         <MediaUpload
           kind="event_banner"
           eventId={initial.eventId}
           accept="image/*"
           value={bannerImage}
-          label="Banner (4:5)"
+          label="Event banner (16:9)"
           onUploaded={setBannerImage}
-          buttonClassName="relative mx-auto flex aspect-[4/5] w-full max-w-xs flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
+          buttonClassName="relative mx-auto flex aspect-video w-full max-w-xl flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-muted text-ink-soft transition hover:border-line-loud disabled:opacity-60"
         />
-        <p className="text-xs text-ink-soft">
-          Portrait 4:5 recommended for the event banner. Stored in the public media library
-          (compressed).
-        </p>
         <div>
           <span className={labelClass}>Gallery</span>
           <div className="mt-2 flex flex-wrap items-center gap-3">

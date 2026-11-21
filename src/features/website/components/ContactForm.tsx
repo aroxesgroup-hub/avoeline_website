@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { Send } from "lucide-react";
 import { submitContactAction } from "@/src/features/website/actions/contact.action";
 import {
   CONTACT_TOPICS,
   CONTACT_TOPIC_LABELS,
   type ContactTopic,
 } from "@/src/features/website/contact.shared";
-import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 
 declare global {
   interface Window {
@@ -34,11 +34,14 @@ type Props = {
   initialTopic?: string | null;
 };
 
+const fieldClass =
+  "h-11 w-full rounded-xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)] px-3 text-sm text-[var(--mkt-ink)] outline-none ring-[var(--mkt-accent)] placeholder:text-[var(--mkt-muted)] focus:ring-2";
+
 function resolveTopic(raw: string | null | undefined): ContactTopic {
   const t = String(raw ?? "")
     .trim()
     .toLowerCase();
-  if (t === "enterprise" || t === "plan" || t === "plans") return "sales";
+  if (t === "enterprise" || t === "plan" || t === "plans" || t === "campus") return "sales";
   if (t === "partner" || t === "partners") return "partnership";
   if ((CONTACT_TOPICS as readonly string[]).includes(t)) return t as ContactTopic;
   return "general";
@@ -48,8 +51,10 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
   const siteKey = turnstileSiteKey?.trim() || "";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [organization, setOrganization] = useState("");
   const [topic, setTopic] = useState<ContactTopic>(() => resolveTopic(initialTopic));
   const [message, setMessage] = useState("");
+  const [expedited, setExpedited] = useState(false);
   const [website, setWebsite] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +62,10 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
   const [pending, startTransition] = useTransition();
   const widgetHost = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    setTopic(resolveTopic(initialTopic));
+  }, [initialTopic]);
 
   useEffect(() => {
     if (!siteKey || !widgetHost.current) return;
@@ -114,10 +123,13 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
 
   if (done) {
     return (
-      <div className="rounded-2xl border border-[var(--mkt-line)] bg-white/60 p-6" role="status">
-        <h2 className="font-display text-xl text-[var(--mkt-ink)]">Message sent</h2>
+      <div
+        className="rounded-2xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)] p-6"
+        role="status"
+      >
+        <h2 className="font-display text-xl text-[var(--mkt-ink)]">Message dispatched</h2>
         <p className="mt-2 text-sm leading-relaxed text-[var(--mkt-muted)]">
-          Thanks — we received your note and will reply soon at the email you provided.
+          Thanks — we received your inquiry and will reply soon at the email you provided.
         </p>
       </div>
     );
@@ -133,8 +145,10 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
           const res = await submitContactAction({
             name,
             email,
+            organization,
             topic,
             message,
+            expedited,
             website,
             turnstileToken,
           });
@@ -151,8 +165,16 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
       }}
       noValidate
     >
-      {/* Honeypot — hidden from users, visible to naive bots */}
-      <div className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden" aria-hidden="true">
+      <div className="mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--mkt-accent)]">
+          Direct message dispatch
+        </p>
+        <h2 className="mt-1 font-display text-2xl font-semibold text-[var(--mkt-ink)]">
+          Send our team an inquiry
+        </h2>
+      </div>
+
+      <div className="absolute left-[-9999px] h-0 w-0 opacity-0" aria-hidden="true">
         <label htmlFor="contact-website">Website</label>
         <input
           id="contact-website"
@@ -165,43 +187,59 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
         />
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="contact-name" className="text-sm font-medium text-[var(--mkt-ink)]">
+            Full name
+          </label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            maxLength={200}
+            autoComplete="name"
+            className={`${fieldClass} mt-1`}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="contact-email" className="text-sm font-medium text-[var(--mkt-ink)]">
+            Email address
+          </label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            maxLength={320}
+            autoComplete="email"
+            className={`${fieldClass} mt-1`}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div>
-        <label htmlFor="contact-name" className={labelClass}>
-          Name
+        <label htmlFor="contact-org" className="text-sm font-medium text-[var(--mkt-ink)]">
+          Organization / university / club
         </label>
         <input
-          id="contact-name"
-          name="name"
+          id="contact-org"
+          name="organization"
           type="text"
-          required
           maxLength={200}
-          autoComplete="name"
           className={`${fieldClass} mt-1`}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={organization}
+          onChange={(e) => setOrganization(e.target.value)}
         />
       </div>
 
       <div>
-        <label htmlFor="contact-email" className={labelClass}>
-          Email
-        </label>
-        <input
-          id="contact-email"
-          name="email"
-          type="email"
-          required
-          maxLength={320}
-          autoComplete="email"
-          className={`${fieldClass} mt-1`}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="contact-topic" className={labelClass}>
-          Topic
+        <label htmlFor="contact-topic" className="text-sm font-medium text-[var(--mkt-ink)]">
+          Inquiry topic
         </label>
         <select
           id="contact-topic"
@@ -219,7 +257,7 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
       </div>
 
       <div>
-        <label htmlFor="contact-message" className={labelClass}>
+        <label htmlFor="contact-message" className="text-sm font-medium text-[var(--mkt-ink)]">
           Message
         </label>
         <textarea
@@ -228,23 +266,47 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
           required
           rows={5}
           maxLength={5000}
-          className={`${fieldClass} mt-1`}
+          placeholder="Tell us about the summit dates, attendee count, ticketing tiers, or required payment settlement integrations…"
+          className={`${fieldClass} mt-1 min-h-[120px] py-3`}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
       </div>
 
+      <label className="flex items-start gap-2.5 text-sm text-[var(--mkt-ink)]">
+        <input
+          type="checkbox"
+          className="mt-1 h-4 w-4 rounded border-[var(--mkt-line)]"
+          checked={expedited}
+          onChange={(e) => setExpedited(e.target.checked)}
+        />
+        <span>
+          I am organizing an upcoming event in the next 60 days{" "}
+          <span className="text-[var(--mkt-muted)]">(flagged for expedited verification)</span>
+        </span>
+      </label>
+
       {siteKey ? <div ref={widgetHost} className="min-h-[65px]" /> : null}
 
       {error ? (
-        <p className="text-sm text-danger" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}
 
-      <button type="submit" disabled={pending} className={buttonClass("primary", "md")}>
-        {pending ? "Sending…" : "Send message"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--mkt-btn)] px-5 text-sm font-semibold text-[var(--mkt-btn-fg)] transition hover:opacity-95 disabled:opacity-60"
+        >
+          <Send className="h-4 w-4" aria-hidden />
+          {pending ? "Dispatching…" : "Dispatch message"}
+        </button>
+        <p className="text-xs text-[var(--mkt-muted)]">
+          Expected reply window: under 2 hours on working agendas.
+        </p>
+      </div>
     </form>
   );
 }

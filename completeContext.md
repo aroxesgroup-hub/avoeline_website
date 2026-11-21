@@ -54,7 +54,7 @@
 
 **Files**
 
-- Client + session: `src/features/auth/authService.ts` (Supabase Auth cookies, `getCurrentUser`, `requireAdmin`, signup/setup). New Auth users also get `public.users` + profile via `private.handle_new_user`. Self-serve: Google or email/password → verify email → profile → plan (`/auth/signup/organizerSetup` | `vendorSetup`); free self-serve organizers get `organizer_profiles.review_status = pending` and vendors `vendor_profiles.status = pending` → `/auth/signup/awaiting-approval` until admin approves (`setOrganizerReview` / `setVendorStatus` / `setTenantVerification`). Paid plans also wait there until owner approves payment at `/admin/billing/pending` (payment approval also sets profile approved). Tenant-created accounts stay approved. Docs: `docs/onboarding-plans-checkout.md`.
+- Client + session: `src/features/auth/authService.ts` (Supabase Auth cookies, `getCurrentUser`, `requireAdmin`, signup/setup). New Auth users also get `public.users` + profile via `private.handle_new_user`. Self-serve: signup wizard (type → credentials) or Google → verify email → profile → themed plan (`/auth/signup/organizerSetup` | `vendorSetup`); `/plans` deep-links via `?plan=&billing=&role=` + cookie `avoeline_signup_intent`. Free self-serve organizers get `organizer_profiles.review_status = pending` and vendors `vendor_profiles.status = pending` → `/auth/signup/awaiting-approval` until admin Approvals. Paid plans: bank screenshot → owner `/admin/billing/pending` (approve sets profile approved; amount respects yearly billing). Forgot/reset password + optional set-password for Google users. Tenant-created accounts stay approved. Docs: `docs/onboarding-plans-checkout.md`.
 - RBAC: `src/features/auth/rbac.service.ts` (`requireRole`, `getAuthenticatedUser`, team-lead check).
 - Module gating: `hasModuleAccess` / `hasVendorModuleAccess` uses the plan's `included_modules` (every key is optional, including the usual free set) plus grant/deny rows in `feature_overrides`. Keys in `src/features/permissions/moduleKeys.ts` (vendor free: dashboard/quotes/services/bookings; pro adds portfolio, event marketing, analytics). Free vendors: max 5 services; portfolio videos require `vendor_portfolio`.
 - Forced password reset: `users.must_reset_password` → `/auth/change-password` (`src/proxy.ts` + sign-in).
@@ -261,7 +261,7 @@ Tenures, club module toggles, announcements (notify club owner), request queue o
 
 ### `website`
 
-Marketing CMS + public contact (docs/19 W1–W5). Blocks/registry in `blocks/`; cached reads in `siteContent.service.ts`; draft sanitize in `blockSanitize.ts`; media gate in `media.logic.ts`; SEO helpers in `pageMetadata.ts` / `seo.logic.ts`.
+Marketing CMS + public contact (docs/19 W1–W5). Blocks/registry in `blocks/` (hero supports Stitch `command` Live Event Command + `trustLogos`); cached reads in `siteContent.service.ts`; draft sanitize in `blockSanitize.ts`; media gate in `media.logic.ts`; SEO helpers in `pageMetadata.ts` / `seo.logic.ts`.
 
 - Contact: `contact.shared.ts` / `contact.logic.ts` (header sanitize, honeypot, hashed-IP rate limit, Turnstile-required helper); `actions/contact.action.ts` (`submitContactAction` → `TABLES.CONTACT_MESSAGES` + `sendPlatformEmail` notifications lane to `info@aroxes.com`, Reply-To visitor, optional auto-reply; Turnstile when `TURNSTILE_SECRET_KEY` set); UI `components/ContactForm.tsx` on `/contact`
 - Admin shell: `/admin/website` + `WEBSITE_CAPS`
@@ -334,7 +334,7 @@ Browse + wizard + ownership. My Events list: `organizerEvents.filters.ts` / `org
 - `browse.service.ts`, `event.controller.ts`, `ownership.ts`
 - **Public DTO:** `publicEvent.service.ts` (`getPublicEventView` via `resolveEventAccess`, `getPublicEventMeta`, **`getRegistrationState`** from `src/lib/registrationState.ts` — docs/24) + client-safe `types.ts` (`PublicEventDto.registration` + per-competition `registerState`/`canRegister`/`closeInherited`; allowlist — no organizer contact, whitelist, meeting password, access codes, **no promoHints / private promo codes**, structured bank/IBAN, attendee/team secrets, sponsor contract/benefits). Allowlisted `paymentInstructions` (plain text) for paid events only. Active in-window tiers with `seatsLeft`; student/group discounts only; `sponsorTiers` for public logo sizing. Columns `events.show_sponsors|show_collaborators|show_partners` (default false); `events.payment_instructions`. Reminder CTA: `RegistrationReminderButton` on `not_open`.
 - Actions: `toggleChecklistItem.action.ts`, `updateEventBasics.action.ts`, `archiveEvent.action.ts`, `deleteEvent.action.ts`, `updatePublicShowToggles.action.ts`
-- Public UI (N3): clean banner hero + meta (`PublicEventHero`); Share / Add-to-calendar menus; `PublicMedia` (banner+gallery lightbox, lazy YouTube/Vimeo); Facts hide unlimited seats; sections Facts → Media → About → Tickets → Agenda → Speakers → Competitions → Sponsors → Organizer → Report; sticky `PublicRegisterCard` with `paymentInstructions` before screenshot + “What happens next”. Helpers in `publicPage.logic.ts` + `addToCalendar.ts`.
+- Public UI (mock): `PublicEventHero` (contain banner, breadcrumbs, badge) + `PublicEventQuickBar` (date/schedule/venue/admission/capacity %); left: Featured tracks (hackathon) → Gallery (`object-contain`) → About → Admission summary → Agenda → Speakers → Competitions → Sponsors → Location → Organizer → Report; sticky **Reserve seat** with selectable `ticketTierId` cards, promos, mint `paymentInstructions`, proof upload. Helpers in `publicPage.logic.ts` + `addToCalendar.ts`.
 - Wizard: `EventWizardLayout` (shell) + `wizard/steps/{Basic,ScheduleLocation,HackathonTracks,Registration,Review}Step`, widgets `DescriptionEditor`, `TimeField`, `MapPreview`, `FormBuilder`. Registration uses shared `TiersAndPromosEditor` (tiers+promos) plus **Entry fee (PKR)** (`PriceOfTicket`) for paid non-hackathons (tiers optional; create seeds a General SKU when fee-only). Hackathons: fees on Competitions (`Entry fee` for single track, per-competition `Fee` when multi); Registration points organizers there. Review shows banner preview + `formatRegistrationSummary` (never “0 seats”), Publish immediately, CMS-linked Terms / Organizer Agreement / Content Rights (acceptances recorded as `user_consents` context `event_publish`). Sponsor show-* toggles live on Sponsors tab only. Defaults: free tickets, PKT timezone (no TZ picker). Validates schedule order, named hackathon tracks, paid entry fee or tiers before next/publish. Product rules: `docs/09-event-creation.md`. Full tab/flow inventory: `docs/10-events-and-hackathon-dashboards.md`.
 - Extra columns: `events.map_url`, `events.requires_registration`, `events.show_sponsors|show_collaborators|show_partners`; `hackathon_tracks.image_url|policies|instructions|instructions_file_*|opens_at|closes_at|registration_closes_at|roster_locks_at|submission_deadline_at|discount_*|ended_at|status|kind|rules_text`; `hackathon_teams.rules_acknowledged_at`.
 - Routes: `/organizer/.../events`, `create`, `[eventId]`, `pub-succ`; public `/events`, `/events/[eventId]` (allowlisted DTO; `/e/[eventId]` short redirect; sticky Register; Share + calendar menus in hero meta; sponsor strips gated by show_*; SEO JSON-LD). Sponsors tab: “Show on public page” switches. Department/club create still uses the organizer wizard.
@@ -496,21 +496,24 @@ Root layout: `src/app/layout.tsx` (fonts, theme FOUC script, `ToastProvider`, Sp
 
 ### Public / marketing
 
-Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.tsx`): `marketing-shell` CSS tokens (docs/19 §2), optional `site_settings` announcement banner (graceful if table missing), `SiteHeader` + `AppFooter`, `robots: index`. App prefixes get `X-Robots-Tag: noindex, nofollow` in `next.config.ts` plus layout metadata on organizer/vendor/attendee/admin.
+Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.tsx`): `marketing-shell` CSS tokens (docs/19 §2), optional `site_settings` announcement banner (graceful if table missing), `SiteHeader` + `AppFooter`, `robots: index`. Marketing header tabs: Features (`/#product`), **Events** (`/events`), Plans, Partners, About, Contact. Brand mark: `public/brand/avoeline-mark.png` via `BrandMark`. Home hero supports CMS `command` (Live Event Dashboard mock) and proof chips (`trustLogos`); events/plans hydrate from DB; plan feature bullets from Plans display tab — editable under `/admin/website` Pages. App prefixes get `X-Robots-Tag: noindex, nofollow` in `next.config.ts` plus layout metadata on organizer/vendor/attendee/admin.
 
 | Path | File |
 | --- | --- |
 | `/` | `src/app/(marketing)/page.tsx` — CMS blocks via `MarketingPageBlocks` + live stats/partners/events/plans/testimonials; JSON-LD |
-| `/plans` | cards + module comparison + enterprise CTA + FAQ (`listPublicPlans` / `getModuleComparison`) |
-| `/about` `/partners` | CMS blocks + granted partners by category (empty sections hidden) |
-| `/contact` | `ContactForm` (`?topic=` maps enterprise→sales); CMS blocks when published |
-| `/privacy` `/terms` `/organizer-agreement` `/content-rights` | `getLegalDocument` + TOC/sanitized markdown (`legalMarkdown.ts`); publish accept uses `EVENT_PUBLISH_LEGAL_SLUGS` |
+| `/plans` | Mock pricing layout: monthly/annual cards (`PlansPricingCards`), module comparison, FAQ accordion, campus CTA (`PlansPageContent` / `listPublicPlans` / `getModuleComparison` / `listVisibleFaqs('plans')`) |
+| `/about` | CMS mock (`revalidate=60`): hero → stats → `comparison` → feature_grid → `lineage` → team → cta(`buttons`); edit `/admin/website?tab=pages`; fallback only if unpublished |
+| `/partners` | CMS blocks (hero/stats/logo wall/gateways/perks/trust) + `PartnerApplicationForm` → `contact_messages` + email `info@aroxes.com`; logos from granted `site_partners` (`logo_media_id`); empty walls/CTAs hidden |
+| `/contact` | CMS desk (`revalidate=60`): hero → stats → `support_tiers` → form+`contact_hub` sidebar; `ContactForm` (org/expedited) → `info@aroxes.com`; edit `/admin/website?tab=pages` |
+| `/legal` | Compliance Suite hub: `LegalSuitePage` / `LegalSuiteView` — sidebar + stacked cards + DPA; chrome from `site_settings.legal_suite`; bodies from `legal_documents` |
+| `/privacy` `/terms` `/organizer-agreement` `/content-rights` | Same suite UI with `activeSlug` scroll/highlight; consent/wizard slugs unchanged (`EVENT_PUBLISH_LEGAL_SLUGS`); edit bodies + chrome at `/admin/website?tab=legal` |
 | `sitemap.xml` / `robots.txt` | `src/app/sitemap.ts`, `src/app/robots.ts` |
-| `/events` | `src/app/events/page.tsx` |
+| `/events` | Discovery directory: marketing nav shell, hero, GET filters (`q`/`city`/`category`/`when`/`price`), spotlight, landscape grid, verify + organizer CTAs (`getEventsDirectory`) |
+| `/verify` | Credential lookup form; `?code=` redirects to `/verify/[code]` |
 | `/apply/[token]` | public staff recruitment (token); legacy `staff-apply/[formId]` redirects here |
 | `/f/[token]` | public Custom Forms library submit |
 | `/e/[eventId]` | short redirect → `/events/[eventId]` (query preserved) |
-| `/events/[eventId]` | public event via `getPublicEventView` (hero/facts/register/about/agenda/speakers/competitions/sponsors; SEO + `loading.tsx`) |
+| `/events/[eventId]` | Public mock: landscape hero+CTAs, media-spec strip, quick bar, sticky register (hackathon “squad”), masonry gallery, tabbed `PublicTrackSwitcher` (hackathon), agenda/speakers-as-jury, sponsors/facts (`getPublicEventView`; SEO + `loading.tsx`). Media uploads: landscape banner/gallery budgets in `uploadKinds` + `AssetSpecGuide` |
 | `/events/[eventId]/ticket/[registrationId]` | ticket (hackathon: waiting + enter-code link) |
 | `/events/[eventId]/ticket/[registrationId]/team` | hackathon extras; join-a-team is not the default |
 | `/events/[eventId]/ticket/[registrationId]/tracks/[trackId]/tasks` | ticket-gated task board |
@@ -531,19 +534,21 @@ Marketing lives in the `(marketing)` route group (`src/app/(marketing)/layout.ts
 | `/teams`, `/teams/join` | team join / list |
 | `/clubs/[clubId]` | club detail |
 | `/network` | networking directory |
-| `/auth/change-password` | forced password reset |
+| `/auth/change-password` | forced reset; `?optional=1` for Google users setting a password |
 
 ### Auth
 
 | Path | Notes |
 | --- | --- |
-| `/auth/signin` | `signinClient.tsx` |
-| `/auth/signup` | `SignupPageClient.tsx` |
-| `/auth/signup/organizerSetup` | organizer onboarding |
-| `/auth/signup/vendorSetup` | vendor onboarding |
+| `/auth/signin` | Themed `AuthShell` + Google + forgot password |
+| `/auth/signup` | Wizard: type → credentials; `?plan=&billing=&role=` → cookie `avoeline_signup_intent` |
+| `/auth/signup/organizerSetup` | email → profile → themed plan (preselect + yearly amount) |
+| `/auth/signup/vendorSetup` | same for vendors |
+| `/auth/signup/awaiting-approval` | payment vs profile wait; signOut; set-password link |
+| `/auth/forgot-password` `/auth/reset-password` | Supabase reset email flow |
 | `/admin/signin` | separate admin login |
 
-Layouts: `src/app/auth/layout.tsx`. Shared steps: `src/shared_components/auth/*`.
+Layouts: `src/app/auth/layout.tsx`. Shared: `AuthShell`, setup steps under `src/shared_components/auth/*` + `src/features/onboarding`. Docs: `docs/onboarding-plans-checkout.md`.
 
 ### Attendee (`src/app/attendee/layout.tsx`)
 
@@ -761,6 +766,63 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-21 — Event media specs + hackathon detail UI
+- What: Landscape media matrix (banner/gallery/logo/avatar budgets, SVG logos, soft dim warnings); organizer `AssetSpecGuide`; public hero CTAs + media-spec strip; masonry gallery; hackathon `PublicTrackSwitcher` + squad register title.
+- Files: `uploadKinds.ts`, `publicMediaProcess.ts`, `MediaUpload.tsx`, `AssetSpecGuide.tsx`, `BasicStep.tsx`, `EditBasicsForm.tsx`, `HackathonTracksStep.tsx`, `PublicEventHero.tsx`, `PublicMedia.tsx`, `PublicTrackSwitcher.tsx`, `PublicMediaGuidelineStrip.tsx`, `PublicRegisterCard.tsx`, `RegistrationForm.tsx`, `events/[eventId]/page.tsx`, `plans/2026-11-21-event-media-hackathon-detail.md`
+
+### 2026-11-21 — Legal Compliance Suite
+- What: `/legal` hub (+ deep links) with sidebar, stacked document cards, Zero-Sell, DPA CTA, print bundle; markdown callouts (`NOTE`/`WARNING`/`GUARANTEE`/`SPLIT`); editable suite chrome via `site_settings.legal_suite`; legal v2 seed.
+- Files: `LegalSuiteView.tsx`, `LegalDocumentCard.tsx`, `LegalMarkdownBody.tsx`, `legalSuite.logic.ts`, `legalMarkdown.ts`, `LegalCmsPanel.tsx`, `LegalSuiteChromePanel.tsx`, `(marketing)/legal`, privacy/terms/organizer-agreement/content-rights pages, `AppFooter.tsx`, `seo.logic.ts`, `supabase/migrations/20261121180000_legal_compliance_suite.sql`, `plans/2026-11-21-legal-compliance-suite.md`
+
+### 2026-11-21 — Public event details mock
+- What: Restyled `/events/[eventId]` to mock: breadcrumbs + contain banner, quick-info bar with capacity %, sticky Reserve seat with selectable ticket tiers (`ticketTierId` + promo preview), gallery/competition `object-contain`, section reorder (featured tracks → media → about → agenda → speakers → competitions → location).
+- Files: `PublicEventHero.tsx`, `PublicEventQuickBar.tsx`, `PublicFeaturedTracks.tsx`, `PublicRegisterCard.tsx`, `PublicRegisterFormBlock.tsx`, `RegistrationForm.tsx`, `PublicMedia.tsx`, `PublicCompetitions.tsx`, `events/[eventId]/page.tsx`, `loading.tsx`, `plans/2026-11-21-public-event-details-mock.md`
+
+### 2026-11-21 — Contact desk + themed auth/onboarding
+- What: Contact CMS mock (`support_tiers`, `contact_hub`, org/expedited form). AuthShell marketing chrome; signup wizard + plan deep-link cookie; themed PlanSelectStep with yearly billing amount; forgot/reset/set-password; awaiting signOut. Plans CTAs append `role=Organizer`.
+- Files: contact page/form/actions, block schemas/renderers, `AuthShell.tsx`, signup/signin clients, `signupIntent.ts`, `PlanSelectStep.tsx`, `onboarding.service.ts`, forgot/reset password routes, `docs/onboarding-plans-checkout.md`, `plans/2026-11-21-contact-auth-onboarding.md`, `supabase/migrations/20261121170000_contact_page_cms_content.sql`
+
+### 2026-11-21 — About page exact mock + CMS
+- What: Rebuilt `/about` to match mock (hero, filled stats, Legacy vs Fabric `comparison`, four capability cards, Aroxes `lineage` band, advisory `team`, buttons CTA). New block types `comparison` + `lineage`; `feature_grid` optional `eyebrow`/`anchorId`; `cta.variant` `email`|`buttons`. Seed migration; home feature_grid gets `anchorId=product`.
+- Files: `schemas.ts`, `registry.ts`, `Comparison.tsx`, `Lineage.tsx`, `FeatureGrid.tsx`, `Cta.tsx`, `Team.tsx`, `AdminBlockEditor.tsx`, `MarketingPageBlocks.tsx`, `about/page.tsx`, `supabase/migrations/20261121160000_about_page_cms_content.sql`, `plans/2026-11-21-about-page-cms.md`
+
+### 2026-11-21 — Partners demo content + trust panel
+- What: Seeded 6 granted demo partners; refreshed partners CMS (stats, dual gateways with images, perks, Trust Protocol + editable escrow panel). `steps.panel` schema; Unsplash allowed in `next.config` images.
+- Files: `schemas.ts`, `Steps.tsx`, `AudienceTabs.tsx`, `LogoWall.tsx`, `StatsStrip.tsx`, `next.config.ts`, `supabase/migrations/20261121150000_partners_demo_content.sql`
+
+### 2026-11-21 — Partners page CMS + logos + application email
+- What: Rebuilt `/partners` as CMS-driven mock (hero, stats, logo wall, dual gateways, perks, trust). `logo_wall.category` filters live partners; empty walls hide. Partners admin tab picks `logo_media_id` from Media library. `PartnerApplicationForm` stores `contact_messages` topic=`partnership` and emails `info@aroxes.com`.
+- Files: `partners/page.tsx`, `PartnerApplicationForm.tsx`, `contact.action.ts`, `PartnersCmsPanel.tsx`, `LogoWall.tsx`, `AudienceTabs.tsx`, `schemas.ts`, `MarketingPageBlocks.tsx`, `admin/website/page.tsx`, `supabase/migrations/20261121140000_partners_page_cms_content.sql`, `plans/2026-11-21-partners-page-cms.md`
+
+### 2026-11-21 — Events directory + plans annual + nav unify
+- What: `/events` uses full marketing 6-link header (`marketing-shell`). Rebuilt discovery page (hero, filters, spotlight, 16:10 cards, verify + organizer CTAs). `getEventsDirectory` lists via `isListedPublicly` (includes tiered), excludes demo/archived, URL filters. Plans annual toggle shows yearly total + effective monthly subline and `billing=` on CTAs. `/verify` index accepts `?code=`.
+- Files: `events/layout.tsx`, `events/page.tsx`, `SiteHeader.tsx`, `browse.service.ts`, `browseFilters.ts`, `components/browse/*`, `PlansPricingCards.tsx`, `marketingData.logic.ts`, `verify/page.tsx`, `verify/layout.tsx`, `plans/2026-11-21-events-directory-annual.md`
+
+### 2026-11-21 — Plans page pricing mock + live catalog seed
+- What: Rebuilt `/plans` to match pricing mock (hero, billing toggle, Free/Pro/Enterprise cards, capabilities table, FAQ accordion, campus CTA) on white/mint/emerald light+dark tokens. Client cards in `PlansPricingCards`; server page in `PlansComparison`. Seeded `highlight_features`, public Enterprise card, and `site_faqs` scope=`plans`. Prices/modules still from `subscription_plans` / `module_catalog`.
+- Files: `PlansComparison.tsx`, `PlansPricingCards.tsx`, `marketingData.logic.ts`, `(marketing)/plans/page.tsx`, `supabase/migrations/20261121130000_plans_page_display_content.sql`, `plans/2026-11-21-plans-page-mock.md`
+
+### 2026-11-21 — Marketing white+emerald light/dark tokens
+- What: Retuned `.marketing-shell` / `.public-shell` to mock white + mint + deep emerald (`#064e3b`). Dark mode keeps deep-green buttons/bands (readable white text) with mint accents and elevated panels. Added `--mkt-btn` / `.mkt-card`; wired header/hero/plans/events CTAs.
+- Files: `src/app/globals.css`, `(marketing)/layout.tsx`, chrome + website renderers
+
+### 2026-11-21 — Homepage mockup CMS + live events/plans
+- What: Rebuilt home UI to match latest mock (hero Live Event Dashboard, proof chips, bento features, audience bullets, event cards with Register, plans teaser from DB). Extended schemas (`steps` links, `audience` bullets, feature `tags`/`span`, event location/date/cta, CTA email placeholder). Stats merge CMS-filled values with live keys. Events/plans still hydrate from DB; plan features from Plans display tab. Seed migration applied.
+- Files: `schemas.ts`, `Hero.tsx`, `HeroCommandPanel.tsx`, block renderers, `MarketingPageBlocks.tsx`, `marketingData.service.ts`, `SiteHeader.tsx`, `supabase/migrations/20261121120000_homepage_mock_cms_content.sql`
+
+### 2026-11-17 — Stitch CMS exact screens + Live Event Command hero
+- What: Extended `hero` CMS schema (`eyebrow`, `statusLine`, `tertiaryCta`, `trustLogos`, `command` Live Event Command panel). Built `HeroCommandPanel` + Stitch hero layout. Seeded home/about/partners/contact draft+published from Stitch project `13819902314645578273` via migration. Tightened home section renderers + Plans page headline. Live stats/plans/events/partners still hydrate; command panel is CMS-editable demo content. Edit at `/admin/website?tab=pages`.
+- Files: `schemas.ts`, `Hero.tsx`, `HeroCommandPanel.tsx`, `AdminBlockEditor.tsx`, block renderers, `PlansComparison.tsx`, `supabase/migrations/20261117120000_stitch_marketing_content.sql`, `plans/2026-11-17-stitch-cms-exact-screens.md`
+
+### 2026-11-17 — Events nav tab + Avoeline monogram logo
+- What: Added **Events** (`/events`) to marketing header tabs. Replaced geometric `BrandMark` with the Avoeline monogram (`public/brand/avoeline-mark.png`); dark/inverted panels use CSS invert. Header/footer/auth/dashboard/admin chrome updated for wider mark.
+- Files: `src/shared_components/chrome/SiteHeader.tsx`, `BrandMark.tsx`, `AppFooter.tsx`, `AuthShell.tsx`, `DashboardNav.tsx`, `AdminRail.tsx`, `public/brand/avoeline-mark.png`
+
+### 2026-11-17 — Stitch public site redesign
+- What: Applied Stitch “Modern Dual-Theme Website Redesign” tokens (teal dual-theme + Bricolage) to `.marketing-shell` / `.public-shell`. Restyled SiteHeader/AppFooter, homepage CMS block renderers (`id="product"` on feature grid), `/plans` `/about` `/partners` `/contact` `/privacy` `/terms`, `/events` layout+list + public event hero, and AuthShell for sign-in/sign-up. Live CMS/plans/events/auth data unchanged; no Stitch mock content.
+- Files: `src/app/globals.css`, `src/app/layout.tsx`, `src/shared_components/chrome/{SiteHeader,AppFooter}.tsx`, `src/shared_components/auth/AuthShell.tsx`, `src/features/website/blocks/renderers/*`, `PlansComparison.tsx`, `(marketing)/*`, `src/app/events/{layout,page}.tsx`, `PublicEventHero.tsx`, `plans/2026-11-17-stitch-public-site-redesign.md`
+- Gaps: Navigation CMS tab still does not drive chrome; confirm CMS publish + 390/768/1440 light/dark on a running server.
 
 ### 2026-11-16 — Payment screenshot upload false “event not found”
 - What: `/api/uploads/proof` gated via `assertPublicRegistrationEvent`, which selected a non-existent `events.schedule` column (schedule is composed from `start_date`/`end_date`/…). PostgREST errors were mapped to “We couldn't find this event.” Fixed select + outbox worker; payment field pulled from `per_group` so instructions show; narrowed client error mapping so file “not found” ≠ event missing.

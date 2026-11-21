@@ -64,16 +64,20 @@ export function buildContactNotifyText(input: {
   email: string;
   topic: string;
   message: string;
+  organization?: string;
+  expedited?: boolean;
 }): string {
-  return [
+  const lines = [
     `New contact form submission`,
     ``,
     `Name: ${input.name}`,
     `Email: ${input.email}`,
     `Topic: ${input.topic}`,
-    ``,
-    input.message,
-  ].join("\n");
+  ];
+  if (input.organization?.trim()) lines.push(`Organization: ${input.organization.trim()}`);
+  if (input.expedited) lines.push(`Expedited: yes (event in next 60 days)`);
+  lines.push(``, input.message);
+  return lines.join("\n");
 }
 
 export function buildContactAutoReplyText(name: string): string {

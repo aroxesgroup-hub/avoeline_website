@@ -16,6 +16,10 @@ import { RichTextRenderer } from "./renderers/RichText";
 import { TeamRenderer } from "./renderers/Team";
 import { TimelineRenderer } from "./renderers/Timeline";
 import { ContactInfoRenderer } from "./renderers/ContactInfo";
+import { ComparisonRenderer } from "./renderers/Comparison";
+import { LineageRenderer } from "./renderers/Lineage";
+import { SupportTiersRenderer } from "./renderers/SupportTiers";
+import { ContactHubRenderer } from "./renderers/ContactHub";
 
 type BlockRendererProps<T extends BlockType> = { data: BlockDataMap[T] };
 
@@ -80,6 +84,26 @@ export const BLOCK_REGISTRY: { [K in BlockType]: BlockRegistryEntry<K> } = {
     schema: BLOCK_SCHEMAS.contact_info,
     label: "Contact info",
     Renderer: ContactInfoRenderer,
+  },
+  comparison: {
+    schema: BLOCK_SCHEMAS.comparison,
+    label: "Comparison",
+    Renderer: ComparisonRenderer,
+  },
+  lineage: {
+    schema: BLOCK_SCHEMAS.lineage,
+    label: "Product lineage",
+    Renderer: LineageRenderer,
+  },
+  support_tiers: {
+    schema: BLOCK_SCHEMAS.support_tiers,
+    label: "Support tiers",
+    Renderer: SupportTiersRenderer,
+  },
+  contact_hub: {
+    schema: BLOCK_SCHEMAS.contact_hub,
+    label: "Contact hub",
+    Renderer: ContactHubRenderer,
   },
 };
 

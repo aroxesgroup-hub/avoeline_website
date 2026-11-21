@@ -63,6 +63,21 @@ describe("sanitizeDraftPayload", () => {
     assert.equal(ok.ok, true);
   });
 
+  it("accepts hero command panel draft", () => {
+    const result = sanitizeDraftPayload("hero", {
+      headline: "Hi",
+      command: {
+        title: "Live Event Command",
+        eventName: "Demo",
+        badge: "ACTIVE GATE",
+        stats: [],
+        capacityPercent: 50,
+        activity: [],
+      },
+    });
+    assert.equal(result.ok, true);
+  });
+
   it("requires logo alt when logoUrl is set", () => {
     const missing = sanitizeDraftPayload("logo_wall", {
       items: [{ name: "Acme", logoUrl: "https://example.com/logo.webp", alt: "" }],

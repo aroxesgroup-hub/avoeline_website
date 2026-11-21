@@ -137,7 +137,7 @@ export function OrganizationForm({
           }
           eventId={eventId}
           bucket="sponsor-logos"
-          accept="image/*"
+          accept="image/*,.svg,image/svg+xml"
           label="Upload logo"
           initialUrls={editing?.logoUrl ? [editing.logoUrl] : []}
           buttonClassName="relative flex h-20 w-20 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border-2 border-dashed border-line-loud bg-canvas text-ink-soft transition hover:border-ink disabled:opacity-60"

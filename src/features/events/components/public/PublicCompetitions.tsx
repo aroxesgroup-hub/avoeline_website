@@ -38,11 +38,11 @@ export function PublicCompetitions({
   const join = qsSuffix.includes("?") ? "&" : "?";
 
   return (
-    <section className="space-y-6 border-t border-line pt-8">
+    <section className="space-y-6 border-t border-[var(--mkt-line)] pt-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg text-ink">Competitions</h2>
-          <p className="mt-1 text-sm text-ink-soft">
+          <h2 className="font-display text-lg text-[var(--mkt-ink)]">Competitions</h2>
+          <p className="mt-1 text-sm text-[var(--mkt-muted)]">
             {competitions.length} competition{competitions.length === 1 ? "" : "s"}, each with its
             own team size, close date and prizes.
           </p>
@@ -66,13 +66,10 @@ export function PublicCompetitions({
           const isCtf = track.kind === "ctf";
           const open = track.canRegister && track.registerState !== "waitlist";
           return (
-            <li
-              key={track.id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-line bg-paper"
-            >
+            <li key={track.id} className="mkt-card flex flex-col overflow-hidden rounded-2xl">
               <Link
                 href={detailHref}
-                className="group relative block aspect-[4/5] w-full bg-muted focus-visible:outline-2 focus-visible:outline-offset-2"
+                className="group relative block aspect-[4/3] w-full bg-[var(--mkt-surface-low)] focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 {track.imageUrl ? (
                   <Image
@@ -80,10 +77,10 @@ export function PublicCompetitions({
                     alt=""
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-cover transition group-hover:scale-[1.02]"
+                    className="object-contain object-center p-2 transition group-hover:opacity-95"
                   />
                 ) : (
-                  <span className="flex h-full w-full items-center justify-center font-display text-3xl text-ink-faint">
+                  <span className="flex h-full w-full items-center justify-center font-display text-3xl text-[var(--mkt-muted)]">
                     {track.name.slice(0, 1) || "?"}
                   </span>
                 )}
@@ -98,29 +95,31 @@ export function PublicCompetitions({
               </Link>
               <div className="flex flex-1 flex-col space-y-2 p-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-display text-base text-ink">{track.name}</h3>
+                  <h3 className="font-display text-base text-[var(--mkt-ink)]">{track.name}</h3>
                   {isCtf ? (
-                    <span className="rounded-md border border-line bg-muted px-1.5 py-0.5 text-2xs font-semibold uppercase text-ink">
+                    <span className="rounded-md border border-[var(--mkt-line)] bg-[var(--mkt-surface-low)] px-1.5 py-0.5 text-2xs font-semibold uppercase text-[var(--mkt-ink)]">
                       CTF
                     </span>
                   ) : null}
-                  <span className="rounded-md border border-line px-1.5 py-0.5 text-2xs font-medium text-ink-soft">
+                  <span className="rounded-md border border-[var(--mkt-line)] px-1.5 py-0.5 text-2xs font-medium text-[var(--mkt-muted)]">
                     {statusBadge(track.registerState)}
                   </span>
                 </div>
-                <p className="text-2xs font-medium uppercase text-ink-soft">
+                <p className="text-2xs font-medium uppercase text-[var(--mkt-muted)]">
                   {HACKATHON_KIND_LABELS[track.kind]} · teams of {track.minTeamSize}–
                   {track.maxTeamSize}
                 </p>
                 {track.description ? (
-                  <p className="line-clamp-3 text-sm text-ink-soft">{track.description}</p>
+                  <p className="line-clamp-3 text-sm text-[var(--mkt-muted)]">
+                    {track.description}
+                  </p>
                 ) : null}
-                <p className="text-sm tabular-nums text-ink">
+                <p className="text-sm tabular-nums text-[var(--mkt-ink)]">
                   Fee: {track.fee > 0 ? formatCurrency(track.fee, track.currency, "Free") : "Free"}
                   {track.prizePool ? ` · Prize pool ${track.prizePool}` : ""}
                 </p>
                 {track.discountPercent > 0 ? (
-                  <p className="text-xs text-ink-soft">
+                  <p className="text-xs text-[var(--mkt-muted)]">
                     {track.discountPercent}% off
                     {track.discountNote ? ` — ${track.discountNote}` : ""}
                     {track.discountExpiresAt
@@ -129,7 +128,7 @@ export function PublicCompetitions({
                   </p>
                 ) : null}
                 {track.prizes.length ? (
-                  <ul className="space-y-0.5 text-xs text-ink">
+                  <ul className="space-y-0.5 text-xs text-[var(--mkt-ink)]">
                     {track.prizes.slice(0, 3).map((p, i) => (
                       <li key={`${p.positionLabel}-${i}`}>
                         <span className="font-medium">{p.positionLabel}</span>
@@ -140,18 +139,20 @@ export function PublicCompetitions({
                   </ul>
                 ) : null}
                 {track.rulesText ? (
-                  <details className="rounded-lg border border-line bg-muted/30 px-3 py-2 text-sm">
-                    <summary className="cursor-pointer font-medium text-ink">
+                  <details className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-surface-low)] px-3 py-2 text-sm">
+                    <summary className="cursor-pointer font-medium text-[var(--mkt-ink)]">
                       Rules &amp; instructions
                     </summary>
-                    <p className="mt-2 whitespace-pre-wrap text-ink-soft">{track.rulesText}</p>
+                    <p className="mt-2 whitespace-pre-wrap text-[var(--mkt-muted)]">
+                      {track.rulesText}
+                    </p>
                   </details>
                 ) : null}
-                <p className="text-2xs font-medium uppercase text-ink-soft">
+                <p className="text-2xs font-medium uppercase text-[var(--mkt-muted)]">
                   Registration closes {closeLabel}
                 </p>
                 {track.registrationMessage ? (
-                  <p className="text-xs text-ink-soft">{track.registrationMessage}</p>
+                  <p className="text-xs text-[var(--mkt-muted)]">{track.registrationMessage}</p>
                 ) : null}
                 <div className="mt-auto flex flex-wrap gap-2 pt-2">
                   {open || track.registerState === "waitlist" ? (

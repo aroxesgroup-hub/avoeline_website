@@ -1,18 +1,39 @@
 import { AuthService } from "@/src/features/auth/authService";
 
 import { redirect } from "next/navigation";
-import SignInClient from "./SignupPageClient";
+import SignupPageClient from "./SignupPageClient";
 import { CurrentUserData } from "@/src/services/models/user.type";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { logger } from "@/src/lib/logger";
 import { recordConsentsAfterAuth } from "@/src/features/website/actions/consent.action";
+import { mergeSignupIntent, type SignupBillingPeriod } from "@/src/features/auth/signupIntent";
+
+function parseBilling(value?: string): SignupBillingPeriod {
+  return value === "year" ? "year" : "month";
+}
+
+function parseRole(value?: string): string | undefined {
+  const raw = String(value ?? "").trim();
+  if (!raw) return undefined;
+  const lower = raw.toLowerCase();
+  if (lower === "organizer" || lower === "vendor" || lower === "attendee") {
+    return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  }
+  if (raw === "Organizer" || raw === "Vendor" || raw === "Attendee") return raw;
+  return undefined;
+}
 
 export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string }>;
+  searchParams: Promise<{ role?: string; plan?: string; billing?: string }>;
 }) {
-  const { role } = await searchParams;
+  const { role, plan, billing } = await searchParams;
+  const parsedRole = parseRole(role);
+  const parsedBilling = parseBilling(billing);
+  const parsedPlan = typeof plan === "string" && plan.trim() ? plan.trim() : undefined;
+
+  // Do not write cookies during RSC render — only via Server Actions below / client persist.
 
   const handleSubmitLogin = async (formData: unknown) => {
     "use server";
@@ -28,6 +49,13 @@ export default async function SignUpPage({
         };
       }
 
+      const userType = String(raw.userType ?? "attendee");
+      await mergeSignupIntent({
+        plan: typeof raw.plan === "string" ? raw.plan : undefined,
+        billing: raw.billing === "year" ? "year" : raw.billing === "month" ? "month" : undefined,
+        role: userType,
+      });
+
       await AuthService.signUpWithEmail({
         name: String(raw.name ?? ""),
         email: String(raw.email ?? ""),
@@ -36,7 +64,7 @@ export default async function SignUpPage({
         country: String(raw.country ?? ""),
         city: String(raw.city ?? ""),
         password: String(raw.password ?? ""),
-        userType: String(raw.userType ?? "attendee"),
+        userType,
       });
       const user: CurrentUserData | null = await AuthService.getCurrentUser();
 
@@ -80,8 +108,12 @@ export default async function SignUpPage({
     }
   };
 
-  const parsedRole =
-    role === "Vendor" || role === "Attendee" || role === "Organizer" ? role : undefined;
-
-  return <SignInClient handleSubmitLogin={handleSubmitLogin} role={parsedRole} />;
+  return (
+    <SignupPageClient
+      handleSubmitLogin={handleSubmitLogin}
+      role={parsedRole}
+      plan={parsedPlan}
+      billing={parsedBilling}
+    />
+  );
 }

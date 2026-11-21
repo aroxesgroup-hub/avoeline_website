@@ -18,7 +18,7 @@ export default function RootNotFound() {
       <header className="border-b border-line/80 bg-paper/80">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2.5 px-4 sm:px-6 lg:px-8">
           <Link href="/" className="inline-flex items-center gap-2.5">
-            <BrandMark className="h-8 w-8" />
+            <BrandMark className="h-8 w-auto" />
             <span className="font-display text-lg tracking-tight text-ink">Avoeline</span>
           </Link>
         </div>

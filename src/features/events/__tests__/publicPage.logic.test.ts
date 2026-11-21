@@ -7,6 +7,7 @@ import {
   buildShareMenuItems,
   calendarActionsAllowed,
   publicPaymentInstructions,
+  capacityPercent,
   showSeatsFact,
   whatHappensNextLine,
 } from "../components/public/publicPage.logic";
@@ -81,6 +82,12 @@ describe("public page N3 helpers", () => {
   it("hides seats when unlimited", () => {
     assert.equal(showSeatsFact({ total: 0, left: null }), false);
     assert.equal(showSeatsFact({ total: 100, left: 40 }), true);
+  });
+
+  it("capacity percent from taken/left", () => {
+    assert.equal(capacityPercent({ total: 100, left: null }), null);
+    assert.equal(capacityPercent({ total: 100, left: 15, taken: 85 }), 85);
+    assert.equal(capacityPercent({ total: 200, left: 50 }), 75);
   });
 
   it("payment instructions only for paid with text", () => {

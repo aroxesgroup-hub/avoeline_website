@@ -17,6 +17,7 @@ import { logger } from "@/src/lib/logger";
 import { logModeration } from "@/src/features/admin/actions/moderation";
 import type { AdminIdentity } from "@/src/features/admin/types";
 import { planIsFree } from "@/src/features/onboarding/planHelpers";
+import { planAmountForBilling, type SignupBillingPeriod } from "@/src/features/auth/signupIntent";
 
 export type PlanAudience = "organizer" | "vendor";
 export { planIsFree };
@@ -96,6 +97,8 @@ export async function selectFreePlan(opts: {
       tenantLabel: opts.audience,
     }).catch((err) => logger.warn("[selectFreePlan] welcome email", { err: String(err) }));
   }
+  const { clearSignupIntent } = await import("@/src/features/auth/signupIntent");
+  await clearSignupIntent().catch(() => undefined);
   return { ok: true };
 }
 
@@ -104,13 +107,15 @@ export async function submitPaidPlanScreenshot(opts: {
   audience: PlanAudience;
   planKey: string;
   screenshotPath: string;
+  billing?: SignupBillingPeriod;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const plans = await listPlansForAudience(opts.audience);
   const plan = plans.find((p) => p.key === opts.planKey);
   if (!plan) return { ok: false, error: "Plan not found." };
   if (planIsFree(plan)) return { ok: false, error: "Use the free plan path instead." };
 
-  const amount = Number(plan.price_monthly ?? 0);
+  const billingPeriod: SignupBillingPeriod = opts.billing === "year" ? "year" : "month";
+  const amount = planAmountForBilling(plan, billingPeriod);
   // payments.reference_id is uuid — use a correlation id; plan key lives on users.pending_plan_key
   await recordPayment({
     payerId: opts.userId,
@@ -168,6 +173,8 @@ export async function submitPaidPlanScreenshot(opts: {
     }).catch(() => undefined);
   }
 
+  const { clearSignupIntent } = await import("@/src/features/auth/signupIntent");
+  await clearSignupIntent().catch(() => undefined);
   return { ok: true };
 }
 

@@ -10,6 +10,7 @@ import {
   listAdminPages,
   listPageRevisions,
   getPublicStats,
+  getLegalSuiteSettings,
 } from "@/src/features/website/siteContent.service";
 import {
   listPlansForDisplay,
@@ -116,8 +117,32 @@ async function TabPanel({
   }
 
   if (tab === "partners") {
-    const partners = await listPartnersAdmin();
-    return <PartnersCmsPanel partners={partners} />;
+    const [partners, media] = await Promise.all([listPartnersAdmin(), listSiteMedia(80)]);
+    const mediaOptions = media.map((m) => ({
+      id: m.id,
+      alt: m.alt || m.path,
+      url: siteMediaPublicUrl(m.path),
+    }));
+    const logoById = new Map(mediaOptions.map((m) => [m.id, m.url]));
+    return (
+      <PartnersCmsPanel
+        mediaOptions={mediaOptions}
+        partners={partners.map((p) => ({
+          id: p.id,
+          name: p.name,
+          url: p.url,
+          category: p.category,
+          description: p.description,
+          consent_status: p.consent_status,
+          visible: p.visible,
+          featured: p.featured,
+          sort: p.sort,
+          organizer_id: p.organizer_id,
+          logo_media_id: p.logo_media_id,
+          logoUrl: p.logo_media_id ? (logoById.get(p.logo_media_id) ?? null) : null,
+        }))}
+      />
+    );
   }
 
   if (tab === "stats") {
@@ -151,7 +176,10 @@ async function TabPanel({
   }
 
   if (tab === "legal") {
-    const docs = await listLegalDocuments();
+    const [docs, suiteSettings] = await Promise.all([
+      listLegalDocuments(),
+      getLegalSuiteSettings(),
+    ]);
     const withVersions = await Promise.all(
       docs.map(async (d) => {
         const versions = await listLegalVersions(d.id);
@@ -164,7 +192,7 @@ async function TabPanel({
         };
       }),
     );
-    return <LegalCmsPanel documents={withVersions} />;
+    return <LegalCmsPanel documents={withVersions} suiteSettings={suiteSettings} />;
   }
 
   if (tab === "faq") {

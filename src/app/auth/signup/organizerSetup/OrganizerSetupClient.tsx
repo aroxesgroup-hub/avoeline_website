@@ -25,6 +25,8 @@ interface OrganizerSetupClientProps {
   onSaveProfile: (data: OrganizerSetupProfileData) => Promise<ActionResult>;
   onSelectFreePlan: (planKey: string) => Promise<ActionResult | void>;
   onSubmitPaidPlan: (planKey: string, formData: FormData) => Promise<ActionResult | void>;
+  initialPlanKey?: string;
+  billingPeriod?: "month" | "year";
 }
 
 const STEPS = [
@@ -43,6 +45,8 @@ export default function OrganizerSetupClient({
   onSaveProfile,
   onSelectFreePlan,
   onSubmitPaidPlan,
+  initialPlanKey,
+  billingPeriod = "month",
 }: OrganizerSetupClientProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialVerified ? 2 : 1);
   const [verified, setVerified] = useState(initialVerified);
@@ -120,6 +124,8 @@ export default function OrganizerSetupClient({
           <PlanSelectStep
             plans={plans}
             billing={billing}
+            billingPeriod={billingPeriod}
+            initialPlanKey={initialPlanKey}
             onSelectFree={onSelectFreePlan}
             onSubmitPaid={async ({ planKey, file }) => {
               const fd = new FormData();

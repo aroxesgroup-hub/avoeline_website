@@ -45,14 +45,41 @@ yarn-error.log*
 # env files (secrets)
 .env*
 .env.local
+.env.*.local
 !.env.example
 
 # local capture dumps
 cookies.txt
 body.html
 
-# leftover credential filenames (do not commit)
+# leftover credential filenames / keys (do not commit)
 *firebase-adminsdk*.json
+*credentials*.json
+*service-account*.json
+*serviceaccount*.json
+**/google-services.json
+**/GoogleService-Info.plist
+*.p12
+*.pfx
+*.keystore
+*.jks
+id_rsa
+id_rsa.pub
+*.secret
+secrets/
+.secrets/
+
+# local MCP / Cursor secrets (API keys in headers) — commit *.example only
+.cursor/mcp.json
+.cursor/mcp.local.json
+.cursor/*.local.json
+!.cursor/mcp.json.example
+!.cursor/mcp.local.json.example
+
+# scratch / agent temp
+/tmp/
+/temp/
+*.log
 
 # typescript
 *.tsbuildinfo

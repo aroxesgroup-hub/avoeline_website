@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import type { PublicPricingTier } from "@/src/features/events/types";
 import { newClientRequestId } from "@/src/lib/clientRequestId";
 import { registerAttendeeAction } from "../actions/registerAttendee.action";
 import { previewPromo } from "../actions/previewPromo.action";
@@ -66,6 +67,11 @@ export interface RegistrationFormProps {
   }>;
   /** Prefill competition from `?track=`. */
   initialTrackId?: string | null;
+  /** Paid SKU from the sticky card tier picker (non-hackathon). */
+  selectedTicketTier?: PublicPricingTier | null;
+  currency?: string;
+  /** UUID tier id for promo preview only. */
+  promoTicketTierId?: string | null;
 }
 
 export function RegistrationForm({
@@ -87,6 +93,9 @@ export function RegistrationForm({
   paymentInstructions = null,
   publicPromos = [],
   initialTrackId = null,
+  selectedTicketTier = null,
+  currency = "PKR",
+  promoTicketTierId = null,
 }: RegistrationFormProps) {
   const boundAction = registerAttendeeAction.bind(null, eventId);
   const [state, formAction] = useActionState<ActionResult | null, FormData>(boundAction, null);
@@ -94,6 +103,17 @@ export function RegistrationForm({
     if (initialTrackId && competitions.some((c) => c.id === initialTrackId)) return initialTrackId;
     return competitions[0]?.id ?? "";
   });
+
+  useEffect(() => {
+    const onSelect = (ev: Event) => {
+      const detail = (ev as CustomEvent<{ trackId?: string }>).detail;
+      const id = detail?.trackId;
+      if (id && competitions.some((c) => c.id === id)) setTrackId(id);
+    };
+    window.addEventListener("avoeline:select-track", onSelect as EventListener);
+    return () => window.removeEventListener("avoeline:select-track", onSelect as EventListener);
+  }, [competitions]);
+
   const [registerAsTeam, setRegisterAsTeam] = useState(false);
   const [memberSlots, setMemberSlots] = useState<number[]>([]);
   const [promoPreview, setPromoPreview] = useState<{
@@ -112,7 +132,9 @@ export function RegistrationForm({
     [competitions, trackId],
   );
   const due = selected ? selected.due : isPaid ? 1 : 0;
-  const paidNow = competitions.length ? due > 0 : isPaid;
+  const skuPaid =
+    !competitions.length && selectedTicketTier ? selectedTicketTier.price > 0 : isPaid;
+  const paidNow = competitions.length ? due > 0 : skuPaid;
   const groupMode = groupRegistration && registerAsTeam && !competitions.length;
   const maxMembers = groupMode
     ? Math.max(0, groupMaxSize - 1)
@@ -141,7 +163,15 @@ export function RegistrationForm({
     ? selected.due > 0
       ? formatCurrency(selected.due, selected.currency, "Free")
       : "Free"
-    : priceLabel;
+    : selectedTicketTier
+      ? formatCurrency(selectedTicketTier.price, currency, "Free")
+      : priceLabel;
+
+  const promoTierId = competitions.length ? null : promoTicketTierId;
+
+  useEffect(() => {
+    setPromoPreview(null);
+  }, [promoTierId, trackId]);
 
   return (
     <form
@@ -153,6 +183,9 @@ export function RegistrationForm({
     >
       {inviteToken ? <input type="hidden" name="inviteToken" value={inviteToken} /> : null}
       {accessCode ? <input type="hidden" name="accessCode" value={accessCode} /> : null}
+      {selectedTicketTier && !competitions.length ? (
+        <input type="hidden" name="ticketTierId" value={selectedTicketTier.id} />
+      ) : null}
 
       {/* Honeypot — hidden from people, visible to bots */}
       <div className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden" aria-hidden="true">
@@ -275,8 +308,8 @@ export function RegistrationForm({
             />
           ) : null}
           {showPaymentInstructions ? (
-            <div className="rounded-xl border border-line bg-muted/50 px-4 py-3 text-sm text-ink">
-              <p className="text-2xs font-medium uppercase tracking-wide text-ink-soft">
+            <div className="rounded-xl border border-[var(--mkt-line)] bg-[var(--mkt-accent-tint)] px-4 py-3 text-sm text-[var(--mkt-ink)]">
+              <p className="text-2xs font-medium uppercase tracking-wide text-[var(--mkt-accent-deep)]">
                 Payment instructions
               </p>
               <p className="mt-2 whitespace-pre-wrap break-words">
@@ -397,6 +430,7 @@ export function RegistrationForm({
                           eventId,
                           code: p.label,
                           trackId: trackId || null,
+                          ticketTierId: promoTierId,
                         });
                         if (res.ok) setPromoPreview(res.data);
                         else setPromoPreview(null);
@@ -429,6 +463,7 @@ export function RegistrationForm({
                     eventId,
                     code,
                     trackId: trackId || null,
+                    ticketTierId: promoTierId,
                   });
                   if (res.ok) setPromoPreview(res.data);
                   else setPromoPreview(null);

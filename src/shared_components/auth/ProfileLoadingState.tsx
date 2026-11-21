@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { BrandMark } from '@/src/shared_components/ui/BrandMark';
+import React from "react";
+import { BrandMark } from "@/src/shared_components/ui/BrandMark";
 
 interface ProfileLoadingStateProps {
   title?: string;
@@ -20,8 +20,8 @@ interface ProfileLoadingStateProps {
  * moment the user is made to wait through.
  */
 export default function ProfileLoadingState({
-  title = 'Setting Up Profile',
-  subtitle = 'Please wait while we prepare your account details...',
+  title = "Setting Up Profile",
+  subtitle = "Please wait while we prepare your account details...",
   isOverlay = false,
 }: ProfileLoadingStateProps) {
   const content = (
@@ -35,7 +35,7 @@ export default function ProfileLoadingState({
             one is nearly still, so the mark reads as held rather than spun. */}
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-gray-900 [animation-duration:1.1s]" />
         <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-gray-300 [animation-direction:reverse] [animation-duration:1.8s]" />
-        <BrandMark className="h-7 w-7" />
+        <BrandMark className="h-7 w-auto" />
       </div>
 
       <div>

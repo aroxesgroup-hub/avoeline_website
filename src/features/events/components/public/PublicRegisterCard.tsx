@@ -1,13 +1,11 @@
 import { Users } from "lucide-react";
-import { formatDateMedium } from "@/src/lib/datetime";
-import { formatCurrency } from "@/src/lib/money";
 import type { RegistrationState } from "@/src/lib/registrationState";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
-import { RegistrationForm } from "@/src/features/registration/components/RegistrationForm";
 import type { EventFormField } from "@/src/features/registration/forms/formFields.types";
 import type { PublicEventDto } from "@/src/features/events/types";
 import { whatHappensNextLine } from "./publicPage.logic";
 import { RegistrationReminderButton } from "./RegistrationReminderButton";
+import { PublicRegisterFormBlock } from "./PublicRegisterFormBlock";
 
 type Props = {
   dto: PublicEventDto;
@@ -17,6 +15,14 @@ type Props = {
   attendee?: { name?: string; email?: string } | null;
   initialTrackId?: string | null;
 };
+
+function reserveCardTitle(dto: PublicEventDto): string {
+  if (dto.isHackathon) return "Register your squad";
+  if (/delegate/i.test(dto.title) || /delegate/i.test(dto.admissionLabel)) {
+    return "Reserve delegate seat";
+  }
+  return "Reserve seat";
+}
 
 export function PublicRegisterCard({
   dto,
@@ -31,34 +37,11 @@ export function PublicRegisterCard({
   const formFields = dtoToFormFields(dto);
 
   return (
-    <div className="rounded-2xl border border-line bg-paper p-6 shadow-sm">
-      <p className="text-2xs font-medium uppercase text-ink-soft">
-        {dto.isHackathon ? "Ticket" : "Admission"}
-      </p>
-      <p className="mt-1 font-display text-2xl text-ink">{dto.admissionLabel}</p>
-
-      {dto.pricingTiers.length > 0 && !dto.isHackathon ? (
-        <ul className="mt-4 space-y-2 border-t border-line pt-4">
-          {dto.pricingTiers.map((t) => (
-            <li key={t.id} className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="break-words text-ink">
-                {t.name}
-                {t.availableUntil ? (
-                  <span className="ml-1 text-2xs text-ink-soft">
-                    until {formatDateMedium(t.availableUntil)}
-                  </span>
-                ) : null}
-                {t.seatsLeft != null ? (
-                  <span className="ml-1 text-2xs text-ink-soft">{t.seatsLeft} left</span>
-                ) : null}
-              </span>
-              <span className="shrink-0 tabular-nums text-ink-soft">
-                {formatCurrency(t.price, dto.currency, "Free")}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+    <div className="mkt-card rounded-2xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)] p-6 shadow-[var(--mkt-card-shadow)]">
+      <h2 className="font-display text-xl font-semibold text-[var(--mkt-ink)]">
+        {reserveCardTitle(dto)}
+      </h2>
+      <p className="mt-1 text-sm text-[var(--mkt-muted)]">{dto.admissionLabel}</p>
 
       <div className="mt-6">
         <RegisterBody
@@ -103,6 +86,33 @@ function RegisterBody({
     requiresApproval: dto.requiresApproval,
   });
   const openCompetitions = dto.competitions.filter((c) => c.canRegister);
+  const showSkuTierPicker =
+    !dto.isHackathon && openCompetitions.length === 0 && dto.pricingTiers.length > 0;
+
+  const formCommon = {
+    eventId: dto.id,
+    isPaid: !dto.isFree,
+    priceLabel: dto.admissionLabel,
+    needsApproval: dto.requiresApproval,
+    formFields,
+    groupRegistration: dto.groupRegistration,
+    groupMinSize: dto.groupMinSize,
+    groupMaxSize: dto.groupMaxSize,
+    attendee,
+    publicPromos: dto.publicPromos,
+    initialTrackId,
+    paymentInstructions: dto.paymentInstructions,
+    pricingTiers: dto.pricingTiers,
+    currency: dto.currency,
+    showSkuTierPicker,
+    competitions: openCompetitions.map((c) => competitionChoice(c)),
+    tierChoices:
+      openCompetitions.length > 0
+        ? []
+        : dto.allowTierSelfSelect
+          ? dto.attendeeTiers.filter((t) => !dto.lockedTiers.includes(t))
+          : [],
+  };
 
   if (state === "preview" || preview) {
     return (
@@ -110,34 +120,21 @@ function RegisterBody({
         <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
           {message || "Preview only — registration cannot be submitted from this view."}
         </p>
-        <RegistrationForm
-          eventId={dto.id}
-          isPaid={!dto.isFree}
-          priceLabel={dto.admissionLabel}
+        <PublicRegisterFormBlock
+          {...formCommon}
           inviteToken={null}
           accessCode={null}
           joinsWaitlist={false}
-          needsApproval={dto.requiresApproval}
-          formFields={formFields}
-          competitions={openCompetitions.map((c) => competitionChoice(c))}
-          groupRegistration={dto.groupRegistration}
-          groupMinSize={dto.groupMinSize}
-          groupMaxSize={dto.groupMaxSize}
-          attendee={attendee}
-          tierChoices={[]}
           previewOnly
-          paymentInstructions={dto.paymentInstructions}
-          publicPromos={dto.publicPromos}
-          initialTrackId={initialTrackId}
         />
-        <p className="text-xs text-ink-soft">{nextLine}</p>
+        <p className="text-xs text-[var(--mkt-muted)]">{nextLine}</p>
       </div>
     );
   }
 
   if (state === "unpublished") {
     return (
-      <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+      <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-3 py-2 text-sm text-[var(--mkt-muted)]">
         {message}
       </p>
     );
@@ -145,7 +142,7 @@ function RegisterBody({
 
   if (state === "event_ended") {
     return (
-      <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+      <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-3 py-2 text-sm text-[var(--mkt-muted)]">
         {message}
       </p>
     );
@@ -155,7 +152,7 @@ function RegisterBody({
     const reminder = dto.registration.reminder;
     return (
       <div className="space-y-3">
-        <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+        <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-3 py-2 text-sm text-[var(--mkt-muted)]">
           {message}
         </p>
         {reminder ? (
@@ -172,7 +169,7 @@ function RegisterBody({
 
   if (state === "closed") {
     return (
-      <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+      <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-3 py-2 text-sm text-[var(--mkt-muted)]">
         {message}
       </p>
     );
@@ -203,35 +200,16 @@ function RegisterBody({
     }
     return (
       <div className="space-y-3">
-        <p className="rounded-lg border border-line bg-muted px-3 py-2 text-sm text-ink-soft">
+        <p className="rounded-lg border border-[var(--mkt-line)] bg-[var(--mkt-canvas)] px-3 py-2 text-sm text-[var(--mkt-muted)]">
           {message}
         </p>
-        <RegistrationForm
-          eventId={dto.id}
-          isPaid={!dto.isFree}
-          priceLabel={dto.admissionLabel}
+        <PublicRegisterFormBlock
+          {...formCommon}
           inviteToken={inviteToken}
           accessCode={accessCode}
           joinsWaitlist={state === "waitlist"}
-          needsApproval={dto.requiresApproval}
-          formFields={formFields}
-          competitions={openCompetitions.map((c) => competitionChoice(c))}
-          groupRegistration={dto.groupRegistration}
-          groupMinSize={dto.groupMinSize}
-          groupMaxSize={dto.groupMaxSize}
-          attendee={attendee}
-          publicPromos={dto.publicPromos}
-          initialTrackId={initialTrackId}
-          tierChoices={
-            openCompetitions.length
-              ? []
-              : dto.allowTierSelfSelect
-                ? dto.attendeeTiers.filter((t) => !dto.lockedTiers.includes(t))
-                : []
-          }
-          paymentInstructions={dto.paymentInstructions}
         />
-        <p className="text-xs text-ink-soft">{nextLine}</p>
+        <p className="text-xs text-[var(--mkt-muted)]">{nextLine}</p>
       </div>
     );
   }

@@ -10,15 +10,61 @@ export const ctaLinkSchema = z
   })
   .strict();
 
+export const heroTrustLogoSchema = z
+  .object({
+    name: optionalString,
+    icon: optionalString,
+    href: optionalUrl,
+  })
+  .strict();
+
+export const heroCommandStatSchema = z
+  .object({
+    label: optionalString,
+    value: optionalString,
+    hint: optionalString,
+  })
+  .strict();
+
+export const heroCommandActivitySchema = z
+  .object({
+    text: optionalString,
+    time: optionalString,
+    kind: optionalString,
+  })
+  .strict();
+
+export const heroCommandSchema = z
+  .object({
+    title: optionalString,
+    eventName: optionalString,
+    badge: optionalString,
+    stats: z.array(heroCommandStatSchema).optional().default([]),
+    capacityLabel: optionalString,
+    capacityValue: optionalString,
+    capacityPercent: z.coerce.number().min(0).max(100).optional().default(0),
+    activity: z.array(heroCommandActivitySchema).optional().default([]),
+    footerNote: optionalString,
+    alertLabel: optionalString,
+    exportLabel: optionalString,
+  })
+  .strict();
+
 export const heroBlockSchema = z
   .object({
     headline: optionalString,
     subheadline: optionalString,
+    eyebrow: optionalString,
+    statusLine: optionalString,
     trustLine: optionalString,
+    trustTitle: optionalString,
+    trustLogos: z.array(heroTrustLogoSchema).optional().default([]),
     imageUrl: optionalUrl,
     imageAlt: optionalString,
     primaryCta: ctaLinkSchema.optional(),
     secondaryCta: ctaLinkSchema.optional(),
+    tertiaryCta: ctaLinkSchema.optional(),
+    command: heroCommandSchema.optional(),
   })
   .strict();
 
@@ -43,12 +89,16 @@ export const logoWallItemSchema = z
     logoUrl: optionalUrl,
     href: optionalUrl,
     alt: optionalString,
+    description: optionalString,
   })
   .strict();
 
 export const logoWallBlockSchema = z
   .object({
     title: optionalString,
+    body: optionalString,
+    /** When set, live `site_partners` hydrate filtered by this category. */
+    category: optionalString,
     items: z.array(logoWallItemSchema).optional().default([]),
   })
   .strict();
@@ -59,6 +109,9 @@ export const featureGridItemSchema = z
     body: optionalString,
     icon: optionalString,
     imageUrl: optionalUrl,
+    tags: z.array(z.string()).optional().default([]),
+    /** Layout hint for bento: normal | large | wide */
+    span: optionalString,
   })
   .strict();
 
@@ -66,6 +119,10 @@ export const featureGridBlockSchema = z
   .object({
     title: optionalString,
     body: optionalString,
+    /** Section kicker; defaults to “Comprehensive capabilities” when empty. */
+    eyebrow: optionalString,
+    /** Optional section id (e.g. product for /#product). */
+    anchorId: optionalString,
     items: z.array(featureGridItemSchema).optional().default([]),
   })
   .strict();
@@ -75,6 +132,28 @@ export const stepsItemSchema = z
     title: optionalString,
     body: optionalString,
     icon: optionalString,
+    linkLabel: optionalString,
+    href: optionalUrl,
+  })
+  .strict();
+
+export const stepsPanelRowSchema = z
+  .object({
+    label: optionalString,
+    value: optionalString,
+    hint: optionalString,
+  })
+  .strict();
+
+/** Optional right-rail panel (e.g. Trust Protocol escrow example). */
+export const stepsPanelSchema = z
+  .object({
+    title: optionalString,
+    badge: optionalString,
+    progressLabel: optionalString,
+    progressPercent: z.coerce.number().min(0).max(100).optional().default(0),
+    footer: optionalString,
+    rows: z.array(stepsPanelRowSchema).optional().default([]),
   })
   .strict();
 
@@ -83,6 +162,7 @@ export const stepsBlockSchema = z
     title: optionalString,
     body: optionalString,
     items: z.array(stepsItemSchema).optional().default([]),
+    panel: stepsPanelSchema.optional(),
   })
   .strict();
 
@@ -91,6 +171,10 @@ export const audienceTabSchema = z
     title: optionalString,
     body: optionalString,
     icon: optionalString,
+    bullets: z.array(z.string()).optional().default([]),
+    imageUrl: optionalUrl,
+    ctaLabel: optionalString,
+    ctaHref: optionalUrl,
   })
   .strict();
 
@@ -110,6 +194,10 @@ export const eventShowcaseItemSchema = z
     imageUrl: optionalUrl,
     imageAlt: optionalString,
     meta: optionalString,
+    location: optionalString,
+    dateLabel: optionalString,
+    priceLabel: optionalString,
+    ctaLabel: optionalString,
   })
   .strict();
 
@@ -117,6 +205,8 @@ export const eventShowcaseBlockSchema = z
   .object({
     title: optionalString,
     body: optionalString,
+    viewAllLabel: optionalString,
+    viewAllHref: optionalUrl,
     items: z.array(eventShowcaseItemSchema).optional().default([]),
   })
   .strict();
@@ -127,6 +217,7 @@ export const pricingTeaserItemSchema = z
     tagline: optionalString,
     price: optionalString,
     href: optionalUrl,
+    ctaLabel: optionalString,
     recommended: z.boolean().optional().default(false),
     features: z.array(z.string()).optional().default([]),
   })
@@ -178,8 +269,47 @@ export const ctaBlockSchema = z
   .object({
     headline: optionalString,
     body: optionalString,
+    emailPlaceholder: optionalString,
+    /** email = signup capture (default); buttons = link CTAs only. */
+    variant: z.enum(["email", "buttons"]).optional().default("email"),
+    kicker: optionalString,
     primaryCta: ctaLinkSchema.optional(),
     secondaryCta: ctaLinkSchema.optional(),
+  })
+  .strict();
+
+export const comparisonSideSchema = z
+  .object({
+    label: optionalString,
+    title: optionalString,
+    items: z.array(z.string()).optional().default([]),
+  })
+  .strict();
+
+export const comparisonBlockSchema = z
+  .object({
+    title: optionalString,
+    body: optionalString,
+    left: comparisonSideSchema.optional(),
+    right: comparisonSideSchema.optional(),
+  })
+  .strict();
+
+export const lineageProductSchema = z
+  .object({
+    name: optionalString,
+    status: optionalString,
+    description: optionalString,
+  })
+  .strict();
+
+export const lineageBlockSchema = z
+  .object({
+    eyebrow: optionalString,
+    title: optionalString,
+    body: optionalString,
+    products: z.array(lineageProductSchema).optional().default([]),
+    highlights: z.array(z.string()).optional().default([]),
   })
   .strict();
 
@@ -234,6 +364,43 @@ export const contactInfoBlockSchema = z
   })
   .strict();
 
+export const supportTierItemSchema = z
+  .object({
+    badge: optionalString,
+    title: optionalString,
+    body: optionalString,
+    email: optionalString,
+    topicKey: optionalString,
+    ctaLabel: optionalString,
+    icon: optionalString,
+  })
+  .strict();
+
+export const supportTiersBlockSchema = z
+  .object({
+    title: optionalString,
+    body: optionalString,
+    items: z.array(supportTierItemSchema).optional().default([]),
+  })
+  .strict();
+
+export const contactHubBlockSchema = z
+  .object({
+    title: optionalString,
+    mapImageUrl: optionalUrl,
+    mapEmbedUrl: optionalUrl,
+    address: optionalString,
+    hours: optionalString,
+    emergencyLine: optionalString,
+    emergencyTitle: optionalString,
+    emergencyBody: optionalString,
+    emergencyCtaLabel: optionalString,
+    emergencyCtaHref: optionalUrl,
+    communityLabel: optionalString,
+    communityHref: optionalUrl,
+  })
+  .strict();
+
 export const BLOCK_SCHEMAS = {
   hero: heroBlockSchema,
   stats_strip: statsStripBlockSchema,
@@ -250,6 +417,10 @@ export const BLOCK_SCHEMAS = {
   team: teamBlockSchema,
   timeline: timelineBlockSchema,
   contact_info: contactInfoBlockSchema,
+  comparison: comparisonBlockSchema,
+  lineage: lineageBlockSchema,
+  support_tiers: supportTiersBlockSchema,
+  contact_hub: contactHubBlockSchema,
 } as const;
 
 export type BlockType = keyof typeof BLOCK_SCHEMAS;

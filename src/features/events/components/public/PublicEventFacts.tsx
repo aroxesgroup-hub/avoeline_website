@@ -1,17 +1,10 @@
-import { Calendar, Clock, MapPin, Ticket, Users, Wifi } from "lucide-react";
-import { formatDateMedium, formatTime } from "@/src/lib/datetime";
+import { Calendar, MapPin, Wifi } from "lucide-react";
+import { formatDateMedium } from "@/src/lib/datetime";
 import { isGoogleEmbedUrl, openInMapsHref } from "@/src/lib/mapsUrl";
 import type { PublicEventDto } from "@/src/features/events/types";
 
+/** Location / format / registration window — quick bar owns date/time/admission/capacity. */
 export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
-  const startDate = formatDateMedium(dto.schedule.startDate);
-  const endDate = formatDateMedium(dto.schedule.endDate);
-  const dateLabel =
-    endDate && endDate !== startDate ? `${startDate} – ${endDate}` : startDate || "—";
-  const timeLabel = [formatTime(dto.schedule.startTime), formatTime(dto.schedule.endTime)]
-    .filter(Boolean)
-    .join(" – ");
-  const tz = dto.schedule.timezone || dto.timezone;
   const venue = [dto.location.venueName, dto.location.address, dto.location.city]
     .filter(Boolean)
     .join(", ");
@@ -21,32 +14,17 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
   ]
     .filter(Boolean)
     .join(" · ");
-  const seatsLabel =
-    dto.seats.left === null && dto.seats.total === 0
-      ? "Unlimited"
-      : dto.seats.left === null
-        ? "—"
-        : `${dto.seats.left} left${dto.seats.total ? ` of ${dto.seats.total}` : ""}`;
   const mapsHref = openInMapsHref(dto.location.mapsUrl);
+  const format = dto.schedule.formatLabel || dto.formatLabel;
+
+  if (!venue && !format && !regWindow && !mapsHref) return null;
 
   return (
     <section className="space-y-6">
-      <h2 className="font-display text-lg text-ink">Event details</h2>
-      <div className="grid grid-cols-1 gap-5 border-y border-line py-6 sm:grid-cols-2">
-        <Fact icon={<Calendar className="h-4 w-4" />} label="Date" value={dateLabel || "—"} />
-        <Fact
-          icon={<Clock className="h-4 w-4" />}
-          label="Time"
-          value={timeLabel ? `${timeLabel}${tz ? ` (${tz})` : ""}` : "—"}
-        />
-        <Fact icon={<MapPin className="h-4 w-4" />} label="Venue" value={venue || "—"} />
-        <Fact
-          icon={<Wifi className="h-4 w-4" />}
-          label="Format"
-          value={dto.schedule.formatLabel || dto.formatLabel || "—"}
-        />
-        <Fact icon={<Users className="h-4 w-4" />} label="Seats" value={seatsLabel} />
-        <Fact icon={<Ticket className="h-4 w-4" />} label="Admission" value={dto.admissionLabel} />
+      <h2 className="font-display text-lg text-[var(--mkt-ink)]">Location &amp; access</h2>
+      <div className="grid grid-cols-1 gap-5 border-y border-[var(--mkt-line)] py-6 sm:grid-cols-2">
+        {venue ? <Fact icon={<MapPin className="h-4 w-4" />} label="Venue" value={venue} /> : null}
+        {format ? <Fact icon={<Wifi className="h-4 w-4" />} label="Format" value={format} /> : null}
         {regWindow ? (
           <Fact icon={<Calendar className="h-4 w-4" />} label="Registration" value={regWindow} />
         ) : null}
@@ -58,7 +36,7 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
             href={mapsHref}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex text-sm font-semibold text-ink underline"
+            className="inline-flex text-sm font-semibold text-[var(--mkt-accent-deep)] underline underline-offset-2"
           >
             Open in Maps
           </a>
@@ -66,8 +44,24 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
             <iframe
               title="Venue map"
               src={mapsHref}
-              className="h-48 w-full rounded-2xl border border-line"
+              className="h-48 w-full rounded-2xl border border-[var(--mkt-line)] bg-[var(--mkt-panel)]"
             />
+          ) : null}
+          {dto.location.venueName ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="mkt-card rounded-xl p-4 text-sm text-[var(--mkt-muted)]">
+                <p className="font-semibold text-[var(--mkt-ink)]">{dto.location.venueName}</p>
+                {dto.location.address ? (
+                  <p className="mt-1 leading-relaxed">{dto.location.address}</p>
+                ) : null}
+              </div>
+              {dto.location.city ? (
+                <div className="mkt-card rounded-xl p-4 text-sm text-[var(--mkt-muted)]">
+                  <p className="font-semibold text-[var(--mkt-ink)]">City</p>
+                  <p className="mt-1">{dto.location.city}</p>
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -78,14 +72,14 @@ export function PublicEventFacts({ dto }: { dto: PublicEventDto }) {
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-ink-soft" aria-hidden="true">
+      <span className="mt-0.5 text-[var(--mkt-accent)]" aria-hidden="true">
         {icon}
       </span>
-      {/* One dl per fact so dt/dd are valid children (axe dlitem). */}
       <dl className="min-w-0">
-        <dt className="text-2xs font-medium uppercase text-ink-soft">{label}</dt>
-        {/* No truncate — full date/venue must remain readable */}
-        <dd className="mt-0.5 text-sm text-ink">{value}</dd>
+        <dt className="text-[10px] font-semibold uppercase tracking-wide text-[var(--mkt-muted)]">
+          {label}
+        </dt>
+        <dd className="mt-0.5 text-sm text-[var(--mkt-ink)]">{value}</dd>
       </dl>
     </div>
   );

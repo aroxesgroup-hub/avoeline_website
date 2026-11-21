@@ -45,8 +45,17 @@ function isJsonField(key: string, value: unknown): boolean {
     key === "items" ||
     key === "tabs" ||
     key === "members" ||
+    key === "trustLogos" ||
+    key === "command" ||
+    key === "panel" ||
+    key === "left" ||
+    key === "right" ||
+    key === "products" ||
+    key === "highlights" ||
+    key === "items" ||
     key === "primaryCta" ||
     key === "secondaryCta" ||
+    key === "tertiaryCta" ||
     key.endsWith("Cta")
   );
 }
@@ -142,7 +151,16 @@ export function AdminBlockEditor({
 
           if (isJsonField(key, value)) {
             const fallback =
-              key === "primaryCta" || key === "secondaryCta" || key.endsWith("Cta") ? {} : [];
+              key === "command" ||
+              key === "panel" ||
+              key === "left" ||
+              key === "right" ||
+              key === "primaryCta" ||
+              key === "secondaryCta" ||
+              key === "tertiaryCta" ||
+              key.endsWith("Cta")
+                ? {}
+                : [];
             return (
               <div key={key}>
                 <label className={labelClass} htmlFor={`block-field-${key}`}>

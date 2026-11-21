@@ -5,6 +5,7 @@ import { TABLES } from "@/data/collections";
 import { supabaseAdmin } from "@/data/supabase";
 import type { Database, Json } from "@/src/lib/database.types";
 import { SITE_ALL, SITE_SETTINGS, SITE_STATS, sitePage } from "./cacheTags";
+import { parseLegalSuiteSettings, type LegalSuiteSettings } from "./legalSuite.logic";
 import { normalizePublicStats, type PublicStats } from "./publicStats";
 
 export type { PublicStats } from "./publicStats";
@@ -76,12 +77,15 @@ async function fetchSiteSetting(key: string): Promise<Json | null> {
 export function getPublishedPage(slug: string): Promise<SitePageRow | null> {
   return unstable_cache(() => fetchPublishedPage(slug), ["site-page", slug], {
     tags: [sitePage(slug), SITE_ALL],
+    // Marketing copy is edited via admin + occasional SQL seeds; avoid forever-stale HTML.
+    revalidate: 60,
   })();
 }
 
 export function getPublishedBlocks(pageId: string): Promise<PublishedBlock[]> {
   return unstable_cache(() => fetchPublishedBlocks(pageId), ["site-blocks", pageId], {
     tags: [SITE_ALL],
+    revalidate: 60,
   })();
 }
 
@@ -96,6 +100,11 @@ export function getSiteSetting(key: string): Promise<Json | null> {
   return unstable_cache(() => fetchSiteSetting(key), ["site-setting", key], {
     tags: [SITE_SETTINGS, SITE_ALL],
   })();
+}
+
+export async function getLegalSuiteSettings(): Promise<LegalSuiteSettings> {
+  const raw = await getSiteSetting("legal_suite");
+  return parseLegalSuiteSettings(raw);
 }
 
 export type PublishPageInput = {

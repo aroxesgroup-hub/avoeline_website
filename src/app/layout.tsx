@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/src/shared_components/ui/Toast";
@@ -8,6 +8,14 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-heading",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-mkt-heading",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  // Marketing / public shell only — dashboards keep Space Grotesk via --font-heading.
+  preload: false,
 });
 
 const inter = Inter({
@@ -47,7 +55,7 @@ export default function RootLayout({
       // The script below stamps data-theme onto this element before React hydrates,
       // so the server HTML and the client DOM legitimately differ by one attribute.
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${bricolage.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       {/* children stay a server-rendered slot, so mounting the provider here
           costs nothing -- no page becomes a Client Component because of it. */}

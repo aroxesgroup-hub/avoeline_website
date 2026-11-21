@@ -12,6 +12,7 @@ import {
 } from "@/src/features/onboarding/actions/onboarding.action";
 import { logger } from "@/src/lib/logger";
 import { ConsentFlushClient } from "@/src/features/website/components/ConsentFlushClient";
+import { readSignupIntent } from "@/src/features/auth/signupIntent";
 
 export default async function SignUpVendorPage() {
   const user = await AuthService.getCurrentUser();
@@ -44,10 +45,16 @@ export default async function SignUpVendorPage() {
   }
 
   const { verified: initialVerified } = await AuthService.getEmailVerificationStatus();
-  const [plans, billing] = await Promise.all([
+  const [plans, billing, signupIntent] = await Promise.all([
     listPlansForAudience("vendor"),
     getPlatformBillingSettings(),
+    readSignupIntent(),
   ]);
+  const initialPlanKey =
+    signupIntent?.plan && plans.some((p) => p.key === signupIntent.plan)
+      ? signupIntent.plan
+      : undefined;
+  const billingPeriod = signupIntent?.billing === "year" ? "year" : "month";
 
   const handleCheckVerification = async () => {
     "use server";
@@ -119,6 +126,8 @@ export default async function SignUpVendorPage() {
         onSaveProfile={handleSaveProfile}
         onSelectFreePlan={handleSelectFree}
         onSubmitPaidPlan={handleSubmitPaid}
+        initialPlanKey={initialPlanKey}
+        billingPeriod={billingPeriod}
       />
     </>
   );

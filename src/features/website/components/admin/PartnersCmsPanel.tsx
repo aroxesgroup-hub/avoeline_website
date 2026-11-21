@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
 import { ConfirmDialog } from "@/src/shared_components/ui/ConfirmDialog";
@@ -24,9 +25,34 @@ export type PartnerAdminRow = {
   featured: boolean;
   sort: number;
   organizer_id: string | null;
+  logo_media_id: string | null;
+  logoUrl?: string | null;
 };
 
-export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) {
+export type PartnerMediaOption = {
+  id: string;
+  alt: string;
+  url: string;
+};
+
+const CATEGORY_CHIPS = [
+  "campus",
+  "society",
+  "vendor",
+  "academy",
+  "developer",
+  "media",
+  "sponsor",
+  "technology",
+] as const;
+
+export function PartnersCmsPanel({
+  partners,
+  mediaOptions,
+}: {
+  partners: PartnerAdminRow[];
+  mediaOptions: PartnerMediaOption[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -34,11 +60,17 @@ export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) 
   const [revokeId, setRevokeId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const logoPreview = useMemo(() => {
+    if (!edit?.logo_media_id) return edit?.logoUrl || null;
+    return mediaOptions.find((m) => m.id === edit.logo_media_id)?.url || edit.logoUrl || null;
+  }, [edit, mediaOptions]);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between gap-3">
         <p className="text-sm text-ink-soft">
-          Organizer opt-ins arrive as pending. Approve to show; revoke hides immediately.
+          Organizer opt-ins arrive as pending. Attach a logo from the Media library, approve to show
+          on /partners.
         </p>
         <button
           type="button"
@@ -53,6 +85,7 @@ export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) 
               visible: false,
               featured: false,
               sort: 0,
+              logo_media_id: null,
             })
           }
         >
@@ -73,12 +106,27 @@ export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) 
               key={p.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line p-4"
             >
-              <div>
-                <p className="font-medium text-ink">{p.name}</p>
-                <p className="text-xs text-ink-soft">
-                  {p.category || "uncategorized"}
-                  {p.organizer_id ? " · organizer opt-in" : ""}
-                </p>
+              <div className="flex min-w-0 items-center gap-3">
+                {p.logoUrl ? (
+                  <Image
+                    src={p.logoUrl}
+                    alt=""
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded-lg border border-line object-contain bg-white p-1"
+                  />
+                ) : (
+                  <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-line text-xs text-ink-soft">
+                    No logo
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="font-medium text-ink">{p.name}</p>
+                  <p className="text-xs text-ink-soft">
+                    {p.category || "uncategorized"}
+                    {p.organizer_id ? " · organizer opt-in" : ""}
+                  </p>
+                </div>
               </div>
               <StatusBadge
                 status={
@@ -158,6 +206,7 @@ export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) 
                   url: edit.url || null,
                   category: edit.category || null,
                   description: edit.description || null,
+                  logo_media_id: edit.logo_media_id || null,
                   featured: edit.featured ?? false,
                   visible: edit.visible ?? false,
                   sort: edit.sort ?? 0,
@@ -200,7 +249,55 @@ export function PartnersCmsPanel({ partners }: { partners: PartnerAdminRow[] }) 
                 className={fieldClass}
                 value={edit.category ?? ""}
                 onChange={(e) => setEdit({ ...edit, category: e.target.value })}
+                placeholder="e.g. campus"
               />
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {CATEGORY_CHIPS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className="rounded-full border border-line px-2.5 py-0.5 text-[11px] font-medium text-ink-soft hover:border-ink hover:text-ink"
+                    onClick={() => setEdit({ ...edit, category: c })}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Logo</label>
+              {logoPreview ? (
+                <div className="mb-2 flex h-16 w-40 items-center justify-center rounded-lg border border-line bg-white p-2">
+                  <Image
+                    src={logoPreview}
+                    alt=""
+                    width={140}
+                    height={48}
+                    className="max-h-12 w-auto object-contain"
+                  />
+                </div>
+              ) : (
+                <p className="mb-2 text-xs text-ink-soft">
+                  Upload under Website → Media, then select here.
+                </p>
+              )}
+              <select
+                className={fieldClass}
+                value={edit.logo_media_id ?? ""}
+                onChange={(e) =>
+                  setEdit({
+                    ...edit,
+                    logo_media_id: e.target.value ? e.target.value : null,
+                  })
+                }
+              >
+                <option value="">No logo</option>
+                {mediaOptions.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.alt || m.id.slice(0, 8)}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelClass}>Description</label>

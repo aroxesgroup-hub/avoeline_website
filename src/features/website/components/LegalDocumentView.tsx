@@ -1,13 +1,14 @@
-import ReactMarkdown from "react-markdown";
-import { prepareLegalMarkdown } from "../legalMarkdown";
 import type { LegalDocumentView as LegalDoc } from "../marketingData.service";
+import { prepareLegalMarkdown } from "../legalMarkdown";
+import { LegalMarkdownBody } from "./LegalMarkdownBody";
 
+/** Legacy single-doc layout (admin preview / fallback). Public pages use LegalSuiteView. */
 export function LegalDocumentView({ doc }: { doc: LegalDoc }) {
-  const { body, toc } = prepareLegalMarkdown(doc.bodyMd);
+  const { toc } = prepareLegalMarkdown(doc.bodyMd);
   const updated = doc.effectiveDate || doc.publishedAt.slice(0, 10);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] flex-1 gap-10 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-[var(--mkt-max,80rem)] flex-1 gap-10 px-6 py-12 lg:px-10">
       {toc.length > 0 ? (
         <aside className="hidden w-56 shrink-0 lg:block">
           <nav aria-label="Table of contents" className="sticky top-24">
@@ -41,39 +42,7 @@ export function LegalDocumentView({ doc }: { doc: LegalDoc }) {
           </p>
         </header>
 
-        <div className="prose-marketing max-w-3xl space-y-4 text-base leading-relaxed text-[var(--mkt-text)]">
-          <ReactMarkdown
-            skipHtml
-            components={{
-              h2: ({ children }) => {
-                const text = String(children ?? "");
-                const match = toc.find((t) => t.text === text);
-                const id = match?.id ?? text.toLowerCase().replace(/\s+/g, "-");
-                return (
-                  <h2
-                    id={id}
-                    className="scroll-mt-28 pt-4 font-display text-2xl tracking-tight text-[var(--mkt-ink)]"
-                  >
-                    {children}
-                  </h2>
-                );
-              },
-              a: ({ href, children }) => {
-                const safe = href && !/^javascript:/i.test(href) ? href : "#";
-                return (
-                  <a href={safe} className="underline underline-offset-2" rel="noopener noreferrer">
-                    {children}
-                  </a>
-                );
-              },
-              p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
-              ul: ({ children }) => <ul className="list-disc space-y-1 pl-5">{children}</ul>,
-              ol: ({ children }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
-            }}
-          >
-            {body}
-          </ReactMarkdown>
-        </div>
+        <LegalMarkdownBody bodyMd={doc.bodyMd} />
       </article>
     </div>
   );
