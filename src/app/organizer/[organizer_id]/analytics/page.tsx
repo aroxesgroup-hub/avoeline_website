@@ -5,6 +5,7 @@ import { CalendarDays, ClipboardCheck, Smile, TrendingUp, Users, Wallet } from "
 import EventFeedbackAnalysis from "./EventFeedbackAnalysis";
 import AnalyticsFiltersBar from "./AnalyticsFiltersBar";
 import AnalyticsChartPanel from "./AnalyticsChartPanel";
+import AnalyticsExportButton from "./AnalyticsExportButton";
 import EventPerformanceTable from "./EventPerformanceTable";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
@@ -46,8 +47,68 @@ export default async function AnalyticsPage({
 
   const eventTitles = Object.fromEntries(eventOptions.map((e) => [e.id, e.title]));
 
+  const kpi = [
+    {
+      label: "Registrations",
+      value: tiles.registrations.value,
+      sublabel: (
+        <>
+          {tiles.registrations.peopleHelper}
+          {deltaLabel(tiles.registrations.deltaPct) ? (
+            <span className="mt-1 block">{deltaLabel(tiles.registrations.deltaPct)}</span>
+          ) : null}
+        </>
+      ),
+      icon: <Users size={14} />,
+    },
+    {
+      label: "Revenue",
+      value: tiles.revenue.value,
+      sublabel: (
+        <>
+          {tiles.revenue.helper}
+          {deltaLabel(tiles.revenue.deltaPct) ? (
+            <span className="mt-1 block">{deltaLabel(tiles.revenue.deltaPct)}</span>
+          ) : null}
+        </>
+      ),
+      icon: <Wallet size={14} />,
+    },
+    {
+      label: "Net after costs",
+      value: tiles.netAfterCosts.value,
+      sublabel: (
+        <>
+          {tiles.netAfterCosts.helper}
+          {deltaLabel(tiles.netAfterCosts.deltaPct) ? (
+            <span className="mt-1 block">{deltaLabel(tiles.netAfterCosts.deltaPct)}</span>
+          ) : null}
+        </>
+      ),
+      icon: <TrendingUp size={14} />,
+    },
+    {
+      label: "Satisfaction",
+      value: tiles.satisfaction.value,
+      sublabel: tiles.satisfaction.helper,
+      icon: <Smile size={14} />,
+    },
+    {
+      label: "Events",
+      value: tiles.events.value,
+      sublabel: tiles.events.helper,
+      icon: <CalendarDays size={14} />,
+    },
+    {
+      label: "Check-in rate",
+      value: tiles.checkInRate.value,
+      sublabel: tiles.checkInRate.helper,
+      icon: <ClipboardCheck size={14} />,
+    },
+  ] as const;
+
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8">
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <Breadcrumbs
           items={[
@@ -57,76 +118,32 @@ export default async function AnalyticsPage({
         />
 
         <PageHeader
+          eyebrow="Realtime telemetry · Analytics"
           title="Analytics"
           description="Registrations, revenue, and attendee feedback for your events"
+          actions={<AnalyticsExportButton organizerId={organizer_id} filters={filters} />}
         />
 
         <AnalyticsFiltersBar
-          organizerId={organizer_id}
           basePath={basePath}
           filters={filters}
           eventOptions={eventOptions}
           rangeLabel={dateRangeLabel}
         />
 
-        <section className="grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-2 lg:grid-cols-3">
-          <MetricTile
-            label="Registrations"
-            value={tiles.registrations.value}
-            sublabel={
-              <>
-                {tiles.registrations.peopleHelper}
-                {deltaLabel(tiles.registrations.deltaPct) ? (
-                  <span className="mt-1 block">{deltaLabel(tiles.registrations.deltaPct)}</span>
-                ) : null}
-              </>
-            }
-            icon={<Users size={14} />}
-          />
-          <MetricTile
-            label="Revenue"
-            value={tiles.revenue.value}
-            sublabel={
-              <>
-                {tiles.revenue.helper}
-                {deltaLabel(tiles.revenue.deltaPct) ? (
-                  <span className="mt-1 block">{deltaLabel(tiles.revenue.deltaPct)}</span>
-                ) : null}
-              </>
-            }
-            icon={<Wallet size={14} />}
-          />
-          <MetricTile
-            label="Net after costs"
-            value={tiles.netAfterCosts.value}
-            sublabel={
-              <>
-                {tiles.netAfterCosts.helper}
-                {deltaLabel(tiles.netAfterCosts.deltaPct) ? (
-                  <span className="mt-1 block">{deltaLabel(tiles.netAfterCosts.deltaPct)}</span>
-                ) : null}
-              </>
-            }
-            icon={<TrendingUp size={14} />}
-          />
-          <MetricTile
-            label="Satisfaction"
-            value={tiles.satisfaction.value}
-            sublabel={tiles.satisfaction.helper}
-            icon={<Smile size={14} />}
-          />
-          <MetricTile
-            label="Events"
-            value={tiles.events.value}
-            sublabel={tiles.events.helper}
-            icon={<CalendarDays size={14} />}
-          />
-          <MetricTile
-            label="Check-in rate"
-            value={tiles.checkInRate.value}
-            sublabel={tiles.checkInRate.helper}
-            icon={<ClipboardCheck size={14} />}
-          />
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {kpi.map((tile) => (
+            <Card key={tile.label} tone="flat">
+              <div className="overflow-hidden rounded-xl">
+                <MetricTile
+                  label={tile.label}
+                  value={tile.value}
+                  sublabel={tile.sublabel}
+                  icon={tile.icon}
+                />
+              </div>
+            </Card>
+          ))}
         </section>
 
         <Card title="Registration trend">

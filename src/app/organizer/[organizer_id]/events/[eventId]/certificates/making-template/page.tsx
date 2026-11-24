@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { assertOwnedEvent } from "@/src/features/events/ownership";
 import { ensureTemplateForEvent } from "@/src/features/certificates/certificates.service";
@@ -27,7 +29,27 @@ export default async function MakingTemplate({
     .map((f) => f.key)
     .filter((k) => k && k !== "name" && k !== "email" && k !== "phone");
 
+  const backHref = `/organizer/${organizer_id}/events/${eventId}/certificates`;
+
   return (
-    <CertificateEditorLazy eventId={eventId} initial={template} formFieldKeys={formFieldKeys} />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <Link
+          href={backHref}
+          className="inline-flex items-center gap-1 text-xs text-ink-soft hover:text-ink"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Certificates
+        </Link>
+        <p className="mb-1 mt-3 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Certificate template
+        </p>
+        <h2 className="font-display text-xl text-ink">Template editor</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Layout and fields for issued certificates. No dedicated design PNG — shell only.
+        </p>
+      </div>
+      <CertificateEditorLazy eventId={eventId} initial={template} formFieldKeys={formFieldKeys} />
+    </div>
   );
 }

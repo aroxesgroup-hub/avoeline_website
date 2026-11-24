@@ -82,7 +82,7 @@ export function Modal({
       <div
         onClick={onClose}
         aria-hidden="true"
-        className="fixed inset-0 bg-black/60 transition-opacity"
+        className="fixed inset-0 bg-ink/60 transition-opacity"
         data-modal-backdrop="true"
       />
 

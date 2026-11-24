@@ -476,10 +476,12 @@ export function HackathonPhasesTasksPanel({
   }, [trackFilter, tracks, phases, tasks, openKeys, q, submittedByTrack]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error ? <FormFeedback error={error} /> : null}
       {ok ? <FormFeedback success={ok} /> : null}
-      {pills}
+      <Card>
+        <CardBody className="!py-3">{pills}</CardBody>
+      </Card>
       <Card title="Phases & tasks">
         <CardBody className="space-y-3">{list}</CardBody>
       </Card>

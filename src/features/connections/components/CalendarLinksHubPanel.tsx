@@ -40,7 +40,7 @@ export function CalendarLinksHubPanel({ links }: { links: OwnerCalendarLinkRow[]
               {link.entityId}
               {link.lastSyncedAt ? ` · synced ${new Date(link.lastSyncedAt).toLocaleString()}` : ""}
             </p>
-            {link.lastError ? <p className="text-xs text-red-700">{link.lastError}</p> : null}
+            {link.lastError ? <p className="text-xs text-danger">{link.lastError}</p> : null}
           </div>
           <div className="flex flex-wrap gap-2">
             {link.htmlLink ? (

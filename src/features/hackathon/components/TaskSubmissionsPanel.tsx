@@ -6,6 +6,7 @@ import { buttonClass, fieldClass, labelClass, tableCell, tableHead, tableRow } f
 import { formatExactSecond } from "@/src/lib/datetime";
 import { Modal } from "@/components/ui/Modal";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import {
   getSubmissionDownloadUrlAction,
   reviewTaskSubmissionAction,
@@ -179,140 +180,144 @@ export function TaskSubmissionsPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={buttonClass(trackId === "all" ? "primary" : "secondary", "sm")}
-          onClick={() => {
-            setTrackId("all");
-            setPhaseId("all");
-            setTaskId("all");
-          }}
-        >
-          All
-        </button>
-        {tracks.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={buttonClass(trackId === t.id ? "primary" : "secondary", "sm")}
-            onClick={() => {
-              setTrackId(t.id);
-              setPhaseId("all");
-              setTaskId("all");
-            }}
-          >
-            {t.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-phase">
-            Phase
-          </label>
-          <select
-            id="sub-phase"
-            className={fieldClass}
-            value={phaseId}
-            onChange={(e) => {
-              setPhaseId(e.target.value);
-              setTaskId("all");
-            }}
-          >
-            <option value="all">All phases</option>
-            <option value="none">No phase</option>
-            {filteredPhases.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
+      <Card>
+        <CardBody className="space-y-3 !py-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={buttonClass(trackId === "all" ? "primary" : "secondary", "sm")}
+              onClick={() => {
+                setTrackId("all");
+                setPhaseId("all");
+                setTaskId("all");
+              }}
+            >
+              All
+            </button>
+            {tracks.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={buttonClass(trackId === t.id ? "primary" : "secondary", "sm")}
+                onClick={() => {
+                  setTrackId(t.id);
+                  setPhaseId("all");
+                  setTaskId("all");
+                }}
+              >
+                {t.name}
+              </button>
             ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-task">
-            Task
-          </label>
-          <select
-            id="sub-task"
-            className={fieldClass}
-            value={taskId}
-            onChange={(e) => setTaskId(e.target.value)}
-          >
-            <option value="all">All tasks</option>
-            {filteredTasks.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-status">
-            Status
-          </label>
-          <select
-            id="sub-status"
-            className={fieldClass}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="all">All statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-            <option value="late">Late</option>
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-team">
-            Team search
-          </label>
-          <input
-            id="sub-team"
-            className={fieldClass}
-            value={teamQ}
-            onChange={(e) => setTeamQ(e.target.value)}
-            placeholder="Night Shift"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-from">
-            From
-          </label>
-          <input
-            id="sub-from"
-            type="datetime-local"
-            className={fieldClass}
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className={labelClass} htmlFor="sub-to">
-            To
-          </label>
-          <input
-            id="sub-to"
-            type="datetime-local"
-            className={fieldClass}
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-        </div>
-      </div>
+          </div>
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          className={buttonClass("secondary", "sm")}
-          onClick={exportCsv}
-          disabled={!visible.length}
-        >
-          Export CSV
-        </button>
-      </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-phase">
+                Phase
+              </label>
+              <select
+                id="sub-phase"
+                className={fieldClass}
+                value={phaseId}
+                onChange={(e) => {
+                  setPhaseId(e.target.value);
+                  setTaskId("all");
+                }}
+              >
+                <option value="all">All phases</option>
+                <option value="none">No phase</option>
+                {filteredPhases.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-task">
+                Task
+              </label>
+              <select
+                id="sub-task"
+                className={fieldClass}
+                value={taskId}
+                onChange={(e) => setTaskId(e.target.value)}
+              >
+                <option value="all">All tasks</option>
+                {filteredTasks.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-status">
+                Status
+              </label>
+              <select
+                id="sub-status"
+                className={fieldClass}
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="all">All statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+                <option value="late">Late</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-team">
+                Team search
+              </label>
+              <input
+                id="sub-team"
+                className={fieldClass}
+                value={teamQ}
+                onChange={(e) => setTeamQ(e.target.value)}
+                placeholder="Night Shift"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-from">
+                From
+              </label>
+              <input
+                id="sub-from"
+                type="datetime-local"
+                className={fieldClass}
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass} htmlFor="sub-to">
+                To
+              </label>
+              <input
+                id="sub-to"
+                type="datetime-local"
+                className={fieldClass}
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className={buttonClass("secondary", "sm")}
+              onClick={exportCsv}
+              disabled={!visible.length}
+            >
+              Export CSV
+            </button>
+          </div>
+        </CardBody>
+      </Card>
 
       {!rows.length ? (
         <p className="text-sm text-ink-soft">No task submissions recorded for this event yet.</p>

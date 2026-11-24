@@ -42,7 +42,7 @@
 - Uploads: `src/features/media/uploadMedia.action.ts` (C3 alias `FileUploadField`). Body limits **50mb** (`serverActions.bodySizeLimit` + `proxyClientMaxBodySize`).
 - Paid modules: `hasModuleAccess` / `checkPermission` / `can` — no new raw role gates for modules.
 - C3 UI primitives: `EventCard`, `EventThumb`, `CompetitionFilter`, `FileUploadField`, plus existing Modal/ConfirmDialog/StatusBadge/EmptyState/`DataTable` (Server Component)/`ClientDataTable` (row clicks only)/FilterTabs under `shared_components/ui`. Never mark `DataTable` as `"use client"` — that breaks organizer/vendor/attendee list pages.
-- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `test:load:reads` / `test:api-smoke` / `analyze`; husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Route Handler Postman: collection **Avoeline API Routes** (export `postman/avoeline-api-routes.postman_collection.json`, envs Local/Production). Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
+- Tooling: `npm run typecheck` / `lint` / `knip` / `format` / `test:unit` / `test:e2e` / `test:load:reads` / `test:api-smoke` / `analyze` / `check:hard-colors` (also in `test:unit`); husky + lint-staged on commit; **CSP enforced** + HSTS in `next.config.ts`. Route Handler Postman: collection **Avoeline API Routes** (export `postman/avoeline-api-routes.postman_collection.json`, envs Local/Production). Architecture: `docs/ARCHITECTURE.md`. Phase 10 report: `docs/phase10-hardening-report.md`.
 
 ---
 
@@ -271,8 +271,8 @@ Marketing CMS + public contact (docs/19 W1–W5). Blocks/registry in `blocks/` (
 
 `hackathon_tasks` / completions / assignments (flag hashed server-side) / `hackathon_task_submissions` (per-task review; FileStore + legacy `hackathon-submissions` bucket; `extra.storedFileId` / `extra.links[]`). Final project stays on team submission path. Settings via `getEffectiveConfig(trackId)`: event-wide `hackathon_config` rows (`track_id` null + `event_id`) overridden by track rows. Organizer Settings panel loads the same merge through `getHackathonConfigsForTracks` (so apply-all timers/integrity show as enabled). Matrix: `docs/hackathon-settings-matrix.md`. Track DB still has `opens_at` / `closes_at` / `roster_locks_at` / `submission_deadline_at` (nullable); **Phase B / O0** organizer competition form only edits **`registration_closes_at`** (deprecated closes/opens/roster/submission dates nulled on save; not product fields). Stubs: `docker_sandboxing`, `daily_shifts` = Not active yet. `anti_cheat_tab_close` = browser visibility logging only (not OS lockdown). O6: phase/task FileStore categories; phase windows always gate submit; `allow_resubmission` (default on); scoreboard hour-ago movement.
 
-- Organizer: competitions modal (basics + registration close / closes + merged rules/instructions), Submissions tab (`TaskSubmissionsPanel` file/size/points + `/api/files` proxy), scoreboard (`LiveScoreboardTable` + ▲▼ 1h movement + second-precision / first-blood / track isolation; gated by `live_scoreboard`), Settings (`hackathon_config` + max attachment MB + judging window). Phases & Tasks accordion (phase edit + attachments); CTF via FileStore. Staff with `teams_advanced_roles` get catalog permissions (legacy `page_*` normalized) + optional `team_positions.extra.trackIds`; `filterTracksForViewer` scopes competitions/tasks/scoreboard/submissions.
-- Participant: `getParticipantAccess` reason UI on `/enter` + `/compete`; short-lived httpOnly compete cookie (6h, path `/` for file proxy) + `compete_access_failures` lockout audit; tabbed workspace (Instructions, Phases & Tasks, Scoreboard if `live_scoreboard` on for that track only, own Submissions, Team); rules ack on `hackathon_teams.rules_acknowledged_at`; heartbeat / integrity when settings on; work submit via FileStore (≤5 links).
+- Organizer: competitions modal (basics + registration close / closes + merged rules/instructions), Submissions tab (`TaskSubmissionsPanel` file/size/points + `/api/files` proxy; review upserts `hackathon_task_completions`), scoreboard (`LiveScoreboardTable` from completions only + ▲▼ 1h movement + second-precision / first-blood / track isolation; 15s `LiveRefresh`; gated by `live_scoreboard`; work submit stays 0 pts until accept), Settings (`hackathon_config` + max attachment MB + judging window). Phases & Tasks accordion (phase edit + attachments); CTF via FileStore. Staff with `teams_advanced_roles` get catalog permissions (legacy `page_*` normalized) + optional `team_positions.extra.trackIds`; `filterTracksForViewer` scopes competitions/tasks/scoreboard/submissions.
+- Participant: `getParticipantAccess` reason UI on `/enter` + `/compete`; short-lived httpOnly compete cookie (6h, path `/` for file proxy) + `compete_access_failures` lockout audit; tabbed workspace (Instructions, Phases & Tasks, Scoreboard if `live_scoreboard` on for that track only, own Submissions, Team); rules ack on `hackathon_teams.rules_acknowledged_at`; heartbeat / integrity when settings on; work submit via FileStore (≤5 links; pending review = 0 board points until organizer/judge accept).
 
 ### `admin`
 
@@ -372,7 +372,7 @@ Organizer attendee list, check-in, team/member drawers, registration emails.
 
 - Identity: `registrantIdentity.ts` — snapshot (`Registration.attendee`) over linked `User`; used by list/drawer/team/export/Sheets
 - Approve gate: `approveDisabledReason.ts` — paid + no `payment.proofPath` → tooltip `No payment proof yet`; `paymentProofPlatformUrl` / `storedFileIdFromProofPath` for `file:` → `/api/files/{id}`
-- Import: `importGate.ts` (free-only toolbar); `import/AttendeeImportPanel` + service commits `confirmed` + `extra.imported`
+- Import: `importGate.ts` (free-only); `import/AttendeeImportPanel` steps template→map→preview→commit→done; `extra.imported` + `importBatchId`; undo cancel; optional confirmation emails
 - **N6 emails:** React Email under `emails/attendee/` (600px `AttendeeEmailLayout`); `src/features/email/renderAttendeeEmail.ts` + `attendeeEmail.model.ts`; one `View ticket` CTA; CID QRs via Gmail nodemailer (`cid`); calendar Google + `/api/events/[eventId]/calendar.ics`
 - `attendee.service.ts`, `roster.ts`, `emailTypes.ts` / `emailCompose.logic.ts`, `eventEmail.service.tsx` (`sendOrganizerEmail` / `renderEmailPreview` / `renderOrganizerEmailPayload` → React Email; `requireConnectedSender`)
 - Actions: `checkIn.action.ts`, `joinCode.action.ts`, `eventEmail.action.ts` (`previewComposerEmailAction`, bulk `deferSendNowToOutbox` + `renderAtSend`), `updateAttendeeDetails.action.ts`, `lookupCheckIn.action.ts`, `bulkDecideRegistrations.action.ts`
@@ -492,7 +492,7 @@ One shared ops library (not hackathon occupancy). **Organizer page** `/organizer
 
 ## App routes (`src/app/`)
 
-Root layout: `src/app/layout.tsx` (fonts, theme FOUC script, `ToastProvider`, Speed Insights). Global CSS: `src/app/globals.css`. Errors: `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`.
+Root layout: `src/app/layout.tsx` (fonts, theme FOUC script, `ToastProvider`, Speed Insights). Global CSS: `src/app/globals.css` (imports product tokens from `src/styles/theme.css`; marketing `--mkt-*` stay shell-scoped). **Design parity program complete** (Stages 0–9): `docs/design-parity.md`. Design system: `docs/design-system.md` + gated `/dev/design-system` (non-prod, platform admin). Prefer `shared_components/ui`; form kit `components/ui`; recipes in `src/lib/ui.ts` (`buttonClass`). Errors: `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`.
 
 ### Public / marketing
 
@@ -585,7 +585,7 @@ Slim left rail (`w-48`, `md:pl-52`) shared with vendor and department — same d
 | `.../tasks` | Phases & Tasks |
 | `.../teams` | redirects to `.../attendees` (Phase B; hackathon competitor occupancy on Attendees) |
 | `.../submissions` | submissions |
-| `.../scoreboard` | task-completion scoreboard |
+| `.../scoreboard` | task-completion scoreboard (completions + review sync; 15s refresh) |
 | `.../settings` | hackathon_config apply-to |
 | `.../certificates`, `.../certificates/making-template` | certs |
 | `.../exports` | Excel/CSV + Google Sheets export + **attendee import** (xlsx/csv/Sheet; free events) |
@@ -766,6 +766,78 @@ Env (do not commit values): `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY
 ---
 
 ## Change log
+
+### 2026-11-23 — Design parity Stage 9 (program complete)
+- What: Side-by-side inventory QA (36 PNGs / 35 routes; automated hard-colors + scoreboard/import tests); synced docs/11 (tokens, import, scoreboard); residual debt noted; design-parity Stages 0–9 closed.
+- Files: `docs/design-parity.md`, `docs/11-events-and-hackathon-complete-spec.md`, `completeContext.md`, `plans/2026-11-23-design-parity-stage-9.md`
+
+### 2026-11-23 — Design parity Stage 8
+- What: Full free-event attendee import — XLSX template, stepped UX, `importBatchId` undo, optional confirmation emails, 500-row cap; unit tests wired. STOP before Stage 9.
+- Files: `attendeeImport.{logic,service,action}.ts`, `AttendeeImportPanel.tsx`, `attendeeImport.logic.test.ts`, `package.json`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-8.md`
+
+### 2026-11-23 — Design parity Stage 7
+- What: Live scoreboard correctness — review→`hackathon_task_completions` sync; work submit pending 0 pts until accept; null `attempted_at` hour-ago exclusion; isolation/movement/review-sync unit tests. STOP before Stage 8.
+- Files: `taskSubmissions.service.ts`, `scoreboardReviewSync.logic.ts`, `tasks.action.ts`, `scoreboardAggregate.ts`, `scoreboard*.test.ts`, `scoreboard/page.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-7.md`
+
+### 2026-11-23 — Design parity Stage 6
+- What: Hard-color purge + CI gate — `scripts/check-hard-colors.mjs` / `npm run check:hard-colors` wired into `test:unit`; remapped chromatic utilities to danger/warning/series/primary tokens across CTF, forms, teams, wizard. STOP before Stage 7.
+- Files: `scripts/check-hard-colors.mjs`, `package.json`, CTF/teams/connections/wizard TSX (token remap), `docs/design-parity.md`, `docs/design-system.md`, `plans/2026-11-23-design-parity-stage-6.md`
+
+### 2026-11-23 — Design parity Stage 5 Batch 3
+- What: AdminRail forest `--rail-*` (mirrors DashboardNav); AdminBlockEditor + AdminConnectionStatus `text-danger`. Stage 5 closed. STOP before Stage 6.
+- Files: `AdminRail.tsx`, `AdminBlockEditor.tsx`, `AdminConnectionStatus.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-5-batch3.md`
+
+### 2026-11-23 — Design parity Stage 5 Batch 2
+- What: Auth token hygiene — GoogleAuthButton `text-danger`; ProfileLoadingState ink/line spinner; profile avatar `outline-primary`. STOP before Batch 3 (AdminRail).
+- Files: `GoogleAuthButton.tsx`, `ProfileLoadingState.tsx`, `OrganizerProfileStep.tsx`, `VendorProfileStep.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-5-batch2.md`
+
+### 2026-11-23 — Design parity Stage 5 Batch 1
+- What: Marketing/public token hygiene — `not-found` `--mkt-canvas`; Contact/Partner forms `text-danger`; chrome spot-check clean. STOP before Stage 5 Batch 2 (auth).
+- Files: `src/app/not-found.tsx`, `ContactForm.tsx`, `PartnerApplicationForm.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-5-batch1.md`
+
+### 2026-11-23 — Design parity Stage 4 Batch 4
+- What: Scoreboard/Settings/Certificates/Files/Exports chrome — page eyebrows/`max-w-5xl`; cert MetricTile Card + `text-danger` + template shell; Files paper panels; Sheets `rounded-xl`; import chrome only. Stage 4 event tabs closed. STOP before Stage 5.
+- Files: `scoreboard/page.tsx`, `settings/page.tsx`, `certificates/page.tsx`, `certificateClient.tsx`, `making-template/page.tsx`, `files/page.tsx`, `EventDriveFoldersPanel.tsx`, `EntityFilesPanel.tsx`, `exports/page.tsx`, `GoogleSheetsExportPanel.tsx`, `AttendeeImportPanel.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-4-batch4.md`
+
+### 2026-11-23 — Design parity Stage 4 Batch 3
+- What: Expenses/Competitions/Phases & Tasks/Submissions chrome — page eyebrows/`max-w-5xl`; Expenses Card metrics + danger budget alert; HackathonWorkspace density; track manage chrome; phases/submissions filter Cards. STOP before Stage 4 Batch 4 (Scoreboard/Settings/Certificates/Files/Exports).
+- Files: `expenses/page.tsx`, `ExpensesClient.tsx`, `competitions/page.tsx`, `tasks/page.tsx`, `submissions/page.tsx`, `HackathonWorkspace.tsx`, `HackathonTrackManagePage.tsx`, `HackathonPhasesTasksPanel.tsx`, `TaskSubmissionsPanel.tsx`, `docs/design-parity.md`, `plans/2026-11-23-design-parity-stage-4-batch3.md`
+
+### 2026-11-22 — Design parity Stage 4 Batch 2
+- What: Agenda/Speakers/Vendors/Sponsors tab chrome — Batch 1 eyebrow/`max-w-5xl`/Card/`rounded-xl`; Speakers empty + create overlay; vendor/sponsor add modals IA unchanged. STOP before Stage 4 Batch 3 (Expenses/Competitions/Tasks/Submissions).
+- Files: `agenda/page.tsx`, `AgendaClientContent.tsx`, `AgendaHeader.tsx`, `AgendaTimeline.tsx`, `speakers/page.tsx`, `SpeakerCard.tsx`, `create-speaker/page.tsx`, `CreateSpeakerForm.tsx`, `vendors/page.tsx`, `sponsors/page.tsx`, `SponsorsBoard.tsx`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-4-batch2.md`
+
+### 2026-11-22 — Design parity Stage 4 Batch 1
+- What: Event layout Breadcrumbs/eyebrow/`EventsTab` accent + icons; Overview panel Card + density; Attendees roster chrome (grouped/flat, metrics, check-in tokens); Team + Access section chrome/danger tokens. STOP before Stage 4 Batch 2 (Agenda/Speakers/Vendors/Sponsors).
+- Files: `events/[eventId]/layout.tsx`, `EventTab.tsx`, `events/[eventId]/page.tsx`, `AttendeeClientSide.tsx`, `CheckInLookupBar.tsx`, `attendees/page.tsx`, `staff/page.tsx`, `access/page.tsx`, `TeamsManager.tsx`, `AccessTypeSelector.tsx`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-4-batch1.md`
+
+### 2026-11-22 — Design parity Stage 3 Batch 4
+- What: Form editor/responses + Profile chrome (breadcrumbs, eyebrow, Card, FilterTabs, danger/`buttonClass`); Dashboard PageHeader + density; My Events toolbar Card + denser list/grid. Stage 3 left-rail closed. STOP before Stage 4 event tabs.
+- Files: `forms/[formId]/page.tsx`, `forms/[formId]/responses/page.tsx`, `FormEditorClient.tsx`, `FormResponsesClient.tsx`, `FormBuilder.tsx` (delete token), `profile/page.tsx`, `dashboard/page.tsx`, `events/page.tsx`, `OrganizerEventsToolbar.tsx`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-3-batch4.md`
+
+### 2026-11-22 — Design parity Stage 3 Batch 3
+- What: Forms list / Connections hub / Teams shell chrome; FilterTabs + token alerts; Add Team/Member modal danger tokens. STOP before Batch 4 or Stage 4.
+- Files: `forms/page.tsx`, `FormsListClient.tsx`, `settings/connections/page.tsx`, `ConnectionsHub.tsx`, `GoogleAccountCard.tsx`, `CapabilityIntegrationCards.tsx`, `OrganizerTeamsShell.tsx`, `plans/2026-11-22-design-parity-stage-3-batch3.md`
+
+### 2026-11-22 — Design parity Stage 3 Batch 2
+- What: Analytics/Marketplace/Quotes chrome parity; `PageHeader` eyebrow; Analytics export in header + filter Card + series tokens; Marketplace↔Quotes cross-links; Quotes FilterTabs. STOP before Batch 3 (Forms/Connections/Teams).
+- Files: `PageHeader.tsx`, `analytics/*`, `vendor-marketplace/page.tsx`, `quotes/page.tsx`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-3-batch2.md`
+
+### 2026-11-22 — Design parity Stage 3 Batch 1 shell
+- What: Forest `--rail-*` aliases + `DashboardNav` restyle; organizer `bg-canvas` + “My Events” nav label; Dashboard/Events layout-only chrome. STOP before Batch 2 (Analytics/Marketplace/Quotes).
+- Files: `globals.css`, `DashboardNav.tsx`, `organizer/layout.tsx`, `dashboard/page.tsx`, `events/page.tsx`, `docs/design-parity.md`, `docs/design-system.md`, `plans/2026-11-22-design-parity-stage-3-batch1.md`
+
+### 2026-11-22 — Design parity Stage 2 shared UI
+- What: Aligned `buttonClass`/`Button` to brand primary emerald (destructive outlined, no brightness); Badge/Modal/Card/Input/Select token pass; ConfirmDialog backdrop; docs/design-system.md; gated `/dev/design-system` gallery. STOP before Stage 3 organizer shell.
+- Files: `src/lib/ui.ts`, `src/components/ui/*`, `ConfirmDialog.tsx`, `src/app/dev/design-system/*`, `docs/design-system.md`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-2.md`
+
+### 2026-11-22 — Design parity Stage 1 tokens
+- What: Extracted product light/dark tokens into `src/styles/theme.css` (emerald/forest from designs; remapped violet primary/accent). Wired via `globals.css` import; marketing `--mkt-*` unchanged with documented bridge. WCAG AA contrast table in `docs/design-parity.md`. STOP before Stage 2 shared components.
+- Files: `src/styles/theme.css`, `src/app/globals.css`, `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-1.md`, `plans/INDEX.md`
+
+### 2026-11-22 — Design parity Stage 0 inventory
+- What: Inventoried all unique `design/` PNGs → organizer/event routes + owning components; skipped elements; surfaces with no design (Stage 5 tokens only). STOP before Stage 1 `theme.css` extraction.
+- Files: `docs/design-parity.md`, `plans/2026-11-22-design-parity-stage-0.md`, `plans/INDEX.md`
 
 ### 2026-11-21 — Event media specs + hackathon detail UI
 - What: Landscape media matrix (banner/gallery/logo/avatar budgets, SVG logos, soft dim warnings); organizer `AssetSpecGuide`; public hero CTAs + media-spec strip; masonry gallery; hackathon `PublicTrackSwitcher` + squad register title.

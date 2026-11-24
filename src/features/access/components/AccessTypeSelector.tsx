@@ -133,7 +133,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
             return (
               <label
                 key={opt.id}
-                className={`relative flex cursor-pointer flex-col rounded-2xl border p-4 transition-all ${
+                className={`relative flex cursor-pointer flex-col rounded-xl border p-4 transition-all ${
                   isSelected
                     ? "border-ink bg-muted ring-1 ring-ink/10"
                     : "border-line bg-paper hover:border-line-loud"
@@ -170,7 +170,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 1: Private -> CSV Whitelist + Access Code */}
       {accessType === "private" && (
-        <div className="space-y-5 rounded-2xl border border-line bg-paper p-5">
+        <div className="space-y-5 rounded-xl border border-line bg-paper p-5">
           <div className="border-b border-line pb-2">
             <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Lock className="h-4 w-4 text-ink-soft" />
@@ -218,7 +218,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 2: Invite-Only -> Email List */}
       {accessType === "invite_only" && (
-        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+        <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
           <div className="border-b border-line pb-2">
             <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Mail className="h-4 w-4 text-ink-soft" />
@@ -255,7 +255,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 3: VIP / Tiered -> Repeatable Event Tiers */}
       {accessType === "vip_tiered" && (
-        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+        <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
           <div className="flex items-center justify-between border-b border-line pb-2">
             <div>
               <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
@@ -310,7 +310,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
                   type="button"
                   disabled={disabled || currentTiers.length <= 1}
                   onClick={() => handleRemoveTier(idx)}
-                  className="rounded-lg p-2 text-ink-faint transition hover:text-red-700 disabled:opacity-30"
+                  className="rounded-lg p-2 text-ink-faint transition hover:text-danger disabled:opacity-30"
                   title="Remove tier"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -323,7 +323,7 @@ export const AccessTypeSelector: React.FC<AccessTypeSelectorProps> = ({
 
       {/* CONDITIONAL SECTION 4: Hybrid -> Public with Gated Tiers */}
       {accessType === "hybrid" && (
-        <div className="space-y-4 rounded-2xl border border-line bg-paper p-5">
+        <div className="space-y-4 rounded-xl border border-line bg-paper p-5">
           <div className="border-b border-line pb-2">
             <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Layers className="h-4 w-4 text-ink-soft" />

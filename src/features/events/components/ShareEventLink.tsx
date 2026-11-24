@@ -33,7 +33,7 @@ export function ShareEventLink({ url, label = "Shareable link" }: { url: string;
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+              <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
               Copied
             </>
           ) : (

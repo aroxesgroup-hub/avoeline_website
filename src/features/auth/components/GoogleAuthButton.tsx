@@ -58,7 +58,7 @@ export function GoogleAuthButton({
         </svg>
         {pending ? "Redirecting…" : label}
       </button>
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

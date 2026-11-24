@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { EventsTab } from "@/src/shared_components/organizer/EventTab";
 import { EventService } from "@/src/services/event.service";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
 import { eventLifecycle } from "@/src/lib/eventState";
 import { AuthService } from "@/src/features/auth/authService";
 import { DeleteEventForm } from "@/src/features/events/components/DeleteEventForm";
@@ -105,26 +105,17 @@ export default async function EventLayout({
   // grey second surface is gone: every other screen in the product sits directly
   // on the canvas, so the event sections looked like a different app.
   return (
-    <div className="px-4 py-5 sm:px-6 lg:px-8">
-      <header className="mb-5 border-b border-line">
-        <nav aria-label="Breadcrumb" className="mb-2">
-          <ol className="flex items-center gap-1 text-xs text-ink-soft">
-            <li>
-              <Link
-                href={eventsListHref}
-                className="rounded-xs hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-              >
-                Events
-              </Link>
-            </li>
-            <li aria-hidden="true" suppressHydrationWarning>
-              <ChevronRight className="h-3 w-3" />
-            </li>
-            <li className="truncate text-ink">{event?.title ?? "Event"}</li>
-          </ol>
-        </nav>
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <header className="mb-8 border-b border-line pb-0">
+        <Breadcrumbs
+          items={[{ label: "Events", href: eventsListHref }, { label: event?.title ?? "Event" }]}
+        />
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Console
+        </p>
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-2">
           {event ? (
             <div className="shrink-0" suppressHydrationWarning>
               <EventHeaderMedia
@@ -134,7 +125,7 @@ export default async function EventLayout({
               />
             </div>
           ) : null}
-          <h1 className="font-display text-3xl tracking-tight text-ink sm:text-4xl">
+          <h1 className="font-display text-3xl tracking-tight break-words text-ink sm:text-4xl">
             {event?.title ?? "Event"}
           </h1>
           {/* Derived, not stored. event.status is written once at creation and

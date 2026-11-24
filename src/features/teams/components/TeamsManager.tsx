@@ -218,7 +218,7 @@ export function TeamsManager({
       ) : null}
 
       {showAddTeam ? (
-        <div className="space-y-4 rounded-2xl border border-line bg-paper p-4">
+        <div className="space-y-4 rounded-xl border border-line bg-paper p-4">
           {scope.kind === "event" && library && assignAction && !hideChrome ? (
             <EventStaffAssignForm
               eventId={scope.eventId}
@@ -256,7 +256,7 @@ export function TeamsManager({
           }
         />
       ) : (
-        <ul className="divide-y divide-line rounded-2xl border border-line bg-paper">
+        <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
           {teams.map((team) => {
             const open = !!expanded[team.id];
             const eventLeadId = leadByTeam.get(team.id);

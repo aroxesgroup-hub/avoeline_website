@@ -151,7 +151,7 @@ export default async function OrganizerLayout({ children }: { children: React.Re
         items={[
           { label: "Dashboard", href: `${basePath}/dashboard`, icon: "dashboard" },
           ...(eventsOk
-            ? [{ label: "Events", href: `${basePath}/events`, icon: "events" as const }]
+            ? [{ label: "My Events", href: `${basePath}/events`, icon: "events" as const }]
             : []),
           ...(analyticsOk
             ? [{ label: "Analytics", href: `${basePath}/analytics`, icon: "analytics" as const }]
@@ -186,7 +186,7 @@ export default async function OrganizerLayout({ children }: { children: React.Re
             : []),
         ]}
       />
-      <div className="flex flex-1 flex-col md:pl-52">
+      <div className="flex min-h-screen flex-1 flex-col bg-canvas md:pl-52">
         <main className="flex-1 pb-12">{children}</main>
         <AppFooter compact />
       </div>

@@ -1,213 +1,13 @@
 @import "tailwindcss";
 
-/* ── Raw tokens ──
-   A plain :root rather than @theme on purpose. These are always emitted (Tailwind
-   tree-shakes unused @theme variables), and they are the single place a future dark
-   mode re-points. The @theme block below only *names* them for the utility engine. */
-:root {
-  /* Product surface. Achromatic — chroma is literally 0.
-       paper      cards, dialogs, the top surface
-       canvas     page background
-       line       hairline
-       line-loud  input + interactive borders
-       ink        primary text, primary fill
-       ink-soft   secondary text — 4.96:1 on paper, 4.75:1 on the canvas
-       ink-faint  secondary labels — ≥4.5:1 on paper (WCAG AA) */
-  --paper: #ffffff;
-  --canvas: oklch(0.985 0 0);
-  --line: oklch(0.922 0 0);
-  --line-loud: oklch(0.87 0 0);
-  --ink: oklch(0.205 0 0);
-  --ink-soft: oklch(0.545 0 0);
-  /* Was 0.708 (~2.5:1); ≥4.5:1 on paper so public labels using this token pass AA. */
-  --ink-faint: oklch(0.52 0 0);
-  --ink-invert: #ffffff;
+/* Raw product tokens (light + dark) live in theme.css — design-parity Stage 1.
+   @theme below only *names* them for the utility engine. Marketing --mkt-* stay
+   scoped on .marketing-shell / .public-shell further down. */
+@import "../styles/theme.css";
 
-  /* Recessive fills: chips, meter tracks, table zebra, avatar placeholders. These
-     existed only as bg-gray-100 / bg-gray-200, which are ramp steps and therefore
-     do NOT flip with the theme — a gray is a gray. Naming them semantically is what
-     lets dark mode re-point them. */
-  --muted: oklch(0.97 0 0);
-  --muted-strong: oklch(0.922 0 0);
-
-  /* .ink-panel's own surface, split out from --ink because the two diverge in dark
-     mode: --ink becomes near-white (it is text), while the panel must STAY dark —
-     it is the loudest surface on the page, and a white slab on a dark page is a
-     flashbang, not a hierarchy. Dark mode lifts it above --paper instead. */
-  --panel-bg: var(--ink);
-  --panel-fg: #ffffff;
-
-  /* Legacy names. `home/` consumes these by name via inline styles, so they stay
-     defined rather than being renamed across the marketing components. */
-  --bg: var(--canvas);
-  --surface: var(--paper);
-  --border: var(--line);
-
-  /* ── Accent ──
-     The product is monochrome except here. The accent is the brand violet the
-     marketing site already used, which means this reunites two systems that had
-     drifted apart rather than introducing a third.
-
-     It earns its place on interactive and stateful things only — active nav,
-     focus, links, selection, chart series, progress fills. Never on decoration,
-     never on surfaces, never on a button (a filled black button is stronger).
-     Kept to a few percent of pixels, which is what makes an accent read as
-     deliberate rather than as decoration.
-
-     Contrast, measured: --accent is 4.86:1 on paper and 4.65:1 on canvas, so it
-     clears AA as text on light. On ink it is only 3.69:1 — fine for an indicator
-     bar, NOT for text, which is why rail labels stay white and --accent-on-ink
-     exists for the cases that do need to read on a dark surface. */
-  /* ── Primary & Accent ── */
-  /* #6366f1 failed WCAG AA as small link text on paper; indigo-600 clears ~4.5:1+. */
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-foreground: #ffffff;
-  --primary-soft: #eef2ff;
-  --primary-line: #c7d2fe;
-
-  --accent: #6c5ce7;
-  --accent-strong: #5646d4; /* 6.5:1 on paper — small text, links that must shout */
-  --accent-on-ink: #c3b8f7; /* 9.8:1 on ink — the accent that survives a dark surface */
-  --accent-soft: #efecfd; /* tinted surface, decorative only */
-  --accent-line: #ddd7fb;
-
-  /* ── Semantic status ──
-     Green, amber and red for the states everyone already expects them on. These
-     ADD to the channels status already had — every badge still carries its icon
-     and its text label — because the accessibility rule is that colour must not
-     be the ONLY channel, not that colour is forbidden. Icon plus label plus hue
-     beats any one of them alone, which is why removing hue entirely was the wrong
-     reading of it.
-
-     The shades are darker than the ones usually reached for, and deliberately:
-     the common #16A34A green and #D97706 amber measure 3.30 and 3.19 against
-     white, so both FAIL as body text. These are 5.02, 5.02 and 6.47 on paper, and
-     4.80, 4.81 and 4.62 on the canvas — all clear of AA.
-
-     The -on-ink values are the inverse case: 9 to 13 to 1 on a dark surface and
-     nowhere near passing on a light one, so they are only ever used on ink. */
-  --success: #15803d;
-  --success-soft: #ecfdf3;
-  --success-line: #bbf7d0;
-  --success-on-ink: #86efac;
-
-  --warning: #b45309;
-  --warning-soft: #fffbeb;
-  --warning-line: #fde68a;
-  --warning-on-ink: #fcd34d;
-
-  --danger: #b91c1c;
-  --danger-soft: #fef2f2;
-  --danger-line: #fecaca;
-  --danger-on-ink: #fca5a5;
-
-  /* ── Chart series ──
-     The ONLY place hue is allowed to carry meaning rather than state. Chrome stays
-     monochrome; marks get colour, because a grayscale ramp genuinely cannot separate
-     three categories and "black and white dominant" is about the product's surfaces,
-     not about crippling its charts.
-
-     Slot 1 is the brand violet, so the most important series is always on-brand.
-     Green, amber and red are deliberately ABSENT: they are reserved for status, and a
-     series that borrows a status hue starts lying about itself.
-
-     Validated, not eyeballed — the dataviz validator, both modes, `--pairs all`:
-     lightness band, chroma floor, CVD separation (worst adjacent ΔE 10.3 light /
-     10.7 dark against a target of 8), normal-vision floor (18.3 / 17.6 against a
-     floor of 15) and >=3:1 on the surface all PASS.
-
-     HARD CAP: three. A fourth hue cannot clear the gates against these three, and a
-     generated hue is indistinguishable under CVD. A fourth series folds into "Other"
-     or the chart becomes small multiples. */
-  --series-1: #6c5ce7; /* brand violet — 4.86:1 on paper */
-  --series-2: #0891b2; /* cyan        — 3.68:1 on paper */
-  --series-3: #db2777; /* pink        — 4.60:1 on paper */
-
-  /* Legacy names. `home/` consumes these by name via inline styles. */
-  --violet: var(--accent);
-  --violet-soft: var(--accent-soft);
-}
-
-/* ── Dark mode ────────────────────────────────────────────────────────────────
-   This is the payoff for :root existing at all. Every @theme colour aliases a
-   variable declared above, so re-pointing them here repaints the whole product —
-   the ~2,600 gray-* utilities keep their literal ramp values (a gray stays a gray,
-   deliberately: bg-gray-800 means "a dark chip" in both modes and must not invert),
-   while everything expressed semantically flips.
-
-   The gray ramp is NOT inverted. That was the tempting one-block trick and it is
-   wrong here: gray-900 is used both as "the ink fill that must flip" and as "a dark
-   chip that must not", so inverting the ramp would flip the second kind too. The
-   honest fix is that semantic intent wears a semantic token, which is what the
-   sweep in this commit finishes.
-
-   Contrast, measured against --paper #171717 / --canvas #0a0a0a:
-     ink 17.2:1 · ink-soft 6.9:1 · accent 6.3:1 · success 12.8:1
-     warning 12.4:1 · danger 9.5:1 — all AA text or better.
-   --ink-soft is gray-400, NOT the gray-500 it is in light mode: gray-500 measures
-   3.62:1 on the dark surface and fails as body text. That is the one value that
-   does not simply mirror.
-
-   The OS preference is resolved in JS, not here. The no-flash script in
-   app/layout.tsx stamps data-theme="dark" | "light" onto <html> before first paint,
-   reading localStorage and falling back to prefers-color-scheme. So this file needs
-   ONE attribute-scoped block rather than the same 35 tokens duplicated into a media
-   query — and the toggle wins over the OS setting for free, in both directions. */
+/* OS preference is resolved in JS (layout.tsx no-flash script stamps data-theme).
+   Semantic tokens flip via :root[data-theme="dark"] in theme.css; gray-* ramp does not. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-
-  --paper: oklch(0.205 0 0);
-  --canvas: oklch(0.145 0 0);
-  --line: oklch(0.269 0 0);
-  --line-loud: oklch(0.371 0 0);
-  --ink: oklch(0.985 0 0);
-  --ink-soft: oklch(0.708 0 0);
-  --ink-faint: oklch(0.545 0 0);
-  --ink-invert: oklch(0.205 0 0);
-
-  --muted: oklch(0.269 0 0);
-  --muted-strong: oklch(0.371 0 0);
-
-  /* Lifted above --paper rather than inverted to white. */
-  --panel-bg: oklch(0.269 0 0);
-  --panel-fg: oklch(0.985 0 0);
-
-  /* The -on-ink values were already chosen against #171717, which is exactly what
-     --paper becomes here — so dark mode's semantic layer largely already existed.
-     -strong swaps direction: in light it is DARKER than --accent (text that must
-     shout on white); in dark it must be lighter. */
-  --primary: #818cf8;
-  --primary-hover: #6366f1;
-  --primary-foreground: #ffffff;
-  --primary-soft: #1e1b4b;
-  --primary-line: #312e81;
-
-  --accent: #9b8af5;
-  --accent-strong: #c3b8f7;
-  --accent-soft: #211d3a;
-  --accent-line: #383151;
-
-  --success: #86efac;
-  --success-soft: #0b2818;
-  --success-line: #1c4a31;
-
-  --warning: #fcd34d;
-  --warning-soft: #2a1f05;
-  --warning-line: #4a3a0c;
-
-  --danger: #fca5a5;
-  --danger-soft: #2c1414;
-  --danger-line: #4e2323;
-
-  /* Same three hues, snapped to the dark lightness band (L 0.48–0.67) rather than a
-     separate palette — re-stepping, not re-choosing. */
-  --series-1: #7a6df9;
-  --series-2: #1394b6;
-  --series-3: #e5347f;
-}
 
 @theme {
   /* ── One achromatic ramp. Repaints every existing gray-* utility, ~2.6k of them,
@@ -281,6 +81,13 @@
   --color-muted-strong: var(--muted-strong);
   --color-panel: var(--panel-bg);
   --color-panel-fg: var(--panel-fg);
+
+  /* Organizer console left rail (Stage 3) — maps theme.css --rail-* */
+  --color-rail: var(--rail-bg);
+  --color-rail-fg: var(--rail-fg);
+  --color-rail-muted: var(--rail-muted);
+  --color-rail-active: var(--rail-active);
+  --color-rail-accent: var(--rail-accent);
 
   /* Charts only. Never reach for these as chrome — that is what the accent is for. */
   --color-series-1: var(--series-1);

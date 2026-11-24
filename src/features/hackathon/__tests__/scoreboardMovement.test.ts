@@ -102,4 +102,41 @@ describe("scoreboard rank movement", () => {
     assert.equal(move.get("newcomer")?.direction, "new");
     assert.equal(move.get("newcomer")?.priorRank, null);
   });
+
+  it("null attempted_at counts on now board but not hour-ago cutoffs", () => {
+    const now = Date.parse("2026-11-08T12:00:00Z");
+    const input = {
+      ...base,
+      completions: [
+        {
+          hackathon_team_id: "a",
+          task_id: "t1",
+          points_awarded: 100,
+          is_correct: true,
+          attempted_at: null,
+        },
+        {
+          hackathon_team_id: "b",
+          task_id: "t2",
+          points_awarded: 50,
+          is_correct: true,
+          attempted_at: new Date(now - 2 * 3_600_000).toISOString(),
+        },
+      ],
+    };
+    assert.equal(
+      aggregateScoreboardDetailAt(input, now, { includeUnstamped: true })[0]?.teamId,
+      "a",
+    );
+    assert.equal(
+      aggregateScoreboardDetailAt(input, now - 3_600_000, { includeUnstamped: false }).find(
+        (r) => r.teamId === "a",
+      )?.points,
+      0,
+    );
+    // Unstamped rows look like a recent gain vs hour-ago (0 → 100); review/judge paths stamp attempted_at.
+    const withMove = withRankMovement(input, now);
+    assert.equal(withMove.find((r) => r.teamId === "a")?.movement?.direction, "up");
+    assert.equal(withMove.find((r) => r.teamId === "b")?.movement?.direction, "down");
+  });
 });

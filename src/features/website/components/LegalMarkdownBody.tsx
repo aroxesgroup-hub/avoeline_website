@@ -3,8 +3,8 @@ import { parseLegalSegments, prepareLegalMarkdown, type LegalCalloutKind } from 
 
 const calloutShell: Record<Exclude<LegalCalloutKind, "SPLIT">, string> = {
   NOTE: "border-[var(--mkt-line)] bg-[var(--mkt-accent-tint)]",
-  WARNING: "border-sky-200 bg-sky-50",
-  GUARANTEE: "border-emerald-200 bg-emerald-50",
+  WARNING: "border-accent-line bg-accent-soft",
+  GUARANTEE: "border-accent-line bg-primary-soft",
 };
 
 function MarkdownChunk({ content }: { content: string }) {

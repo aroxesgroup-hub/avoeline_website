@@ -19,7 +19,7 @@ export function ConnectionsOAuthStatus({
       {!googleReady ? (
         <p
           role="status"
-          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning"
         >
           Google connect isn’t available on this site yet. Ask your platform admin to finish setup.
           {hasAccounts
@@ -41,7 +41,7 @@ export function ConnectionsOAuthStatus({
                   <span className="text-ink-faint"> (or {v.legacyAlias})</span>
                 ) : null}
                 :{" "}
-                <span className={v.present ? "text-emerald-800" : "text-red-800"}>
+                <span className={v.present ? "text-success" : "text-danger"}>
                   {v.present ? "present" : "missing"}
                 </span>
               </li>
@@ -56,7 +56,7 @@ export function ConnectionsOAuthStatus({
             </li>
             <li>
               Ready:{" "}
-              <span className={diagnostics.ready ? "text-emerald-800" : "text-red-800"}>
+              <span className={diagnostics.ready ? "text-success" : "text-danger"}>
                 {diagnostics.ready ? "yes" : "no"}
               </span>
             </li>

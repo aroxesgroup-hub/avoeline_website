@@ -19,8 +19,8 @@ export default async function Create_speaker({
   const sessions = await listAgendaItemOptions(eventId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl shadow-2xl rounded-2xl drop-shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-md">
+      <div className="relative w-full max-w-4xl rounded-xl shadow-lg">
         <CreateSpeakerForm
           handle_speaker_submission={handle_speaker_submission}
           sessions={sessions}

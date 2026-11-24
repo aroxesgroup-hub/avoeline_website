@@ -88,7 +88,7 @@ export function OrganizerAccessTab({
         </button>
       </div>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
       {flash ? <p className="text-sm text-ink">{flash}</p> : null}
       {copyLink ? (
         <div className="rounded-xl border border-line bg-muted p-3 text-sm">
@@ -355,7 +355,7 @@ function EditGrantModal({
       }
     >
       <div className="space-y-4">
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         <div>
           <label className={labelClass} htmlFor="edit-exp">
             Expiry

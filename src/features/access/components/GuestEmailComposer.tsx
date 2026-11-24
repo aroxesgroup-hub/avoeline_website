@@ -95,7 +95,7 @@ export function GuestEmailComposer({
   return (
     <div className="flex flex-col gap-5">
       {!senderConnected ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-ink">
+        <div className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-ink">
           Email is disconnected. Connect Google under Settings → Connections to send, or use{" "}
           <strong>Copy link</strong> on each row below.
         </div>

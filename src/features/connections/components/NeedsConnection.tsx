@@ -22,7 +22,7 @@ export function NeedsConnection({
   return (
     <p
       role="status"
-      className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+      className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning"
     >
       {message || label} —{" "}
       <Link className="font-medium underline" href={href}>

@@ -121,7 +121,7 @@ export function AgendaItemModal({
         {state?.error ? <FormFeedback error={state.error} /> : null}
 
         {warnings.length ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-ink">
+          <div className="rounded-xl border border-warning-line bg-warning-soft px-3 py-2 text-sm text-ink">
             <p className="font-medium">Overlap warnings (you can still save)</p>
             <ul className="mt-1 list-disc pl-4 text-xs text-ink-soft">
               {warnings.map((w, i) => (

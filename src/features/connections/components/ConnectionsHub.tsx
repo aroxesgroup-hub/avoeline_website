@@ -71,7 +71,7 @@ export function ConnectionsHub({
       {safeError ? (
         <p
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+          className="rounded-xl border border-danger-line bg-danger-soft px-4 py-3 text-sm text-danger"
         >
           {safeError}
         </p>
@@ -79,7 +79,7 @@ export function ConnectionsHub({
       {success ? (
         <p
           role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+          className="rounded-xl border border-success-line bg-success-soft px-4 py-3 text-sm text-success"
         >
           {success}
         </p>
@@ -87,7 +87,7 @@ export function ConnectionsHub({
       {ownerChanged.length ? (
         <p
           role="status"
-          className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning"
         >
           Owner changed — re-authorize the organization Google account. Any org admin can reconnect
           or disconnect it.

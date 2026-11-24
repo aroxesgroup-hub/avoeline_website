@@ -2,10 +2,12 @@ import "server-only";
 
 import { TABLES } from "@/data/collections";
 import { HACKATHON_SUBMISSIONS_BUCKET, getSignedUrl, supabaseAdmin } from "@/data/supabase";
+import { completionFromReview } from "./scoreboardReviewSync.logic";
 import type { TaskSubmissionRow, TaskSubmissionStatus } from "./taskSubmissions.types";
 
 export type { TaskSubmissionRow, TaskSubmissionStatus } from "./taskSubmissions.types";
 export { isSafeInlinePreview } from "./taskSubmissions.types";
+export { completionFromReview } from "./scoreboardReviewSync.logic";
 
 export type TaskSubmissionFilters = {
   trackId?: string | null;
@@ -157,16 +159,56 @@ export async function reviewTaskSubmission(input: {
   pointsAwarded?: number | null;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!isStatus(input.status)) return { ok: false, message: "Invalid status." };
+
+  const { data: row, error: loadError } = await supabaseAdmin
+    .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
+    .select("id, team_id, task_id")
+    .eq("id", input.id)
+    .maybeSingle();
+  if (loadError || !row) return { ok: false, message: "Could not update that submission." };
+
+  const { data: task } = await supabaseAdmin
+    .from(TABLES.HACKATHON_TASKS)
+    .select("id, points")
+    .eq("id", row.task_id)
+    .maybeSingle();
+
+  const now = new Date().toISOString();
+  const sync = completionFromReview({
+    status: input.status,
+    pointsAwarded: input.pointsAwarded,
+    taskPoints: task?.points != null ? Number(task.points) : 0,
+  });
+
   const { error } = await supabaseAdmin
     .from(TABLES.HACKATHON_TASK_SUBMISSIONS)
     .update({
       status: input.status,
       review_note: input.reviewNote?.trim() || null,
       points_awarded: input.pointsAwarded ?? null,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     } as never)
     .eq("id", input.id);
   if (error) return { ok: false, message: "Could not update that submission." };
+
+  // Live board reads completions only — keep in sync with organizer review (Stage 7).
+  const { error: completionError } = await supabaseAdmin
+    .from(TABLES.HACKATHON_TASK_COMPLETIONS)
+    .upsert(
+      {
+        hackathon_team_id: row.team_id,
+        task_id: row.task_id,
+        is_correct: sync.is_correct,
+        points_awarded: sync.points_awarded,
+        attempted_at: now,
+        submitted_flag: null,
+      },
+      { onConflict: "hackathon_team_id,task_id" },
+    );
+  if (completionError) {
+    return { ok: false, message: "Submission saved but the scoreboard could not be updated." };
+  }
+
   return { ok: true };
 }
 

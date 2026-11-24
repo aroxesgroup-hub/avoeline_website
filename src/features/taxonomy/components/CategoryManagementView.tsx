@@ -43,9 +43,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
   checklistTemplates,
 }) => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"superCategories" | "eventFormats">(
-    "superCategories"
-  );
+  const [activeTab, setActiveTab] = useState<"superCategories" | "eventFormats">("superCategories");
 
   // Modals state
   const [addingType, setAddingType] = useState<"superCategory" | "eventFormat" | null>(null);
@@ -66,12 +64,12 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
 
   // Field set modal state
   const [activeFieldSetCategory, setActiveFieldSetCategory] = useState<SuperCategoryDoc | null>(
-    null
+    null,
   );
 
   // Checklist modal state
   const [activeChecklistCategory, setActiveChecklistCategory] = useState<SuperCategoryDoc | null>(
-    null
+    null,
   );
 
   // Toggling status state
@@ -111,7 +109,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
         renamingItem.type,
         renamingItem.id,
         renamingItem.name,
-        renamingItem.description
+        renamingItem.description,
       );
       if (res.success) {
         setRenamingItem(null);
@@ -129,7 +127,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
   const handleToggleActive = async (
     type: "superCategory" | "eventFormat",
     id: string,
-    currentActive: boolean
+    currentActive: boolean,
   ) => {
     setTogglingId(id);
     try {
@@ -219,11 +217,9 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
       <div className="flex items-start gap-3 p-4 rounded-xl border border-line bg-muted text-ink text-xs leading-relaxed">
         <Sparkles className="w-4 h-4 text-ink shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-ink">
-            Fully Data-Driven Taxonomy:
-          </span>{" "}
-          Active items immediately appear on the event creation form. Deactivating an item removes it
-          from future event creation dropdowns without breaking any existing events that reference it.
+          <span className="font-semibold text-ink">Fully Data-Driven Taxonomy:</span> Active items
+          immediately appear on the event creation form. Deactivating an item removes it from future
+          event creation dropdowns without breaking any existing events that reference it.
         </div>
       </div>
 
@@ -251,26 +247,22 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                 ) : (
                   superCategories.map((cat) => {
                     const fieldSet = fieldSets.find(
-                      (fs) => fs.superCategoryId === cat.id || fs.id === cat.id
+                      (fs) => fs.superCategoryId === cat.id || fs.id === cat.id,
                     );
                     const fieldsCount = fieldSet?.fields?.length || 0;
                     const templatesCount = checklistTemplates.filter(
-                      (t) => t.superCategoryId === cat.id
+                      (t) => t.superCategoryId === cat.id,
                     ).length;
 
                     return (
                       <tr
                         key={cat.id}
                         className={`transition-colors ${
-                          !cat.active
-                            ? "bg-muted opacity-75"
-                            : "hover:hover:bg-muted"
+                          !cat.active ? "bg-muted opacity-75" : "hover:hover:bg-muted"
                         }`}
                       >
                         <td className="px-6 py-4">
-                          <div className="font-semibold text-ink">
-                            {cat.name}
-                          </div>
+                          <div className="font-semibold text-ink">{cat.name}</div>
                           {cat.description && (
                             <div className="text-xs text-ink-soft line-clamp-1 mt-0.5">
                               {cat.description}
@@ -304,9 +296,9 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                           <button
                             type="button"
                             onClick={() => setActiveChecklistCategory(cat)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border border-line bg-muted text-ink hover:border-emerald-400 transition"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border border-line bg-muted text-ink hover:border-accent transition"
                           >
-                            <CheckSquare className="w-3 h-3 text-emerald-500" />
+                            <CheckSquare className="w-3 h-3 text-primary" />
                             <span>
                               {templatesCount > 0
                                 ? `${templatesCount} checklist${templatesCount === 1 ? "" : "s"}`
@@ -383,15 +375,11 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                     <tr
                       key={fmt.id}
                       className={`transition-colors ${
-                        !fmt.active
-                          ? "bg-muted opacity-75"
-                          : "hover:hover:bg-muted"
+                        !fmt.active ? "bg-muted opacity-75" : "hover:hover:bg-muted"
                       }`}
                     >
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-ink">
-                          {fmt.name}
-                        </div>
+                        <div className="font-semibold text-ink">{fmt.name}</div>
                         {fmt.description && (
                           <div className="text-xs text-ink-soft line-clamp-1 mt-0.5">
                             {fmt.description}
@@ -404,9 +392,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                           label={fmt.active ? "Active" : "Inactive"}
                         />
                       </td>
-                      <td className="px-6 py-4 font-mono text-xs text-ink-soft">
-                        {fmt.id}
-                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-ink-soft">{fmt.id}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex items-center gap-2">
                           <button
@@ -427,9 +413,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                           <button
                             type="button"
                             disabled={togglingId === fmt.id}
-                            onClick={() =>
-                              handleToggleActive("eventFormat", fmt.id, fmt.active)
-                            }
+                            onClick={() => handleToggleActive("eventFormat", fmt.id, fmt.active)}
                             className={`p-1.5 rounded-lg transition ${
                               fmt.active
                                 ? "text-ink-soft hover:bg-danger-soft hover:text-danger"
@@ -457,8 +441,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
             <form onSubmit={handleAddSubmit}>
               <div className="px-6 py-4 border-b border-line">
                 <h3 className="text-base font-semibold text-ink">
-                  Add New{" "}
-                  {addingType === "superCategory" ? "Super Category" : "Event Format"}
+                  Add New {addingType === "superCategory" ? "Super Category" : "Event Format"}
                 </h3>
               </div>
 
@@ -526,9 +509,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
           <div className="bg-paper border border-line rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <form onSubmit={handleRenameSubmit}>
               <div className="px-6 py-4 border-b border-line">
-                <h3 className="text-base font-semibold text-ink">
-                  Rename / Edit Category
-                </h3>
+                <h3 className="text-base font-semibold text-ink">Rename / Edit Category</h3>
               </div>
 
               <div className="p-6 space-y-4">
@@ -544,9 +525,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
                     type="text"
                     required
                     value={renamingItem.name}
-                    onChange={(e) =>
-                      setRenamingItem({ ...renamingItem, name: e.target.value })
-                    }
+                    onChange={(e) => setRenamingItem({ ...renamingItem, name: e.target.value })}
                     className={fieldClass}
                     autoFocus
                   />
@@ -595,7 +574,7 @@ export const CategoryManagementView: React.FC<CategoryManagementViewProps> = ({
             fieldSets.find(
               (fs) =>
                 fs.superCategoryId === activeFieldSetCategory.id ||
-                fs.id === activeFieldSetCategory.id
+                fs.id === activeFieldSetCategory.id,
             )?.fields || []
           }
           onClose={() => setActiveFieldSetCategory(null)}

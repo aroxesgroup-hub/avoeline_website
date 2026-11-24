@@ -8,6 +8,7 @@ import AgendaTimeline from "@/src/features/agendas/components/AgendaTimeline";
 import { AgendaItemModal } from "@/src/features/agendas/components/AgendaItemModal";
 import { AgendaDay, Session } from "@/src/services/models/agenda.model";
 import { buttonClass } from "@/src/lib/ui";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { deleteAgendaItemAction } from "../actions/agendaItem.action";
 
 interface AgendaClientContentProps {
@@ -58,40 +59,47 @@ function AgendaContent({
   };
 
   return (
-    <>
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg border border-line p-0.5">
-          <button
-            type="button"
-            className={`${buttonClass(view === "timeline" ? "secondary" : "ghost", "sm")} gap-1`}
-            onClick={() => setView("timeline")}
-          >
-            <GanttChart size={14} aria-hidden />
-            Timeline
+    <div className="space-y-4">
+      <Card>
+        <CardBody className="flex flex-wrap items-center justify-between gap-3 !py-3">
+          <div className="inline-flex rounded-lg border border-line p-0.5">
+            <button
+              type="button"
+              className={`${buttonClass(view === "timeline" ? "secondary" : "ghost", "sm")} gap-1`}
+              onClick={() => setView("timeline")}
+            >
+              <GanttChart size={14} aria-hidden />
+              Timeline
+            </button>
+            <button
+              type="button"
+              className={`${buttonClass(view === "list" ? "secondary" : "ghost", "sm")} gap-1`}
+              onClick={() => setView("list")}
+            >
+              <List size={14} aria-hidden />
+              List
+            </button>
+          </div>
+          <button type="button" className={buttonClass("primary", "sm")} onClick={openAdd}>
+            <Plus size={14} aria-hidden />
+            Add item
           </button>
-          <button
-            type="button"
-            className={`${buttonClass(view === "list" ? "secondary" : "ghost", "sm")} gap-1`}
-            onClick={() => setView("list")}
-          >
-            <List size={14} aria-hidden />
-            List
-          </button>
-        </div>
-        <button type="button" className={buttonClass("primary", "sm")} onClick={openAdd}>
-          <Plus size={14} aria-hidden />
-          Add item
-        </button>
-      </div>
+        </CardBody>
+      </Card>
 
-      <AgendaHeader
-        id={id}
-        organizer_id={organizer_id}
-        days={days}
-        sessionsByDay={sessionsByDay}
-        activeDate={activeDate}
-        onAdd={openAdd}
-      />
+      <Card>
+        <CardBody className="!pb-0">
+          <AgendaHeader
+            id={id}
+            organizer_id={organizer_id}
+            days={days}
+            sessionsByDay={sessionsByDay}
+            activeDate={activeDate}
+            onAdd={openAdd}
+          />
+        </CardBody>
+      </Card>
+
       <AgendaTimeline sessions={activeSessions} view={view} onEdit={openEdit} onDelete={onDelete} />
 
       <AgendaItemModal
@@ -109,7 +117,7 @@ function AgendaContent({
         editing={editing}
         attendeeTiers={attendeeTiers}
       />
-    </>
+    </div>
   );
 }
 

@@ -17,7 +17,7 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
     switch (rank) {
       case 1:
         return (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 font-bold text-xs text-amber-950 shadow-xs ring-2 ring-amber-300">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-warning font-bold text-xs text-ink-invert shadow-xs ring-2 ring-warning-line">
             🥇 1
           </span>
         );
@@ -29,7 +29,7 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
         );
       case 3:
         return (
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 font-bold text-xs text-white shadow-xs ring-2 ring-amber-500">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-warning font-bold text-xs text-white shadow-xs ring-2 ring-warning">
             🥉 3
           </span>
         );
@@ -47,17 +47,18 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
       <div className="flex flex-col justify-between gap-4 border-b border-line pb-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="text-lg font-bold text-ink flex items-center gap-2">
-            <Trophy className="text-amber-500" size={20} />
+            <Trophy className="text-warning" size={20} />
             Live CTF & Hackathon Scoreboard
           </h3>
           <p className="text-xs text-ink-soft">
-            Real-time rankings for {trackName}. Ranked by total score, with earlier last solve timestamp as tie-breaker.
+            Real-time rankings for {trackName}. Ranked by total score, with earlier last solve
+            timestamp as tie-breaker.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Live Updating
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary dark:bg-primary-soft dark:text-primary">
+            <span className="h-2 w-2 rounded-full bg-primary-soft0 animate-pulse" /> Live Updating
           </span>
         </div>
       </div>
@@ -67,7 +68,8 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
           <Trophy className="mx-auto text-ink-faint mb-2" size={32} />
           <h4 className="font-semibold text-ink">Scoreboard is empty</h4>
           <p className="text-xs text-ink-soft mt-1">
-            As teams submit correct flags and complete challenge milestones, scores will populate here.
+            As teams submit correct flags and complete challenge milestones, scores will populate
+            here.
           </p>
         </div>
       ) : (
@@ -92,7 +94,9 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
                   <td className="p-3.5">{getRankBadge(entry.rank)}</td>
                   <td className="p-3.5">
                     <span className="font-bold text-ink text-sm">{entry.teamName}</span>
-                    <span className="block text-2xs text-ink-soft font-mono">ID: {entry.teamId.slice(0, 8)}</span>
+                    <span className="block text-2xs text-ink-soft font-mono">
+                      ID: {entry.teamId.slice(0, 8)}
+                    </span>
                   </td>
                   <td className="p-3.5">
                     <div className="flex items-center gap-1.5">
@@ -102,7 +106,7 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
                           <span
                             key={idx}
                             title={`${s.title} (+${s.points} pts)`}
-                            className="h-2 w-2 rounded-full bg-indigo-600"
+                            className="h-2 w-2 rounded-full bg-series-2"
                           />
                         ))}
                       </div>
@@ -111,7 +115,7 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
                   <td className="p-3.5 text-ink-soft font-mono text-2xs">
                     {entry.lastSolveTime ? formatDateMedium(entry.lastSolveTime) : "—"}
                   </td>
-                  <td className="p-3.5 text-right font-mono text-base font-bold text-indigo-600 dark:text-indigo-400">
+                  <td className="p-3.5 text-right font-mono text-base font-bold text-series-2 dark:text-series-2">
                     {entry.totalPoints} pts
                   </td>
                 </tr>
@@ -123,12 +127,10 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
 
       {/* Selected Team Solves Modal / Drill-down */}
       {selectedTeam ? (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/20 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/10">
+        <div className="rounded-2xl border border-accent-line bg-accent-soft p-5 dark:border-accent-line dark:bg-accent-soft">
           <div className="flex items-center justify-between pb-3 border-b border-line">
             <div>
-              <h4 className="font-bold text-ink">
-                Solve Breakdown: {selectedTeam.teamName}
-              </h4>
+              <h4 className="font-bold text-ink">Solve Breakdown: {selectedTeam.teamName}</h4>
               <p className="text-2xs text-ink-soft">
                 Rank #{selectedTeam.rank} · {selectedTeam.totalPoints} total points earned
               </p>
@@ -149,10 +151,10 @@ export function LiveCTFScoreboard({ scoreboard, trackName }: LiveCTFScoreboardPr
                 className="flex items-center justify-between rounded-xl border border-line bg-paper p-3 text-xs"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={14} className="text-emerald-600" />
+                  <CheckCircle size={14} className="text-primary" />
                   <span className="font-semibold text-ink">{solve.title}</span>
                 </div>
-                <span className="font-mono font-bold text-indigo-600">+{solve.points} pts</span>
+                <span className="font-mono font-bold text-series-2">+{solve.points} pts</span>
               </div>
             ))}
           </div>

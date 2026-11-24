@@ -14,6 +14,7 @@ import { consumeReconnectToken } from "@/src/features/connections/server/reconne
 import { buildBlockedByAdminNote } from "@/src/features/connections/lib/blockedByAdminCopy";
 import { diagnoseGoogleConnectionsEnv, getGoogleOAuthConfig } from "@/src/env";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
 
 const TAB_TO_SECTION: Record<string, string> = {
   library: "drive",
@@ -90,30 +91,39 @@ export default async function OrganizerConnectionsSettingsPage({
   const oauthDiagnostics = adminIdentity ? diagnoseGoogleConnectionsEnv() : null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <ScrollToConnectionSection section={section} />
-      <PageHeader
-        title="Connections"
-        description="Google account, email, Calendar and Meet, Drive, and Sheets."
-      />
-      <div className="mb-4">
-        <DelayedConfirmationsBanner ownerId={organizer_id} />
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <ScrollToConnectionSection section={section} />
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: `/organizer/${organizer_id}/dashboard` },
+            { label: "Connections" },
+          ]}
+        />
+        <PageHeader
+          eyebrow="Settings · Connections & integrations"
+          title="Connections"
+          description="Google account, email, Calendar and Meet, Drive, and Sheets."
+        />
+        <div className="mb-4">
+          <DelayedConfirmationsBanner ownerId={organizer_id} />
+        </div>
+        <ConnectionsPage
+          ownerType="user"
+          ownerId={organizer_id}
+          connections={connections}
+          googleReady={googleReady}
+          catalogScope="organizer"
+          hubBasePath={hubBase}
+          calendarLinks={calendarLinks}
+          sheetSyncs={sheetSyncs}
+          emailBatches={{ rows: emailPage.rows, nextCursor: emailPage.nextCursor }}
+          error={sp.e || reconnectErr}
+          success={sp.ok || reconnectOk}
+          blockedNote={blockedNote}
+          oauthDiagnostics={oauthDiagnostics}
+        />
       </div>
-      <ConnectionsPage
-        ownerType="user"
-        ownerId={organizer_id}
-        connections={connections}
-        googleReady={googleReady}
-        catalogScope="organizer"
-        hubBasePath={hubBase}
-        calendarLinks={calendarLinks}
-        sheetSyncs={sheetSyncs}
-        emailBatches={{ rows: emailPage.rows, nextCursor: emailPage.nextCursor }}
-        error={sp.e || reconnectErr}
-        success={sp.ok || reconnectOk}
-        blockedNote={blockedNote}
-        oauthDiagnostics={oauthDiagnostics}
-      />
     </div>
   );
 }

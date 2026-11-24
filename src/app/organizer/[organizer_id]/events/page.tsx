@@ -346,16 +346,20 @@ export default async function MyEventsPage({
   ];
 
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[100rem]">
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[100rem] space-y-1">
         <Breadcrumbs
-          items={[{ label: "Dashboard", href: `${base_address}/dashboard` }, { label: "Events" }]}
+          items={[
+            { label: "Dashboard", href: `${base_address}/dashboard` },
+            { label: "My Events" },
+          ]}
         />
         <FormFeedback
           error={typeof resolvedParams.e === "string" ? resolvedParams.e : undefined}
           success={typeof resolvedParams.ok === "string" ? resolvedParams.ok : undefined}
         />
         <PageHeader
+          eyebrow="Console · Event library"
           title="My Events"
           description={`${live} live · ${archived} archived`}
           actions={createBtn}
@@ -390,7 +394,7 @@ export default async function MyEventsPage({
           </div>
         ) : filters.view === "grid" ? (
           <>
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {pageEvents.map((e) => {
                 const t = tallyFor(e.id);
                 const date = formatDate(e.schedule?.startDate);
@@ -398,7 +402,7 @@ export default async function MyEventsPage({
                 return (
                   <li
                     key={e.id}
-                    className="flex flex-col overflow-hidden border border-line bg-paper"
+                    className="flex flex-col overflow-hidden rounded-xl border border-line bg-paper"
                   >
                     <Link href={`${base_address}/events/${e.id}`} className="block">
                       <div className="relative aspect-[16/9] w-full bg-muted">
@@ -474,7 +478,7 @@ export default async function MyEventsPage({
           </>
         ) : (
           <>
-            <div className="overflow-hidden border border-line">
+            <div className="overflow-hidden rounded-xl border border-line bg-paper">
               <DataTable
                 caption={filters.status === "all" ? "All events" : `${filters.status} events`}
                 rows={pageEvents}

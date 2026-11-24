@@ -1,4 +1,5 @@
 import React from "react";
+import { labelClass } from "@/src/lib/ui";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -24,7 +25,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       required,
       ...props
     },
-    ref
+    ref,
   ) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
     const errorId = inputId && error ? `${inputId}-error` : undefined;
@@ -33,10 +34,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`w-full ${wrapperClassName}`}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-ink-soft"
-          >
+          <label htmlFor={inputId} className={`mb-1.5 ${labelClass}`}>
             {label}
             {required && <span className="ml-1 text-danger">*</span>}
           </label>
@@ -81,7 +79,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

@@ -157,7 +157,16 @@ export default async function CertificateIssuancePage({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Certificates
+        </p>
+        <h2 className="font-display text-xl text-ink">Certificates</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Issue and email credentials for registrants of this event.
+        </p>
+      </div>
       <DriveHealthBanner
         organizerId={organizer_id}
         eventId={eventId}

@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import {
-  Layers,
-  Lock,
-  Unlock,
-  Plus,
-  Clock,
-  ShieldCheck,
-} from "lucide-react";
+import { Layers, Lock, Unlock, Plus, Clock, ShieldCheck } from "lucide-react";
 import type { HackathonPhase } from "../../types";
 import { lockPhaseAction, savePhaseAction } from "../../actions/ctf.action";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -19,22 +12,20 @@ export interface PhaseProgressionManagerProps {
   phases: HackathonPhase[];
 }
 
-export function PhaseProgressionManager({
-  eventId,
-  tracks,
-  phases,
-}: PhaseProgressionManagerProps) {
+export function PhaseProgressionManager({ eventId, tracks, phases }: PhaseProgressionManagerProps) {
   const [selectedTrackId, setSelectedTrackId] = useState<string>(tracks[0]?.id || "");
   const [showAddForm, setShowAddForm] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ success?: boolean; msg?: string } | null>(null);
 
-  const trackPhases = phases.filter((p) => (selectedTrackId ? p.trackId === selectedTrackId : true));
+  const trackPhases = phases.filter((p) =>
+    selectedTrackId ? p.trackId === selectedTrackId : true,
+  );
 
   const handleLockPhase = (phaseId: string, title: string) => {
     if (
       !confirm(
-        `CRITICAL: Are you sure you want to permanently close and lock "${title}"?\n\nOnce closed, no participant or team can submit or modify deliverables for this phase.`
+        `CRITICAL: Are you sure you want to permanently close and lock "${title}"?\n\nOnce closed, no participant or team can submit or modify deliverables for this phase.`,
       )
     ) {
       return;
@@ -55,7 +46,7 @@ export function PhaseProgressionManager({
       <div className="flex flex-col justify-between gap-4 border-b border-line pb-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="text-lg font-bold text-ink flex items-center gap-2">
-            <Layers className="text-indigo-600 dark:text-indigo-400" size={20} />
+            <Layers className="text-series-2 dark:text-series-2" size={20} />
             Phase-Wise Progression Engine
           </h3>
           <p className="text-xs text-ink-soft">
@@ -92,8 +83,8 @@ export function PhaseProgressionManager({
         <div
           className={`rounded-xl p-3 text-xs font-medium ${
             feedback.success
-              ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+              ? "bg-primary-soft text-primary dark:bg-primary-soft dark:text-primary"
+              : "bg-danger-soft text-danger dark:bg-danger-soft dark:text-danger-on-ink"
           }`}
         >
           {feedback.msg}
@@ -101,14 +92,16 @@ export function PhaseProgressionManager({
       ) : null}
 
       {/* Strict Phase Rule Callout */}
-      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
-        <ShieldCheck className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+      <div className="flex items-start gap-3 rounded-2xl border border-warning-line bg-warning-soft/50 p-4 dark:border-warning-line/50 dark:bg-warning-soft">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-warning dark:text-warning-on-ink mt-0.5" />
         <div className="text-xs">
-          <span className="font-bold text-amber-900 dark:text-amber-200">
+          <span className="font-bold text-warning dark:text-warning-on-ink">
             Immutable Phase Progression Guard Active
           </span>
-          <p className="mt-0.5 text-amber-800/90 dark:text-amber-300/90">
-            Teams must complete deliverables for Phase N before unlocking Phase N+1. Once an organizer marks a phase as closed, write operations are permanently rejected server-side to guarantee audit integrity.
+          <p className="mt-0.5 text-warning/90 dark:text-warning-on-ink/90">
+            Teams must complete deliverables for Phase N before unlocking Phase N+1. Once an
+            organizer marks a phase as closed, write operations are permanently rejected server-side
+            to guarantee audit integrity.
           </p>
         </div>
       </div>
@@ -204,11 +197,7 @@ export function PhaseProgressionManager({
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className={buttonClass("primary", "sm")}
-              >
+              <button type="submit" disabled={isPending} className={buttonClass("primary", "sm")}>
                 {isPending ? "Saving..." : "Create Phase"}
               </button>
             </div>
@@ -240,16 +229,14 @@ export function PhaseProgressionManager({
               className={`rounded-2xl border p-5 transition ${
                 phase.isClosed
                   ? "border-line bg-muted/40 opacity-80"
-                  : "border-indigo-200 bg-paper shadow-xs dark:border-indigo-900/60"
+                  : "border-accent-line bg-paper shadow-xs dark:border-accent-line"
               }`}
             >
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
                   <div
                     className={`flex h-9 w-9 items-center justify-center rounded-xl font-bold text-sm ${
-                      phase.isClosed
-                        ? "bg-muted text-ink-soft"
-                        : "bg-indigo-600 text-white shadow-xs"
+                      phase.isClosed ? "bg-muted text-ink-soft" : "bg-series-2 text-white shadow-xs"
                     }`}
                   >
                     #{phase.phaseNumber}
@@ -266,12 +253,12 @@ export function PhaseProgressionManager({
 
                 <div className="flex items-center gap-2">
                   {phase.isClosed ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-950/60 dark:text-red-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-danger-soft px-3 py-1 text-xs font-semibold text-danger dark:bg-danger-soft dark:text-danger-on-ink">
                       <Lock size={12} /> Closed & Locked
                     </span>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary dark:bg-primary-soft dark:text-primary">
                         <Unlock size={12} /> In Progress
                       </span>
                       <button

@@ -60,7 +60,7 @@ export function GoogleSheetsExportPanel({
   ];
 
   return (
-    <section className="mt-8 space-y-4 rounded-2xl border border-line bg-paper p-5">
+    <section className="space-y-4 rounded-xl border border-line bg-paper p-5">
       <div>
         <h2 className="font-display text-lg text-ink">Google Sheets</h2>
         <p className="text-sm text-ink-soft">

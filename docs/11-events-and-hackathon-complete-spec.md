@@ -1,6 +1,8 @@
 # Avoeline — Events & Hackathon: Complete System Spec
 
 > **Organizer Google mail / Connections:** use [`docs/17-connections-system.md`](17-connections-system.md) + [`docs/18-email-send-limits-and-scheduling.md`](18-email-send-limits-and-scheduling.md). This file remains the source of truth for event/hackathon UI and tabs; do not treat its older email-connection notes as authoritative.
+>
+> **Visual design parity** (PNG inventory, tokens, stage history) lives in [`docs/design-parity.md`](design-parity.md) + [`docs/design-system.md`](design-system.md). This file stays the behavior/UI-rules SoT.
 
 This is the single source of truth for the unified Event/Hackathon dashboard. It replaces `10-events-and-hackathon-dashboards.md` AND `10-events-and-hackathon-dashboards-v2.md` — stop reading those two, read only this one. Everything agreed across the UI/UX cleanup rounds is folded in here. When working on any one tab, you only need this file plus the actual code — don't also pull the two superseded docs into context.
 
@@ -20,6 +22,8 @@ This is the single source of truth for the unified Event/Hackathon dashboard. It
 ## Part 2 — Global Design System Rules (apply to every tab, no exceptions)
 
 These are the cross-cutting rules established across every cleanup round. Any new tab or feature built from here on must follow these by default — don't re-derive them per feature.
+
+**Tokens & chrome (design-parity Stages 1–6):** Product colors live in [`src/styles/theme.css`](../src/styles/theme.css) (imported from `globals.css`). Recipes and gallery: [`docs/design-system.md`](design-system.md), `/dev/design-system`. Organizer/admin left rails use forest `--rail-*` (`bg-rail`). Prefer `buttonClass` / shared Card/FilterTabs; ban chromatic Tailwind utilities via `npm run check:hard-colors` (also runs in `test:unit`). Marketing keeps scoped `--mkt-*`.
 
 1. **"Add X" forms are buttons that open a modal, never a permanently-rendered form taking up page space.** This applies to: Add Competition, Add Phase, Add Task, Add Sponsor (exception: Sponsors' add form is compact enough to stay inline — keep as-is), Add Staff Position. If a form has more than ~4 fields, it opens in a modal with sectioned/divided groups, not one long flat scroll.
 2. **Lists default to collapsed, expand on click (accordion-style, no navigation away).** Competitions, Phases, Tasks, Teams (when detail-heavy) all show a compact summary row by default; clicking expands in place. Don't render every nested detail open by default — this was the single biggest mess across every page reviewed.
@@ -92,6 +96,8 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 **Solo attendees:** keep the current combined drawer including payment (no team to separate payment from).
 
 **Export:** two-sheet workbook when the event has teams/groups — Sheet 1 (Teams/leads: name, competition, lead contact, member count, checked-in count, payment status, amount, public ticket URL, registration status, access code) + Sheet 2 (Members: all custom-form columns + name/email/phone/role/team/competition/check-in/registration id/personal ticket URL). Flat events: one sheet with custom-form columns + public ticket URL.
+
+**Roster import (free events only):** `AttendeeImportPanel` on Attendees (Import modal) and Exports. Flow: download XLSX template → upload Excel/CSV or Google Sheet → map columns → preview → commit (`registrations` as `confirmed`, `extra.imported` + `extra.importBatchId`) → optional undo (cancel by batch) → optional confirmation emails (checkbox; default off). Paid events blocked (`importGate` / `PAID_IMPORT_TOOLTIP`). Cap 500 rows per import. Same panel on Exports.
 
 ---
 
@@ -282,9 +288,9 @@ After check-in action: `revalidatePath` both Attendees AND Overview (shared occu
 
 **Purpose:** Live, auditable ranking per competition.
 
-**Data:** `hackathon_scores`, `hackathon_task_completions`, aggregated per `hackathon_team_id` scoped strictly to the selected `track_id`.
+**Data:** **`hackathon_task_completions` only** (aggregated via `scoreboardAggregate` / `trackTaskScoreboardDetail`), scoped strictly to the selected `track_id`. Do not resurrect `hackathon_scores` for the live board. Organizer submission review and judge scoring upsert completions; reviewable work submit writes 0 pts / not correct until accept (Stage 7).
 
-**Main table (not a flat list):** Rank, Team Name, Points, Tasks Solved (`3/8`), Phases Completed (`2/3`), Last Submission (relative time with exact stamp to the second on hover), expand chevron. Sorted by points descending; **tie-break:** more tasks solved, then earlier last solve (caption on the board). Competition filter pills drive which competition's board is shown. 15-second live refresh. Aggregation is isolated per `track_id` (see unit test).
+**Main table (not a flat list):** Rank (+ ▲▼ vs ~1h ago from `attempted_at`), Team Name, Points, Tasks Solved (`3/8`), Phases Completed (`2/3`), Last Submission (relative time with exact stamp to the second on hover), expand chevron. Sorted by points descending; **tie-break:** more tasks solved, then earlier last solve (caption on the board). Competition filter pills drive which competition's board is shown. **15-second `LiveRefresh`** (not Realtime). Aggregation is isolated per `track_id` (unit tests). Gated by `live_scoreboard`.
 
 **Per-team expanded detail (click row, accordion):** phase-by-phase completion with exact timestamp (to the second); task-by-task table (task name — deep-links to its Phases & Tasks definition —, points available, solved y/n, points earned, exact solve timestamp); "First blood" badge for first-to-solve per task (cheap to compute from existing timestamps).
 
@@ -338,6 +344,8 @@ Config keys in use: `live_scoreboard`, `ctf_flags`, `task_hints`, `per_task_time
 **Purpose:** Download structured data about the event.
 
 **Kinds:** Attendee list (two-sheet when teams/groups exist, per the Attendees spec above), Check-in log, Financial summary, Sponsors and partners, and (hackathon events, now included since Exports is part of the unified dashboard) the Hackathon team export — two sheets: Team summary (team name, competition, member count, registration status, payment status, access-code-revealed status, submitted y/n) + Member detail (team name repeated, member name/email/phone, is_lead, individual registration status, checked-in + timestamp, custom-form answers).
+
+**Also on this tab:** Google Sheets sync panel + the same free-event **`AttendeeImportPanel`** as Attendees (template / map / preview / commit / undo / optional emails).
 
 ---
 

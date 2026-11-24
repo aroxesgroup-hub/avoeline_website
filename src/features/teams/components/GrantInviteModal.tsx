@@ -328,7 +328,7 @@ export function GrantInviteModal({
               Use {"{{inviteLink}}"} for the set-password URL.
             </p>
           </div>
-          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
         </div>
       ) : (
         <div className="space-y-3 text-sm">
@@ -352,7 +352,7 @@ export function GrantInviteModal({
             Email sends only when Google is connected. Otherwise you get a copyable invite link.
             Temp password (if created) is shown once here — never in email.
           </p>
-          {error ? <p className="text-red-700">{error}</p> : null}
+          {error ? <p className="text-danger">{error}</p> : null}
           {okMsg ? <p className="text-ink">{okMsg}</p> : null}
           {tempPassword ? (
             <p className="rounded-lg bg-muted p-3">

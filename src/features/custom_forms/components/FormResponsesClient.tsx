@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import type { CustomFormPublic, CustomFormResponsePublic } from "../types";
 import { buttonClass } from "@/src/lib/ui";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 
 export function FormResponsesClient({
-  ownerId,
   form,
   responses,
 }: {
@@ -39,19 +38,17 @@ export function FormResponsesClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href={`/organizer/${ownerId}/forms/${form.id}`}
-          className="text-sm underline text-ink-soft hover:text-ink"
-        >
-          Back to editor
-        </Link>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button type="button" className={buttonClass("secondary", "sm")} onClick={downloadCsv}>
           Download CSV
         </button>
       </div>
       {!responses.length ? (
-        <p className="text-sm text-ink-soft">No responses yet.</p>
+        <Card>
+          <CardBody>
+            <p className="text-sm text-ink-soft">No responses yet.</p>
+          </CardBody>
+        </Card>
       ) : (
         <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
           {responses.map((r) => (

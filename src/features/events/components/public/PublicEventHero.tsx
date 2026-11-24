@@ -133,7 +133,7 @@ export function PublicEventHero({ dto, preview }: { dto: PublicEventDto; preview
               </a>
             )}
             {dto.registration.state === "closing_soon" ? (
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-900">
+              <span className="rounded-full bg-warning-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-warning">
                 Closing soon
               </span>
             ) : null}

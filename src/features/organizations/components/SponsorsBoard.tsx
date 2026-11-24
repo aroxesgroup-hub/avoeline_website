@@ -96,7 +96,7 @@ export function SponsorsBoard({
   }, [orgs, showSponsors, showCollaborators, showPartners]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           <button type="button" className={buttonClass("primary", "sm")} onClick={openAdd}>
@@ -129,7 +129,7 @@ export function SponsorsBoard({
           description="Add a sponsor, collaborator or partner. Nothing appears publicly until you turn on the switches above."
         />
       ) : (
-        <ul className="divide-y divide-line rounded-2xl border border-line bg-paper">
+        <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
           {orgs.map((o) => {
             const progress = o.type === "sponsor" ? benefitProgress(o.benefits) : null;
             return (
@@ -297,7 +297,7 @@ export function SponsorsBoard({
             />
           </div>
         ) : (
-          <div className="rounded-2xl border border-line p-6 text-center">
+          <div className="rounded-xl border border-line p-6 text-center">
             <p className="text-2xs uppercase text-ink-soft">Public card preview</p>
             {draftLogo || editing?.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element

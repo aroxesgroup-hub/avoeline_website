@@ -62,12 +62,16 @@ export function aggregateScoreboardDetail(input: ScoreboardAggregateInput): Scor
 export function aggregateScoreboardDetailAt(
   input: ScoreboardAggregateInput,
   atMs: number,
+  opts?: { includeUnstamped?: boolean },
 ): ScoreboardDetailRow[] {
   const taskIds = new Set(input.taskRows.map((t) => t.id));
+  // Null attempted_at: count on the live board only — never on historical cutoffs
+  // so missing stamps do not invent false ▲▼ movement (Stage 7).
+  const includeUnstamped = opts?.includeUnstamped ?? atMs === Number.POSITIVE_INFINITY;
   const done = input.completions.filter((c) => {
     if (!c.is_correct || !taskIds.has(String(c.task_id))) return false;
     const at = c.attempted_at ? Date.parse(String(c.attempted_at)) : NaN;
-    if (!Number.isFinite(at)) return atMs === Number.POSITIVE_INFINITY;
+    if (!Number.isFinite(at)) return includeUnstamped;
     return at <= atMs;
   });
   const firstBlood = new Map<string, { teamId: string; at: string }>();
@@ -175,8 +179,10 @@ export function withRankMovement(
   nowMs = Date.now(),
   lookbackMs = 60 * 60 * 1000,
 ): ScoreboardDetailRow[] {
-  const nowRows = aggregateScoreboardDetailAt(input, nowMs);
-  const hourAgoRows = aggregateScoreboardDetailAt(input, nowMs - lookbackMs);
+  const nowRows = aggregateScoreboardDetailAt(input, nowMs, { includeUnstamped: true });
+  const hourAgoRows = aggregateScoreboardDetailAt(input, nowMs - lookbackMs, {
+    includeUnstamped: false,
+  });
   const move = computeRankMovement(nowRows, hourAgoRows);
   return nowRows.map((r) => ({
     ...r,

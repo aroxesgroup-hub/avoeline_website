@@ -14,7 +14,7 @@ const LINKS = [
 
 export default function RootNotFound() {
   return (
-    <div className="marketing-shell flex min-h-full flex-1 flex-col bg-canvas">
+    <div className="marketing-shell flex min-h-full flex-1 flex-col bg-[var(--mkt-canvas)]">
       <header className="border-b border-line/80 bg-paper/80">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2.5 px-4 sm:px-6 lg:px-8">
           <Link href="/" className="inline-flex items-center gap-2.5">

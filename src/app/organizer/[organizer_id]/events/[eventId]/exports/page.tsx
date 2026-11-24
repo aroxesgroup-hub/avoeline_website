@@ -46,7 +46,17 @@ export default async function EventExportsPage({
   };
 
   return (
-    <>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Exports
+        </p>
+        <h2 className="font-display text-xl text-ink">Exports & Sheets sync</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Download workbooks, sync to Google Sheets, and import free-event attendees (import UX:
+          Stage 8).
+        </p>
+      </div>
       <Card title="Exports">
         <CardBody>
           <p className="pb-2 text-xs text-ink-soft">
@@ -60,14 +70,12 @@ export default async function EventExportsPage({
           />
         </CardBody>
       </Card>
-      <div className="mt-6">
-        <AttendeeImportPanel eventId={eventId} />
-      </div>
+      <AttendeeImportPanel eventId={eventId} />
       <GoogleSheetsExportPanel
         eventId={eventId}
         organizerId={organizer_id}
         showHackathonTeams={hackathon}
       />
-    </>
+    </div>
   );
 }

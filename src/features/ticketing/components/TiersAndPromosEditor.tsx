@@ -489,7 +489,7 @@ export function TiersAndPromosEditor(props: TiersAndPromosEditorProps) {
                 <button
                   type="button"
                   onClick={() => onTiersChange(tiers.filter((t) => t.id !== tier.id))}
-                  className="text-xs text-red-700"
+                  className="text-xs text-danger"
                 >
                   Remove
                 </button>
@@ -531,7 +531,7 @@ export function TiersAndPromosEditor(props: TiersAndPromosEditorProps) {
               <button
                 type="button"
                 onClick={() => onPromosChange(promos.filter((p) => p.id !== promo.id))}
-                className="text-xs text-red-700"
+                className="text-xs text-danger"
               >
                 Remove
               </button>

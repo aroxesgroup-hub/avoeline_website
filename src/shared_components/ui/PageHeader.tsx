@@ -10,14 +10,22 @@ export default function PageHeader({
   title,
   description,
   actions,
+  eyebrow,
 }: {
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
+  /** Optional console label above the title (Stage 3 design parity). */
+  eyebrow?: ReactNode;
 }) {
   return (
     <header className="mb-8 flex flex-col gap-4 border-b border-line pb-7 sm:flex-row sm:items-end sm:justify-between">
       <div>
+        {eyebrow ? (
+          <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+            {eyebrow}
+          </p>
+        ) : null}
         {/* Titles are data -- an organizer with no organization name
                     falls back to their email address, which has no space to
                     break at and pushed every page sideways on a phone. */}

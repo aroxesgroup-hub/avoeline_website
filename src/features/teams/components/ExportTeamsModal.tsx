@@ -225,7 +225,7 @@ export function ExportTeamsModal({
           ) : null}
         </fieldset>
 
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
       </div>
     </Modal>
   );

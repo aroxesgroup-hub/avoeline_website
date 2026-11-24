@@ -59,9 +59,13 @@ export function ParticipantArena({
   schedules,
   submissions,
 }: ParticipantArenaProps) {
-  const [activeTab, setActiveTab] = useState<"challenges" | "phases" | "schedule" | "sandbox">("challenges");
+  const [activeTab, setActiveTab] = useState<"challenges" | "phases" | "schedule" | "sandbox">(
+    "challenges",
+  );
   const [flagInputs, setFlagInputs] = useState<Record<string, string>>({});
-  const [flagMessages, setFlagMessages] = useState<Record<string, { isCorrect?: boolean; msg: string }>>({});
+  const [flagMessages, setFlagMessages] = useState<
+    Record<string, { isCorrect?: boolean; msg: string }>
+  >({});
   const [isPending, startTransition] = useTransition();
 
   // Phase deliverable state
@@ -80,7 +84,7 @@ export function ParticipantArena({
 
   // Set of solved challenge IDs for this team
   const solvedChallengeIds = new Set(
-    submissions.filter((s) => s.isCorrect && s.teamId === team.id).map((s) => s.challengeId)
+    submissions.filter((s) => s.isCorrect && s.teamId === team.id).map((s) => s.challengeId),
   );
 
   const teamScore = submissions
@@ -240,7 +244,7 @@ export function ParticipantArena({
       {/* Team Header & Live Points */}
       <div className="flex flex-col justify-between gap-4 border-b border-line pb-5 sm:flex-row sm:items-center">
         <div>
-          <span className="text-2xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+          <span className="text-2xs font-bold uppercase tracking-wider text-series-2 dark:text-series-2">
             Team & Collaboration Arena · Role Scoped
           </span>
           <h2 className="text-xl font-bold text-ink flex items-center gap-2">
@@ -262,18 +266,18 @@ export function ParticipantArena({
             disabled={isPending || checkInDone}
             className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
               checkInDone
-                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 cursor-default"
-                : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs"
+                ? "bg-primary-soft text-primary dark:bg-primary-soft dark:text-primary cursor-default"
+                : "bg-series-2 text-white hover:bg-series-2 shadow-xs"
             }`}
           >
-            <Activity size={14} className={checkInDone ? "text-emerald-600" : "animate-pulse"} />
+            <Activity size={14} className={checkInDone ? "text-primary" : "animate-pulse"} />
             {checkInDone ? "Checked-In Active" : "Hourly Check-in Pulse"}
           </button>
 
           {/* Points Badge */}
           <div className="rounded-xl border border-line bg-muted/30 px-3.5 py-1.5 text-right">
             <span className="block text-3xs font-bold uppercase text-ink-soft">Team Score</span>
-            <span className="font-mono text-base font-bold text-indigo-600 dark:text-indigo-400">
+            <span className="font-mono text-base font-bold text-series-2 dark:text-series-2">
               {teamScore} pts
             </span>
           </div>
@@ -281,7 +285,7 @@ export function ParticipantArena({
       </div>
 
       {checkInMsg ? (
-        <div className="rounded-xl bg-emerald-50 p-2.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 flex items-center gap-2">
+        <div className="rounded-xl bg-primary-soft p-2.5 text-xs font-medium text-primary dark:bg-primary-soft dark:text-primary flex items-center gap-2">
           <CheckCircle2 size={14} />
           {checkInMsg}
         </div>
@@ -290,8 +294,18 @@ export function ParticipantArena({
       {/* Arena Navigation Tabs */}
       <div className="flex gap-2 border-b border-line pb-3">
         {[
-          { id: "challenges", label: "CTF Challenges", icon: Terminal, badge: `${solvedChallengeIds.size}/${challenges.length}` },
-          { id: "phases", label: "Phase Progression", icon: Layers, badge: `Phase ${phaseProgress?.currentPhaseNumber || 1}` },
+          {
+            id: "challenges",
+            label: "CTF Challenges",
+            icon: Terminal,
+            badge: `${solvedChallengeIds.size}/${challenges.length}`,
+          },
+          {
+            id: "phases",
+            label: "Phase Progression",
+            icon: Layers,
+            badge: `Phase ${phaseProgress?.currentPhaseNumber || 1}`,
+          },
           { id: "sandbox", label: "Docker Sandboxes", icon: Box, badge: "Premium" },
           { id: "schedule", label: "Daily Schedule & Tasks", icon: Clock },
         ].map((tab) => {
@@ -301,11 +315,11 @@ export function ParticipantArena({
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as "challenges" | "phases" | "schedule" | "sandbox")}
+              onClick={() =>
+                setActiveTab(tab.id as "challenges" | "phases" | "schedule" | "sandbox")
+              }
               className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
-                isActive
-                  ? "bg-ink text-white shadow-xs"
-                  : "bg-surface text-ink hover:bg-muted"
+                isActive ? "bg-ink text-white shadow-xs" : "bg-surface text-ink hover:bg-muted"
               }`}
             >
               <Icon size={14} />
@@ -331,7 +345,7 @@ export function ParticipantArena({
             <span className="text-xs text-ink-soft">
               Enter captured flags below. Solves immediately increment team score.
             </span>
-            <span className="text-xs font-semibold text-emerald-600">
+            <span className="text-xs font-semibold text-primary">
               {solvedChallengeIds.size} of {challenges.length} Solved
             </span>
           </div>
@@ -345,14 +359,16 @@ export function ParticipantArena({
               {challenges.map((challenge) => {
                 const isSolved = solvedChallengeIds.has(challenge.id);
                 const msg = flagMessages[challenge.id];
-                const teamSandbox = sandboxes.find((s) => s.challengeId === challenge.id && s.teamId === team.id);
+                const teamSandbox = sandboxes.find(
+                  (s) => s.challengeId === challenge.id && s.teamId === team.id,
+                );
 
                 return (
                   <div
                     key={challenge.id}
                     className={`rounded-2xl border p-4 transition ${
                       isSolved
-                        ? "border-emerald-200 bg-emerald-50/20 dark:border-emerald-900/40 dark:bg-emerald-950/10"
+                        ? "border-accent-line bg-primary-soft/20 dark:border-accent-line/40 dark:bg-primary-soft"
                         : "border-line bg-surface hover:border-ink/20"
                     }`}
                   >
@@ -372,28 +388,30 @@ export function ParticipantArena({
                       </div>
 
                       <div className="text-right">
-                        <span className="font-mono text-sm font-bold text-indigo-600">
+                        <span className="font-mono text-sm font-bold text-series-2">
                           {challenge.points} pts
                         </span>
                         {isSolved ? (
-                          <span className="block text-2xs font-bold text-emerald-600 flex items-center gap-1">
+                          <span className="block text-2xs font-bold text-primary flex items-center gap-1">
                             <CheckCircle2 size={11} /> Solved
                           </span>
                         ) : null}
                       </div>
                     </div>
 
-                    <p className="mt-2 text-xs text-ink-soft leading-relaxed">{challenge.description}</p>
+                    <p className="mt-2 text-xs text-ink-soft leading-relaxed">
+                      {challenge.description}
+                    </p>
 
                     {/* Docker Sandbox Launch for this challenge */}
                     {challenge.requiresDocker ? (
                       <div className="mt-3 rounded-xl border border-line bg-muted/40 p-3 text-xs">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-ink flex items-center gap-1">
-                            <Box size={14} className="text-indigo-600" /> Isolated Machine
+                            <Box size={14} className="text-series-2" /> Isolated Machine
                           </span>
                           {teamSandbox ? (
-                            <span className="text-2xs font-semibold text-emerald-600">
+                            <span className="text-2xs font-semibold text-primary">
                               Running on port {teamSandbox.portMappings[0]?.hostPort || 22}
                             </span>
                           ) : (
@@ -409,7 +427,8 @@ export function ParticipantArena({
                         </div>
                         {teamSandbox ? (
                           <p className="mt-1 font-mono text-2xs text-ink-soft">
-                            Endpoint: {teamSandbox.hostEndpoint} · User: {teamSandbox.credentials?.username}
+                            Endpoint: {teamSandbox.hostEndpoint} · User:{" "}
+                            {teamSandbox.credentials?.username}
                           </p>
                         ) : null}
                       </div>
@@ -418,7 +437,7 @@ export function ParticipantArena({
                     {/* Flag Submission Input */}
                     <div className="mt-4 pt-3 border-t border-line/60">
                       {isSolved ? (
-                        <div className="rounded-xl bg-emerald-100/60 p-2 text-center text-xs font-semibold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+                        <div className="rounded-xl bg-primary-soft/60 p-2 text-center text-xs font-semibold text-primary dark:bg-primary-soft dark:text-primary">
                           ✓ Flag Verified! +{challenge.points} points awarded.
                         </div>
                       ) : (
@@ -428,7 +447,10 @@ export function ParticipantArena({
                               type="text"
                               value={flagInputs[challenge.id] || ""}
                               onChange={(e) =>
-                                setFlagInputs((prev) => ({ ...prev, [challenge.id]: e.target.value }))
+                                setFlagInputs((prev) => ({
+                                  ...prev,
+                                  [challenge.id]: e.target.value,
+                                }))
                               }
                               placeholder="FLAG{...}"
                               className={`flex-1 ${fieldClass}`}
@@ -446,7 +468,7 @@ export function ParticipantArena({
                           {msg ? (
                             <p
                               className={`text-2xs font-semibold ${
-                                msg.isCorrect ? "text-emerald-600" : "text-red-600"
+                                msg.isCorrect ? "text-primary" : "text-danger"
                               }`}
                             >
                               {msg.msg}
@@ -466,12 +488,13 @@ export function ParticipantArena({
       {/* TAB 2: PHASE PROGRESSION */}
       {activeTab === "phases" ? (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50/20 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/10">
-            <span className="font-bold text-xs text-indigo-900 dark:text-indigo-200 block">
+          <div className="rounded-2xl border border-accent-line bg-accent-soft p-4 dark:border-accent-line dark:bg-accent-soft">
+            <span className="font-bold text-xs text-series-2 dark:text-series-2 block">
               Sequential Milestone Rule
             </span>
-            <p className="text-xs text-indigo-800/80 dark:text-indigo-300/80 mt-0.5">
-              Each phase must be completed before the next unlocks. Once closed by the organizer, previous phases cannot be altered or revisited.
+            <p className="text-xs text-series-2 dark:text-series-2 mt-0.5">
+              Each phase must be completed before the next unlocks. Once closed by the organizer,
+              previous phases cannot be altered or revisited.
             </p>
           </div>
 
@@ -481,7 +504,8 @@ export function ParticipantArena({
               const isCompleted = phaseProgress?.completedPhaseNumbers?.includes(phase.phaseNumber);
               const isUnlocked =
                 phase.phaseNumber === 1 ||
-                (phaseProgress?.completedPhaseNumbers?.includes(phase.phaseNumber - 1) && !isClosed);
+                (phaseProgress?.completedPhaseNumbers?.includes(phase.phaseNumber - 1) &&
+                  !isClosed);
 
               return (
                 <div
@@ -490,10 +514,10 @@ export function ParticipantArena({
                     isClosed
                       ? "border-line bg-muted/40 opacity-75"
                       : isCompleted
-                      ? "border-emerald-200 bg-emerald-50/20 dark:border-emerald-900/50"
-                      : isUnlocked
-                      ? "border-indigo-200 bg-paper shadow-xs"
-                      : "border-line bg-muted/20 opacity-60"
+                        ? "border-accent-line bg-primary-soft/20 dark:border-accent-line/50"
+                        : isUnlocked
+                          ? "border-accent-line bg-paper shadow-xs"
+                          : "border-line bg-muted/20 opacity-60"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -511,15 +535,15 @@ export function ParticipantArena({
 
                     <div>
                       {isClosed ? (
-                        <span className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-950/60 dark:text-red-300">
+                        <span className="flex items-center gap-1 rounded-full bg-danger-soft px-3 py-1 text-xs font-semibold text-danger dark:bg-danger-soft dark:text-danger-on-ink">
                           <Lock size={12} /> Phase Closed
                         </span>
                       ) : isCompleted ? (
-                        <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                        <span className="flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary dark:bg-primary-soft dark:text-primary">
                           <CheckCircle2 size={12} /> Completed
                         </span>
                       ) : isUnlocked ? (
-                        <span className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                        <span className="flex items-center gap-1 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-series-2 dark:bg-accent-soft dark:text-series-2">
                           <Unlock size={12} /> Active
                         </span>
                       ) : (
@@ -577,32 +601,37 @@ export function ParticipantArena({
       {/* TAB 3: DOCKER SANDBOX (PREMIUM) */}
       {activeTab === "sandbox" ? (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/20 p-4 dark:border-indigo-900/50">
-            <Box size={20} className="text-indigo-600 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-2xl border border-accent-line bg-accent-soft p-4 dark:border-accent-line">
+            <Box size={20} className="text-series-2 mt-0.5" />
             <div>
               <h4 className="font-bold text-xs text-ink">Per-Team Container Isolation</h4>
               <p className="text-xs text-ink-soft mt-0.5">
-                Target machines are provisioned strictly in your team&apos;s sandbox. No other team shares your container instance or attack surface.
+                Target machines are provisioned strictly in your team&apos;s sandbox. No other team
+                shares your container instance or attack surface.
               </p>
             </div>
           </div>
 
           {sandboxes.filter((s) => s.teamId === team.id).length === 0 ? (
             <p className="text-xs text-ink-soft py-6 text-center italic">
-              No active sandbox instances. Launch a machine from any challenge requiring Docker in the Challenges tab.
+              No active sandbox instances. Launch a machine from any challenge requiring Docker in
+              the Challenges tab.
             </p>
           ) : (
             <div className="space-y-4">
               {sandboxes
                 .filter((s) => s.teamId === team.id)
                 .map((sb) => (
-                  <div key={sb.id} className="rounded-2xl border border-line bg-surface p-4 space-y-3">
+                  <div
+                    key={sb.id}
+                    className="rounded-2xl border border-line bg-surface p-4 space-y-3"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="font-mono text-2xs text-indigo-600">{sb.id}</span>
+                        <span className="font-mono text-2xs text-series-2">{sb.id}</span>
                         <h5 className="font-bold text-ink text-sm">{sb.challengeTitle}</h5>
                       </div>
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-2xs font-bold uppercase text-emerald-800">
+                      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-2xs font-bold uppercase text-primary">
                         {sb.status}
                       </span>
                     </div>
@@ -615,7 +644,7 @@ export function ParticipantArena({
                       {sb.portMappings.map((pm, i) => (
                         <div key={i} className="flex justify-between">
                           <span className="text-ink-soft">{pm.protocol} Port:</span>
-                          <span className="text-indigo-600 font-semibold">{pm.hostPort}</span>
+                          <span className="text-series-2 font-semibold">{pm.hostPort}</span>
                         </div>
                       ))}
                       {sb.credentials?.username ? (
@@ -656,7 +685,10 @@ export function ParticipantArena({
           ) : (
             <div className="space-y-4">
               {schedules.map((sch) => (
-                <div key={sch.id} className="rounded-2xl border border-line bg-surface p-5 space-y-3">
+                <div
+                  key={sch.id}
+                  className="rounded-2xl border border-line bg-surface p-5 space-y-3"
+                >
                   <div className="flex items-center justify-between">
                     <h4 className="font-bold text-ink text-sm">
                       Day {sch.dayNumber}: {sch.title}
@@ -669,10 +701,12 @@ export function ParticipantArena({
                   {sch.tasks.map((task) => (
                     <div
                       key={task.id}
-                      className="rounded-xl border border-indigo-200 bg-indigo-50/20 p-4 dark:border-indigo-900/50 space-y-2"
+                      className="rounded-xl border border-accent-line bg-accent-soft p-4 dark:border-accent-line space-y-2"
                     >
                       <span className="font-bold text-xs text-ink block">{task.title}</span>
-                      <p className="text-xs text-ink-soft whitespace-pre-line">{task.instructions}</p>
+                      <p className="text-xs text-ink-soft whitespace-pre-line">
+                        {task.instructions}
+                      </p>
 
                       <div className="mt-3 border-t border-line/60 pt-3 space-y-2">
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

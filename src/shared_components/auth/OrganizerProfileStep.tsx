@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import AddSocialsModal from './AddSocialsModal';
-import ProfileLoadingState from './ProfileLoadingState';
-import { ImagePlus } from 'lucide-react';
-import { uploadMedia } from '@/src/features/media/uploadMedia.action';
-import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
-import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
-import type { OrganizerSetupProfileData } from '@/src/features/auth/authService';
+import React, { useState } from "react";
+import AddSocialsModal from "./AddSocialsModal";
+import ProfileLoadingState from "./ProfileLoadingState";
+import { ImagePlus } from "lucide-react";
+import { uploadMedia } from "@/src/features/media/uploadMedia.action";
+import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import type { OrganizerSetupProfileData } from "@/src/features/auth/authService";
 
 type ActionResult = { success: boolean; error?: string };
 
@@ -21,22 +21,22 @@ interface OrganizerProfileStepProps {
 export default function OrganizerProfileStep({
   onNext,
   onSave,
-  initialEmail = '',
+  initialEmail = "",
 }: OrganizerProfileStepProps) {
   const [isSocialsOpen, setIsSocialsOpen] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    username: '',
-    description: '',
-    address: '',
+    username: "",
+    description: "",
+    address: "",
     email: initialEmail,
-    contactNo: '',
-    established: '',
-    recoveryContact: '',
-    website: '',
-    link1: '',
+    contactNo: "",
+    established: "",
+    recoveryContact: "",
+    website: "",
+    link1: "",
   });
 
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
@@ -45,7 +45,7 @@ export default function OrganizerProfileStep({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'description' && value.length > 100) return;
+    if (name === "description" && value.length > 100) return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -70,11 +70,11 @@ export default function OrganizerProfileStep({
       let logoUrl: string | null = null;
       if (profileFile) {
         const fd = new FormData();
-        fd.append('file', profileFile);
-        fd.append('folder', 'organizer-logos');
+        fd.append("file", profileFile);
+        fd.append("folder", "organizer-logos");
         const upload = await uploadMedia(fd);
         if (!upload.success) {
-          setError(upload.error || 'Logo upload failed.');
+          setError(upload.error || "Logo upload failed.");
           setIsLoading(false);
           return;
         }
@@ -90,7 +90,7 @@ export default function OrganizerProfileStep({
       // while a redirect was already scheduled, and a second click re-ran the write.
       const saved: ActionResult = onSave ? await onSave(payload) : { success: true };
       if (!saved.success) {
-        setError(saved.error || 'Failed to save organizer profile.');
+        setError(saved.error || "Failed to save organizer profile.");
         setIsLoading(false);
         return;
       }
@@ -99,13 +99,13 @@ export default function OrganizerProfileStep({
       // path because the server action redirects out of this tree.
       const finished = (await onNext?.()) as ActionResult | undefined;
       if (finished && !finished.success) {
-        setError(finished.error || 'Failed to finish setup.');
+        setError(finished.error || "Failed to finish setup.");
       }
       // Left loading on the success path: the action redirects, and clearing it
       // would flash an interactive form during navigation.
       setIsLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile.');
+      setError(err instanceof Error ? err.message : "Failed to save profile.");
       setIsLoading(false);
     }
   };
@@ -131,7 +131,7 @@ export default function OrganizerProfileStep({
                 keyboard, which made the only avatar control mouse-only. */}
             <label
               htmlFor="organizer-logo"
-              className="group relative block cursor-pointer rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
+              className="group relative block cursor-pointer rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary"
             >
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-line-loud bg-paper p-1">
                 {profileImage ? (
@@ -159,7 +159,7 @@ export default function OrganizerProfileStep({
               />
             </label>
             <span className="mt-3 text-sm font-semibold uppercase text-ink">
-              {formData.username || 'Your organization'}
+              {formData.username || "Your organization"}
             </span>
           </div>
 
@@ -170,7 +170,9 @@ export default function OrganizerProfileStep({
               </h2>
 
               <div>
-                <label htmlFor="org-username" className={labelClass}>Username</label>
+                <label htmlFor="org-username" className={labelClass}>
+                  Username
+                </label>
                 <input
                   id="org-username"
                   type="text"
@@ -183,7 +185,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-description" className={labelClass}>Description</label>
+                <label htmlFor="org-description" className={labelClass}>
+                  Description
+                </label>
                 <div className="relative mt-1 w-full">
                   <input
                     id="org-description"
@@ -202,7 +206,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-address" className={labelClass}>Address</label>
+                <label htmlFor="org-address" className={labelClass}>
+                  Address
+                </label>
                 <input
                   id="org-address"
                   type="text"
@@ -215,7 +221,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-email" className={labelClass}>Email</label>
+                <label htmlFor="org-email" className={labelClass}>
+                  Email
+                </label>
                 <input
                   id="org-email"
                   type="email"
@@ -228,7 +236,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-contact" className={labelClass}>Contact No</label>
+                <label htmlFor="org-contact" className={labelClass}>
+                  Contact No
+                </label>
                 <input
                   id="org-contact"
                   type="tel"
@@ -247,7 +257,9 @@ export default function OrganizerProfileStep({
               </h2>
 
               <div>
-                <label htmlFor="org-established" className={labelClass}>Established</label>
+                <label htmlFor="org-established" className={labelClass}>
+                  Established
+                </label>
                 <input
                   id="org-established"
                   type="text"
@@ -260,7 +272,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-recovery" className={labelClass}>Recovery Contact</label>
+                <label htmlFor="org-recovery" className={labelClass}>
+                  Recovery Contact
+                </label>
                 <input
                   id="org-recovery"
                   type="text"
@@ -273,7 +287,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-website" className={labelClass}>Website</label>
+                <label htmlFor="org-website" className={labelClass}>
+                  Website
+                </label>
                 <input
                   id="org-website"
                   type="url"
@@ -286,7 +302,9 @@ export default function OrganizerProfileStep({
               </div>
 
               <div>
-                <label htmlFor="org-link1" className={labelClass}>Link 1</label>
+                <label htmlFor="org-link1" className={labelClass}>
+                  Link 1
+                </label>
                 <input
                   id="org-link1"
                   type="url"
@@ -307,9 +325,9 @@ export default function OrganizerProfileStep({
               <button
                 type="button"
                 onClick={() => setIsSocialsOpen(true)}
-                className={buttonClass('secondary', 'lg', 'w-full')}
+                className={buttonClass("secondary", "lg", "w-full")}
               >
-                Add Socials{' '}
+                Add Socials{" "}
                 {socialLinks.filter((s) => s.url).length > 0 &&
                   `(${socialLinks.filter((s) => s.url).length})`}
               </button>
@@ -317,9 +335,9 @@ export default function OrganizerProfileStep({
               <button
                 type="submit"
                 disabled={isLoading}
-                className={buttonClass('primary', 'lg', 'w-full')}
+                className={buttonClass("primary", "lg", "w-full")}
               >
-                {isLoading ? 'Saving…' : 'Save and finish'}
+                {isLoading ? "Saving…" : "Save and finish"}
               </button>
             </div>
           </div>

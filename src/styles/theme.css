@@ -1,0 +1,146 @@
+/* ── Product design tokens (Stage 1) ─────────────────────────────────────────
+   Source: design/ organizer PNGs (Dashboard, My Events, Overview, Attendees,
+   Teams, Scoreboard) + value bridge to marketing --mkt-* greens in globals.css.
+
+   Lives in :root (not @theme) so values always emit and dark mode can re-point
+   them. Tailwind @theme in globals.css only aliases these for utilities.
+
+   Brand remapped from violet/indigo → emerald/forest. DashboardNav hardcoded
+   Stage 3 Batch 1 wires --rail-* into DashboardNav.
+
+   WCAG AA pairs: see docs/design-parity.md § Stage 1 WCAG.
+*/
+
+:root {
+  /* Surfaces — warm off-white canvas from organizer mocks */
+  --paper: #ffffff;
+  --canvas: #f9faf7;
+  --line: #e5ebe7;
+  --line-loud: #cfd8d3;
+  --ink: #0f1716;
+  --ink-soft: #5b6b64; /* ≥4.5:1 on paper + canvas */
+  --ink-faint: #64746b; /* ≥4.5:1 on paper + canvas */
+  --ink-invert: #ffffff;
+
+  --muted: #f0f5f2;
+  --muted-strong: #e2ebe6;
+
+  /* Loud dark surface (stat cards, future rail). Stays dark in both themes. */
+  --panel-bg: #0b1c1a;
+  --panel-fg: #ffffff;
+
+  /* Stage 3 rail chrome (design left nav) — unused until shell restyle */
+  --rail-bg: #0b1c1a;
+  --rail-fg: #ffffff;
+  --rail-muted: #8aa39a;
+  --rail-active: #134e4a;
+  --rail-accent: #4ade80;
+
+  /* Legacy names consumed by home/ inline styles */
+  --bg: var(--canvas);
+  --surface: var(--paper);
+  --border: var(--line);
+
+  /* Primary = deep emerald CTA (matches --mkt-btn / --mkt-accent-deep) */
+  --primary: #064e3b; /* 9.72:1 on paper */
+  --primary-hover: #047857;
+  --primary-foreground: #ffffff; /* 9.72:1 on primary */
+  --primary-soft: #ecfdf5; /* matches --mkt-accent-tint */
+  --primary-line: #a7f3d0;
+
+  /* Accent = AA body/link green (not #059669 — that fails AA as small text) */
+  --accent: #047857; /* 5.48:1 on paper */
+  --accent-strong: #065f46; /* 7.68:1 on paper — links that must shout */
+  --accent-on-ink: #6ee7b7; /* ≥11:1 on rail — indicators / text on dark */
+  --accent-soft: #ecfdf5;
+  --accent-line: #d1e7df; /* matches --mkt-line */
+
+  /* Semantic status — darker than Tailwind defaults so body text clears AA */
+  --success: #15803d;
+  --success-soft: #ecfdf5;
+  --success-line: #bbf7d0;
+  --success-on-ink: #86efac;
+
+  --warning: #b45309;
+  --warning-soft: #fffbeb;
+  --warning-line: #fde68a;
+  --warning-on-ink: #fcd34d;
+
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --danger-line: #fecaca;
+  --danger-on-ink: #fca5a5;
+
+  /* Chart series — slot 1 brand teal (not status green). Cyan + pink companions.
+     Status green/amber/red stay reserved for badges. Cap: three. */
+  --series-1: #0f766e; /* teal — 5.47:1 on paper */
+  --series-2: #0891b2; /* cyan — 3.68:1 on paper (marks / large UI) */
+  --series-3: #db2777; /* pink — 4.60:1 on paper */
+
+  /* Console rhythm (Stage 2–3); @theme radius/shadow remain source for utilities */
+  --console-radius-control: 0.5rem;
+  --console-radius-card: 0.75rem;
+  --console-space-page: 1.5rem;
+  --console-space-card: 1.25rem;
+  --console-shadow-card: 0 12px 40px -24px rgba(6, 78, 59, 0.18);
+
+  /* Legacy violet aliases → accent so home/ inline styles follow brand */
+  --violet: var(--accent);
+  --violet-soft: var(--accent-soft);
+}
+
+/* Dark mode — forest canvas aligned with .marketing-shell dark --mkt-* */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #17332d;
+  --canvas: #071412;
+  --line: #2a4a42;
+  --line-loud: #3d5f56;
+  --ink: #ecfdf8;
+  --ink-soft: #8fb5ab; /* ≥6:1 on paper */
+  --ink-faint: #6b9488;
+  --ink-invert: #0b1c1a;
+
+  --muted: #0f221e;
+  --muted-strong: #134e4a;
+
+  --panel-bg: #0f221e;
+  --panel-fg: #ecfdf8;
+
+  --rail-bg: #050f0d;
+  --rail-fg: #ecfdf8;
+  --rail-muted: #8fb5ab;
+  --rail-active: #134e4a;
+  --rail-accent: #34d399;
+
+  --primary: #34d399; /* 7.06:1 on dark paper — links / emphasis */
+  --primary-hover: #6ee7b7;
+  --primary-foreground: #022c22; /* 7.88:1 on mint fill */
+  --primary-soft: #134e4a;
+  --primary-line: #2a4a42;
+
+  --accent: #6ee7b7;
+  --accent-strong: #a7f3d0;
+  --accent-on-ink: #6ee7b7;
+  --accent-soft: #134e4a;
+  --accent-line: #2a4a42;
+
+  --success: #86efac;
+  --success-soft: #0b2818;
+  --success-line: #1c4a31;
+
+  --warning: #fcd34d;
+  --warning-soft: #2a1f05;
+  --warning-line: #4a3a0c;
+
+  --danger: #fca5a5;
+  --danger-soft: #2c1414;
+  --danger-line: #4e2323;
+
+  --series-1: #2dd4bf;
+  --series-2: #22d3ee;
+  --series-3: #f472b6;
+
+  --console-shadow-card: 0 16px 48px -28px rgba(0, 0, 0, 0.55);
+}

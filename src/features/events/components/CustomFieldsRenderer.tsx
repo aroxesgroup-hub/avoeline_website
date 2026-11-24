@@ -137,7 +137,7 @@ function RegistrationFileInput({
         <input type="hidden" name={name} value={JSON.stringify({ path, bucket: "filestore" })} />
       ) : null}
       {pending ? <p className="text-xs text-ink-soft">Uploading…</p> : null}
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

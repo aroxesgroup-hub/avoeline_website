@@ -26,6 +26,7 @@ import { OrganizerLibraryClient } from "./OrganizerLibraryClient";
 import { EmailBatchesClient } from "./EmailBatchesClient";
 import { ConnectDialog } from "./ConnectDialog";
 import { PermissionList } from "./PermissionList";
+import { buttonClass } from "@/src/lib/ui";
 import type { OwnerCalendarLinkRow } from "../server/calendarSync.service";
 import type { OwnerSheetSyncRow } from "../server/sheetSync.service";
 
@@ -72,7 +73,7 @@ function EnableButton({
       <button
         type="button"
         disabled={!googleReady || !entry.active}
-        className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+        className={buttonClass("primary", "sm")}
         onClick={() => setOpen(true)}
       >
         {label}
@@ -93,7 +94,7 @@ function StatusLine({ enabled }: { enabled: boolean }) {
   return (
     <p className="text-xs font-medium text-ink-soft">
       Status:{" "}
-      <span className={enabled ? "text-emerald-800" : "text-amber-900"}>
+      <span className={enabled ? "text-success" : "text-warning"}>
         {enabled ? "Enabled" : "Not enabled"}
       </span>
     </p>
@@ -159,7 +160,7 @@ export function EmailIntegrationCard({
               <button
                 type="button"
                 disabled={pending}
-                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+                className={buttonClass("primary", "sm")}
                 onClick={() =>
                   start(async () => {
                     const r = await testConnectionAction({ connectionId: conn!.id });
@@ -205,8 +206,8 @@ export function EmailIntegrationCard({
                 Sent emails
               </a>
             </div>
-            {message ? <p className="text-xs text-emerald-800">{message}</p> : null}
-            {error ? <p className="text-xs text-red-700">{error}</p> : null}
+            {message ? <p className="text-xs text-success">{message}</p> : null}
+            {error ? <p className="text-xs text-danger">{error}</p> : null}
             {emailBatches ? (
               <div id="email-sent" className="scroll-mt-24 border-t border-line pt-4">
                 <h3 className="mb-2 text-sm font-medium text-ink">Sent emails</h3>
@@ -287,7 +288,7 @@ export function CalendarMeetIntegrationCard({
               <button
                 type="button"
                 disabled={pending}
-                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+                className={buttonClass("primary", "sm")}
                 onClick={() =>
                   start(async () => {
                     const r = await createTestCalendarEventAction({ connectionId: calConn!.id });
@@ -353,8 +354,8 @@ export function CalendarMeetIntegrationCard({
                 </a>
               </p>
             ) : null}
-            {message ? <p className="text-xs text-emerald-800">{message}</p> : null}
-            {error ? <p className="text-xs text-red-700">{error}</p> : null}
+            {message ? <p className="text-xs text-success">{message}</p> : null}
+            {error ? <p className="text-xs text-danger">{error}</p> : null}
             <div className="border-t border-line pt-4">
               <h3 className="mb-2 text-sm font-medium text-ink">Recent synced events</h3>
               <CalendarLinksHubPanel links={calendarLinks} />
@@ -410,7 +411,7 @@ export function DriveIntegrationCard({
               <button
                 type="button"
                 disabled={pending}
-                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+                className={buttonClass("primary", "sm")}
                 onClick={() =>
                   start(async () => {
                     const r = await openAvoelineFolderAction({ connectionId: conn!.id });
@@ -465,8 +466,8 @@ export function DriveIntegrationCard({
                 </a>
               </p>
             ) : null}
-            {message ? <p className="text-xs text-emerald-800">{message}</p> : null}
-            {error ? <p className="text-xs text-red-700">{error}</p> : null}
+            {message ? <p className="text-xs text-success">{message}</p> : null}
+            {error ? <p className="text-xs text-danger">{error}</p> : null}
             {showLibrary ? (
               <div id="drive-library" className="scroll-mt-24 border-t border-line pt-4">
                 <h3 className="mb-2 text-sm font-medium text-ink">All files</h3>
@@ -526,7 +527,7 @@ export function SheetsIntegrationCard({
               <button
                 type="button"
                 disabled={pending || !conn}
-                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+                className={buttonClass("primary", "sm")}
                 onClick={() =>
                   start(async () => {
                     if (!conn) return;
@@ -557,8 +558,8 @@ export function SheetsIntegrationCard({
                 </a>
               </p>
             ) : null}
-            {message ? <p className="text-xs text-emerald-800">{message}</p> : null}
-            {error ? <p className="text-xs text-red-700">{error}</p> : null}
+            {message ? <p className="text-xs text-success">{message}</p> : null}
+            {error ? <p className="text-xs text-danger">{error}</p> : null}
             <div className="border-t border-line pt-4">
               <h3 className="mb-2 text-sm font-medium text-ink">Linked sheets</h3>
               <SheetSyncsHubPanel ownerId={ownerId} syncs={sheetSyncs} />

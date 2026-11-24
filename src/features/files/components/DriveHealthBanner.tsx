@@ -20,10 +20,10 @@ export async function DriveHealthBanner({
   const href = connectionsHref || `/organizer/${organizerId}/connections`;
   const tone =
     health.status === "active"
-      ? "border-amber-200 bg-amber-50 text-amber-950"
+      ? "border-warning-line bg-warning-soft text-warning"
       : health.status === "needs_reconnect" || health.status === "full"
-        ? "border-amber-300 bg-amber-50 text-amber-950"
-        : "border-red-200 bg-red-50 text-red-950";
+        ? "border-warning-line bg-warning-soft text-warning"
+        : "border-danger-line bg-danger-soft text-danger";
 
   return (
     <div className={`mb-4 rounded-lg border px-3 py-2 text-sm ${tone}`} role="status">

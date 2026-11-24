@@ -2,6 +2,24 @@
 
 | Date | Slug | Status | Summary |
 | --- | --- | --- | --- |
+| 2026-11-23 | [design-parity-stage-9](2026-11-23-design-parity-stage-9.md) | done | Stage 9: parity QA + docs/11 + completeContext; design-parity program closed. |
+| 2026-11-23 | [design-parity-stage-8](2026-11-23-design-parity-stage-8.md) | done | Stage 8: attendee import template/undo/optional email + stepped UX; STOP before Stage 9. |
+| 2026-11-23 | [design-parity-stage-7](2026-11-23-design-parity-stage-7.md) | done | Stage 7: scoreboard review→completions sync + submit policy + movement/tests; STOP before Stage 8. |
+| 2026-11-23 | [design-parity-stage-6](2026-11-23-design-parity-stage-6.md) | done | Stage 6: hard-color purge + `check:hard-colors` in `test:unit`; STOP before Stage 7 scoreboard. |
+| 2026-11-23 | [design-parity-stage-5-batch3](2026-11-23-design-parity-stage-5-batch3.md) | done | Stage 5 Batch 3: AdminRail forest rail + admin `text-danger`; Stage 5 done; STOP before Stage 6. |
+| 2026-11-23 | [design-parity-stage-5-batch2](2026-11-23-design-parity-stage-5-batch2.md) | done | Stage 5 Batch 2: auth tokens (danger/ink/outline-primary); STOP before Batch 3 AdminRail. |
+| 2026-11-23 | [design-parity-stage-5-batch1](2026-11-23-design-parity-stage-5-batch1.md) | done | Stage 5 Batch 1: marketing/public tokens (`not-found` mkt canvas, form `text-danger`); STOP before Batch 2 auth. |
+| 2026-11-23 | [design-parity-stage-4-batch4](2026-11-23-design-parity-stage-4-batch4.md) | done | Stage 4 Batch 4: Scoreboard/Settings/Certificates/Files/Exports; Stage 4 done; STOP before Stage 5. |
+| 2026-11-23 | [design-parity-stage-4-batch3](2026-11-23-design-parity-stage-4-batch3.md) | done | Stage 4 Batch 3: Expenses/Competitions/Tasks/Submissions chrome; STOP before Batch 4. |
+| 2026-11-22 | [design-parity-stage-4-batch2](2026-11-22-design-parity-stage-4-batch2.md) | done | Stage 4 Batch 2: Agenda/Speakers/Vendors/Sponsors chrome; STOP before Batch 3. |
+| 2026-11-22 | [design-parity-stage-4-batch1](2026-11-22-design-parity-stage-4-batch1.md) | done | Stage 4 Batch 1: event shell + Overview/Attendees/Team/Access; STOP before Batch 2. |
+| 2026-11-22 | [design-parity-stage-3-batch4](2026-11-22-design-parity-stage-3-batch4.md) | done | Stage 3 Batch 4: Form builder/Profile/list density; Stage 3 done; STOP before Stage 4. |
+| 2026-11-22 | [design-parity-stage-3-batch3](2026-11-22-design-parity-stage-3-batch3.md) | done | Stage 3 Batch 3: Forms/Connections/Teams chrome; STOP before Batch 4 / Stage 4. |
+| 2026-11-22 | [design-parity-stage-3-batch2](2026-11-22-design-parity-stage-3-batch2.md) | done | Stage 3 Batch 2: Analytics/Marketplace/Quotes chrome; STOP before Batch 3. |
+| 2026-11-22 | [design-parity-stage-3-batch1](2026-11-22-design-parity-stage-3-batch1.md) | done | Stage 3 Batch 1: forest rail + Dashboard/Events chrome; STOP before Batch 2. |
+| 2026-11-22 | [design-parity-stage-2](2026-11-22-design-parity-stage-2.md) | done | Stage 2: shared UI tokens, `/dev/design-system`, `docs/design-system.md`; STOP before Stage 3 shell. |
+| 2026-11-22 | [design-parity-stage-1](2026-11-22-design-parity-stage-1.md) | done | Stage 1: `src/styles/theme.css` emerald/forest product tokens + WCAG table; STOP before Stage 2. |
+| 2026-11-22 | [design-parity-stage-0](2026-11-22-design-parity-stage-0.md) | done | Stage 0 design→route→component inventory in `docs/design-parity.md`; STOP before Stage 1 tokens. |
 | 2026-11-21 | [event-media-hackathon-detail](2026-11-21-event-media-hackathon-detail.md) | done | Landscape media matrix + public hackathon track switcher / gallery / hero CTAs. |
 | 2026-11-21 | [legal-compliance-suite](2026-11-21-legal-compliance-suite.md) | done | `/legal` Compliance Suite hub; editable chrome + legal CMS bodies; callouts. |
 | 2026-11-21 | [public-event-details-mock](2026-11-21-public-event-details-mock.md) | done | Public event mock: quick bar, Reserve seat tiers, contain media, section reorder. |

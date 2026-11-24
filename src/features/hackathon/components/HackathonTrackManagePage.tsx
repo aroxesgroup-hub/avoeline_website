@@ -132,7 +132,7 @@ export default async function TrackDetailPage({
   const locked = rosterLocked(track, { unlockedByOrganizer: false });
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <Link
           href={base}
@@ -141,7 +141,10 @@ export default async function TrackDetailPage({
           <ChevronLeft className="h-3.5 w-3.5" />
           All tracks
         </Link>
-        <h2 className="mt-2 font-display text-xl text-ink">
+        <p className="mb-1 mt-3 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Competition track
+        </p>
+        <h2 className="font-display text-xl text-ink">
           {track.name}{" "}
           <span className="text-base font-normal text-ink-soft">
             {HACKATHON_KIND_LABELS[track.kind]}
@@ -333,7 +336,7 @@ export default async function TrackDetailPage({
         </CardBody>
       </Card>
 
-      <section className="grid grid-cols-2 gap-y-8 border-y border-line py-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+      <section className="grid grid-cols-2 gap-y-6 border-y border-line py-6 sm:grid-cols-4 sm:divide-x sm:divide-line">
         <MetricTile
           label="Teams"
           value={`${teams.length}`}

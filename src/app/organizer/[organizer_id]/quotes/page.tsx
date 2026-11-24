@@ -13,6 +13,8 @@ import { ArrowLeftRight, ChevronRight, FileText, Inbox, Store } from "lucide-rea
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
+import { FilterTabs } from "@/src/shared_components/ui/FilterTabs";
 import { buttonClass } from "@/src/lib/ui";
 
 function sanitizeForClient<T>(obj: T): T {
@@ -122,9 +124,21 @@ export default async function QuoteManagementPage({
   // on the Past tab and when nothing is selected yet.
   const otherQuotes = displayQuotes.filter((b: any) => b?.bookingId !== selectedQuote?.bookingId);
 
-  const tabs = [
-    { label: "Active Quotes", value: "active", count: activeQuotes.length },
-    { label: "Past Quotes", value: "past", count: pastQuotes.length },
+  const quotesBase = `/organizer/${organizer_id}/quotes`;
+  const marketplaceHref = `/organizer/${organizer_id}/vendor-marketplace`;
+  const filterTabs = [
+    {
+      label: "Active Quotes",
+      value: "active",
+      count: activeQuotes.length,
+      href: `${quotesBase}?tab=active`,
+    },
+    {
+      label: "Past Quotes",
+      value: "past",
+      count: pastQuotes.length,
+      href: `${quotesBase}?tab=past`,
+    },
   ];
 
   // A missing vendor row no longer blanks the whole card -- the quote is the
@@ -143,7 +157,7 @@ export default async function QuoteManagementPage({
     const negotiations = quote?.negotiation || [];
 
     return (
-      <section className="rounded-2xl border border-line bg-paper p-6 md:p-8">
+      <section className="rounded-xl border border-line bg-paper p-6 shadow-xs md:p-8">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-line bg-muted">
@@ -264,28 +278,28 @@ export default async function QuoteManagementPage({
   };
 
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <PageHeader title="Quote Management" description="Review vendor quotes" />
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: `/organizer/${organizer_id}/dashboard` },
+            { label: "Marketplace", href: marketplaceHref },
+            { label: "Quotes" },
+          ]}
+        />
 
-        <nav className="mb-6 flex gap-8 border-b border-line" aria-label="Quote filters">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.value;
-            return (
-              <Link
-                key={tab.value}
-                href={`?tab=${tab.value}`}
-                className={`shrink-0 border-b-2 pb-3 text-sm font-medium transition ${
-                  isActive
-                    ? "border-ink text-ink"
-                    : "border-transparent text-ink-soft hover:text-ink"
-                }`}
-              >
-                {tab.label} <span className="tabular-nums">({tab.count})</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <PageHeader
+          eyebrow="Marketplace · Quote management & RFQs"
+          title="Quote Management"
+          description="Review vendor quotes and negotiate proposals."
+          actions={
+            <Link href={marketplaceHref} className={buttonClass("secondary", "md")}>
+              Browse marketplace
+            </Link>
+          }
+        />
+
+        <FilterTabs tabs={filterTabs} activeValue={activeTab} label="Quote filters" />
 
         {displayQuotes.length === 0 ? (
           <EmptyState
@@ -298,10 +312,7 @@ export default async function QuoteManagementPage({
             }
             action={
               activeTab === "active" ? (
-                <Link
-                  href={`/organizer/${organizer_id}/vendor-marketplace`}
-                  className={buttonClass()}
-                >
+                <Link href={marketplaceHref} className={buttonClass()}>
                   Browse providers
                 </Link>
               ) : undefined
@@ -329,8 +340,8 @@ export default async function QuoteManagementPage({
                   return (
                     <Link
                       key={booking?.bookingId || i}
-                      href={`?tab=${activeTab}&quote=${booking?.bookingId}`}
-                      className="flex items-center justify-between rounded-2xl border border-line bg-paper p-4 transition hover:border-line-loud"
+                      href={`${quotesBase}?tab=${activeTab}&quote=${booking?.bookingId}`}
+                      className="flex items-center justify-between rounded-xl border border-line bg-paper p-4 shadow-xs transition hover:border-line-loud"
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-muted">

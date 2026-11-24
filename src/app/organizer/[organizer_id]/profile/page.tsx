@@ -29,7 +29,8 @@ import { OrganizerPartnerOptIn } from "@/src/features/website/components/Organiz
 import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
-import { labelClass } from "@/src/lib/ui";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
+import { buttonClass, labelClass } from "@/src/lib/ui";
 import { TeamEngineService } from "@/src/features/teams/teamEngine.service";
 import {
   getClubWorkspacePlan,
@@ -38,7 +39,6 @@ import {
 import { PlanStatusBanner } from "@/src/features/department/components/PlanStatusBanner";
 import { MODULE_LABELS } from "@/src/features/permissions/moduleKeys";
 import { getOrganizerEmailConnection } from "@/src/features/email/organizerEmailConnection.service";
-import { buttonClass } from "@/src/lib/ui";
 import Link from "next/link";
 
 const PAST_STATUSES = new Set(["completed", "cancelled"]);
@@ -107,94 +107,105 @@ export default async function OrganizerProfile({
   const location = [organizer.address.city, organizer.address.country].filter(Boolean).join(", ");
 
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8">
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <PageHeader title={publicName} description={roleLine} />
+        <Breadcrumbs
+          items={[{ label: "Dashboard", href: `${basePath}/dashboard` }, { label: "Profile" }]}
+        />
+        <PageHeader
+          eyebrow="Account · Profile & settings"
+          title={publicName}
+          description={roleLine}
+        />
         {clubPlan ? (
           <div className="mb-6">
             <PlanStatusBanner plan={clubPlan} audience="club" />
           </div>
         ) : null}
 
-        <section className="mb-8 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
-          <MetricTile
-            label="Events Created"
-            value={String(stats.totalEventsCreated)}
-            icon={<CalendarDays size={14} />}
-          />
-          <MetricTile
-            label="Attendees"
-            value={String(stats.totalAttendees)}
-            icon={<Users size={14} />}
-          />
-          <MetricTile
-            label="Avg Rating"
-            value={stats.averageRating.toFixed(1)}
-            icon={<Star size={14} />}
-          />
-          <MetricTile
-            label="Revenue"
-            value={formatCurrencyCompact(stats.totalRevenue)}
-            icon={<Wallet size={14} />}
-          />
-        </section>
+        <Card tone="raised" className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-4">
+            <MetricTile
+              label="Events Created"
+              value={String(stats.totalEventsCreated)}
+              icon={<CalendarDays size={14} />}
+            />
+            <MetricTile
+              label="Attendees"
+              value={String(stats.totalAttendees)}
+              icon={<Users size={14} />}
+            />
+            <MetricTile
+              label="Avg Rating"
+              value={stats.averageRating.toFixed(1)}
+              icon={<Star size={14} />}
+            />
+            <MetricTile
+              label="Revenue"
+              value={formatCurrencyCompact(stats.totalRevenue)}
+              icon={<Wallet size={14} />}
+            />
+          </div>
+        </Card>
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* LEFT COLUMN */}
           <div className="space-y-6 lg:col-span-4">
-            <div className="rounded-2xl border border-line bg-paper p-5">
-              <div className="flex items-center gap-4">
-                {organizer.organization.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={organizer.organization.logo}
-                    alt=""
-                    className="size-16 shrink-0 rounded-full border border-line bg-paper object-contain p-1.5"
-                  />
-                ) : (
-                  <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-ink-invert">
-                    {initial}
-                  </div>
-                )}
-                {organizer.verification.isVerified && (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-ink">
-                    <BadgeCheck size={16} aria-hidden="true" />
-                    Verified
-                  </span>
-                )}
-              </div>
-
-              {organizer.organization.description && (
-                <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-                  {organizer.organization.description}
-                </p>
-              )}
-
-              <div className="mt-4 space-y-2 text-sm text-ink-soft">
-                <p className="flex items-center gap-2">
-                  <MapPin size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
-                  <span>{location || "—"}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Mail size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
-                  <span className="truncate">{organizer.contact.primaryEmail || "—"}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
-                  <span className="tabular-nums">{organizer.contact.primaryPhone || "—"}</span>
-                </p>
-              </div>
-
-              <div className="mt-6">
-                <p className={labelClass}>Organization Logo</p>
-                <div className="mt-2">
-                  <OrganizerLogoUpload
-                    organizerId={organizer_id}
-                    currentLogo={organizer.organization.logo}
-                  />
+            <Card>
+              <CardBody>
+                <div className="flex items-center gap-4">
+                  {organizer.organization.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={organizer.organization.logo}
+                      alt=""
+                      className="size-16 shrink-0 rounded-full border border-line bg-paper object-contain p-1.5"
+                    />
+                  ) : (
+                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink text-2xl font-semibold text-ink-invert">
+                      {initial}
+                    </div>
+                  )}
+                  {organizer.verification.isVerified && (
+                    <span className="inline-flex items-center gap-1.5 text-sm text-ink">
+                      <BadgeCheck size={16} aria-hidden="true" />
+                      Verified
+                    </span>
+                  )}
                 </div>
-              </div>
-            </div>
+
+                {organizer.organization.description && (
+                  <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+                    {organizer.organization.description}
+                  </p>
+                )}
+
+                <div className="mt-4 space-y-2 text-sm text-ink-soft">
+                  <p className="flex items-center gap-2">
+                    <MapPin size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
+                    <span>{location || "—"}</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Mail size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
+                    <span className="truncate">{organizer.contact.primaryEmail || "—"}</span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Phone size={16} className="shrink-0 text-ink-faint" aria-hidden="true" />
+                    <span className="tabular-nums">{organizer.contact.primaryPhone || "—"}</span>
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <p className={labelClass}>Organization Logo</p>
+                  <div className="mt-2">
+                    <OrganizerLogoUpload
+                      organizerId={organizer_id}
+                      currentLogo={organizer.organization.logo}
+                    />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
 
             {u.userId === organizer_id ? (
               <OrganizerPartnerOptIn organizerId={organizer_id} />
@@ -208,29 +219,31 @@ export default async function OrganizerProfile({
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-10 lg:col-span-8">
-            <section className="mb-6 grid grid-cols-1 rounded-2xl border border-line bg-paper shadow-sm sm:grid-cols-4">
-              <MetricTile
-                label="Upcoming"
-                value={String(stats.upcomingEvents)}
-                icon={<CalendarDays size={14} />}
-              />
-              <MetricTile
-                label="Completed"
-                value={String(stats.completedEvents)}
-                icon={<ShieldCheck size={14} />}
-              />
-              <MetricTile
-                label="Published"
-                value={String(stats.publishedEvents)}
-                icon={<TrendingUp size={14} />}
-              />
-              <MetricTile
-                label="Avg / Event"
-                value={stats.averageAttendeesPerEvent.toFixed(0)}
-                icon={<Users size={14} />}
-              />
-            </section>
+          <div className="space-y-6 lg:col-span-8">
+            <Card tone="raised">
+              <div className="grid grid-cols-1 sm:grid-cols-4">
+                <MetricTile
+                  label="Upcoming"
+                  value={String(stats.upcomingEvents)}
+                  icon={<CalendarDays size={14} />}
+                />
+                <MetricTile
+                  label="Completed"
+                  value={String(stats.completedEvents)}
+                  icon={<ShieldCheck size={14} />}
+                />
+                <MetricTile
+                  label="Published"
+                  value={String(stats.publishedEvents)}
+                  icon={<TrendingUp size={14} />}
+                />
+                <MetricTile
+                  label="Avg / Event"
+                  value={stats.averageAttendeesPerEvent.toFixed(0)}
+                  icon={<Users size={14} />}
+                />
+              </div>
+            </Card>
 
             <Card title="Account Settings">
               <CardBody>
@@ -249,20 +262,20 @@ export default async function OrganizerProfile({
                     ? `Connected as ${emailConnection?.fromEmail}. Required for attendee and certificate mail.`
                     : "Not connected. Attendee and certificate sends are blocked until you connect Google."}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-ink">
-                  <Link href={`${basePath}/settings/connections`} className="underline">
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={`${basePath}/settings/connections`}
+                    className={buttonClass("secondary", "sm")}
+                  >
                     {emailConnected ? "Manage connections" : "Connect Google"}
                   </Link>
                   <Link
                     href={`${basePath}/settings/connections?section=drive`}
-                    className="underline text-ink-soft hover:text-ink"
+                    className={buttonClass("ghost", "sm")}
                   >
                     Drive library
                   </Link>
-                  <Link
-                    href={`${basePath}/forms`}
-                    className="underline text-ink-soft hover:text-ink"
-                  >
+                  <Link href={`${basePath}/forms`} className={buttonClass("ghost", "sm")}>
                     Custom forms
                   </Link>
                 </div>

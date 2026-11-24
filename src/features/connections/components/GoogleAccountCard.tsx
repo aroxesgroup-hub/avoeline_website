@@ -7,6 +7,7 @@ import { accountPermissionChips, STATUS_LABEL } from "../lib/connectionCardHelpe
 import { formatSafeActionError } from "../lib/connectionUserErrors";
 import { disconnectConnectionAction } from "../actions/connections.action";
 import { ConnectDialog } from "./ConnectDialog";
+import { buttonClass } from "@/src/lib/ui";
 
 export function GoogleAccountCard({
   connection,
@@ -62,8 +63,8 @@ export function GoogleAccountCard({
               <span
                 className={
                   connection.status === "active"
-                    ? "rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-800"
-                    : "rounded-full bg-amber-50 px-2 py-0.5 text-amber-900"
+                    ? "rounded-full bg-success-soft px-2 py-0.5 text-success"
+                    : "rounded-full bg-warning-soft px-2 py-0.5 text-warning"
                 }
               >
                 {STATUS_LABEL[connection.status] || connection.status}
@@ -76,7 +77,7 @@ export function GoogleAccountCard({
             <button
               type="button"
               disabled={pending || !googleReady}
-              className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
+              className={buttonClass("primary", "sm")}
               onClick={() => setReconnectOpen(true)}
             >
               Reconnect
@@ -85,7 +86,7 @@ export function GoogleAccountCard({
           <button
             type="button"
             disabled={pending || !googleReady}
-            className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-ink disabled:opacity-50"
+            className={buttonClass("secondary", "sm")}
             onClick={() => setAddOpen(true)}
           >
             Add another account
@@ -93,7 +94,7 @@ export function GoogleAccountCard({
           <button
             type="button"
             disabled={pending}
-            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-800 disabled:opacity-50"
+            className={buttonClass("destructive", "sm")}
             onClick={() =>
               start(async () => {
                 const r = await disconnectConnectionAction({ connectionId: connection.id });
@@ -112,7 +113,7 @@ export function GoogleAccountCard({
           <span
             key={chip.id}
             className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-              chip.enabled ? "bg-emerald-50 text-emerald-900" : "bg-canvas text-ink-soft"
+              chip.enabled ? "bg-success-soft text-success" : "bg-canvas text-ink-soft"
             }`}
           >
             {chip.label}
@@ -121,7 +122,7 @@ export function GoogleAccountCard({
         ))}
       </div>
 
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
 
       <ConnectDialog
         open={reconnectOpen}

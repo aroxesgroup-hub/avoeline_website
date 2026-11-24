@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import {
-  Terminal,
-  Plus,
-  Trash2,
-  Shuffle,
-  Box,
-  KeyRound,
-  Hash,
-} from "lucide-react";
+import { Terminal, Plus, Trash2, Shuffle, Box, KeyRound, Hash } from "lucide-react";
 import { CTF_CATEGORIES, type CTFChallenge } from "../../types";
 import { saveCTFChallengeAction, deleteCTFChallengeAction } from "../../actions/ctf.action";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -35,7 +27,8 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
   });
 
   const handleDelete = (challengeId: string) => {
-    if (!confirm("Delete this CTF challenge? Submissions and scoreboard points will be removed.")) return;
+    if (!confirm("Delete this CTF challenge? Submissions and scoreboard points will be removed."))
+      return;
     startTransition(async () => {
       const res = await deleteCTFChallengeAction(challengeId, eventId);
       if (res.success) {
@@ -61,11 +54,12 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
       <div className="flex flex-col justify-between gap-4 border-b border-line pb-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="text-lg font-bold text-ink flex items-center gap-2">
-            <Terminal className="text-indigo-600 dark:text-indigo-400" size={20} />
+            <Terminal className="text-series-2 dark:text-series-2" size={20} />
             CTF Challenge Bank & Flags
           </h3>
           <p className="text-xs text-ink-soft">
-            Configure static & dynamic flag tasks, per-task timers, randomized task pools, and Docker sandboxes.
+            Configure static & dynamic flag tasks, per-task timers, randomized task pools, and
+            Docker sandboxes.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -82,11 +76,7 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
               ))}
             </select>
           ) : null}
-          <button
-            type="button"
-            onClick={handleOpenNew}
-            className={buttonClass("primary", "sm")}
-          >
+          <button type="button" onClick={handleOpenNew} className={buttonClass("primary", "sm")}>
             <Plus size={14} />
             New Challenge
           </button>
@@ -97,8 +87,8 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
         <div
           className={`rounded-xl p-3 text-xs font-medium ${
             feedback.success
-              ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+              ? "bg-primary-soft text-primary dark:bg-primary-soft dark:text-primary"
+              : "bg-danger-soft text-danger dark:bg-danger-soft dark:text-danger-on-ink"
           }`}
         >
           {feedback.msg}
@@ -139,7 +129,7 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
 
       {/* Create / Edit Form Modal */}
       {showForm ? (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/20 p-5 dark:border-indigo-900/60 dark:bg-indigo-950/10">
+        <div className="rounded-2xl border border-accent-line bg-accent-soft p-5 dark:border-accent-line dark:bg-accent-soft">
           <div className="flex items-center justify-between pb-3 border-b border-line">
             <h4 className="font-bold text-ink">
               {editingChallenge ? `Edit Challenge: ${editingChallenge.title}` : "Add CTF Challenge"}
@@ -277,11 +267,14 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
             <div className="rounded-xl border border-line bg-paper p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Box className="text-indigo-600" size={16} />
+                  <Box className="text-series-2" size={16} />
                   <div>
-                    <span className="text-xs font-bold text-ink">Docker Sandbox Machine (Premium)</span>
+                    <span className="text-xs font-bold text-ink">
+                      Docker Sandbox Machine (Premium)
+                    </span>
                     <p className="text-2xs text-ink-soft">
-                      Spawns an isolated exploitable container per team with private ports & credentials.
+                      Spawns an isolated exploitable container per team with private ports &
+                      credentials.
                     </p>
                   </div>
                 </div>
@@ -290,13 +283,15 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
                   name="requiresDocker"
                   value="true"
                   defaultChecked={editingChallenge?.requiresDocker || false}
-                  className="h-4 w-4 rounded accent-indigo-600"
+                  className="h-4 w-4 rounded accent-primary"
                 />
               </div>
               <div className="mt-3">
                 <input
                   name="dockerImage"
-                  defaultValue={editingChallenge?.dockerImage || "ghcr.io/avoeline/ctf-web-sqli:latest"}
+                  defaultValue={
+                    editingChallenge?.dockerImage || "ghcr.io/avoeline/ctf-web-sqli:latest"
+                  }
                   placeholder="Docker image registry URI"
                   className={fieldClass}
                 />
@@ -311,11 +306,7 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className={buttonClass("primary", "sm")}
-              >
+              <button type="submit" disabled={isPending} className={buttonClass("primary", "sm")}>
                 {isPending ? "Saving..." : "Save Challenge"}
               </button>
             </div>
@@ -359,7 +350,7 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
                   <td className="p-3.5">
                     <span className="font-semibold text-ink">{challenge.title}</span>
                     {challenge.randomPoolTag ? (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded bg-indigo-50 px-1.5 py-0.5 text-2xs text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                      <span className="ml-2 inline-flex items-center gap-1 rounded bg-accent-soft px-1.5 py-0.5 text-2xs text-series-2 dark:bg-accent-soft dark:text-series-2">
                         <Shuffle size={10} /> {challenge.randomPoolTag}
                       </span>
                     ) : null}
@@ -372,18 +363,18 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
                   <td className="p-3.5 font-mono font-semibold">{challenge.points} pts</td>
                   <td className="p-3.5">
                     {challenge.flagType === "dynamic" ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-2xs font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-2 py-0.5 text-2xs font-semibold text-series-3 dark:bg-accent-soft dark:text-series-3">
                         <Hash size={11} /> Dynamic Salt
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-2xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-2 py-0.5 text-2xs font-semibold text-series-2 dark:bg-accent-soft dark:text-series-2">
                         <KeyRound size={11} /> Static
                       </span>
                     )}
                   </td>
                   <td className="p-3.5">
                     {challenge.requiresDocker ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-2xs font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-primary-soft px-2 py-0.5 text-2xs font-semibold text-primary dark:bg-primary-soft dark:text-primary">
                         <Box size={11} /> Docker VM
                       </span>
                     ) : (
@@ -396,14 +387,14 @@ export function CTFChallengeManager({ eventId, tracks, challenges }: CTFChalleng
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(challenge)}
-                        className="font-medium text-indigo-600 hover:underline"
+                        className="font-medium text-series-2 hover:underline"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(challenge.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-danger hover:text-danger"
                         title="Delete challenge"
                       >
                         <Trash2 size={14} />

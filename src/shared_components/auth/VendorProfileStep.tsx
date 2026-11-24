@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import AddSocialsModal from './AddSocialsModal';
-import ProfileLoadingState from './ProfileLoadingState';
-import { ImagePlus, Plus, X } from 'lucide-react';
-import { uploadMedia } from '@/src/features/media/uploadMedia.action';
-import { buttonClass, fieldClass, labelClass } from '@/src/lib/ui';
-import { FormFeedback } from '@/src/shared_components/ui/FormFeedback';
-import type { VendorSetupProfileData } from '@/src/features/auth/authService';
+import React, { useState } from "react";
+import AddSocialsModal from "./AddSocialsModal";
+import ProfileLoadingState from "./ProfileLoadingState";
+import { ImagePlus, Plus, X } from "lucide-react";
+import { uploadMedia } from "@/src/features/media/uploadMedia.action";
+import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import { FormFeedback } from "@/src/shared_components/ui/FormFeedback";
+import type { VendorSetupProfileData } from "@/src/features/auth/authService";
 
 type ActionResult = { success: boolean; error?: string };
 
@@ -21,25 +21,25 @@ interface VendorProfileStepProps {
 export default function VendorProfileStep({
   onNext,
   onSave,
-  initialEmail = '',
+  initialEmail = "",
 }: VendorProfileStepProps) {
   const [isSocialsOpen, setIsSocialsOpen] = useState<boolean>(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    username: '',
-    description: '',
-    address: '',
+    username: "",
+    description: "",
+    address: "",
     email: initialEmail,
-    contactNo: '',
-    established: '',
-    recoveryContact: '',
-    website: '',
-    link1: '',
+    contactNo: "",
+    established: "",
+    recoveryContact: "",
+    website: "",
+    link1: "",
   });
 
-  const [serviceInput, setServiceInput] = useState<string>('');
+  const [serviceInput, setServiceInput] = useState<string>("");
   const [services, setServices] = useState<string[]>([]);
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -47,19 +47,19 @@ export default function VendorProfileStep({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'description' && value.length > 100) return;
+    if (name === "description" && value.length > 100) return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddService = () => {
     if (serviceInput.trim()) {
       setServices([...services, serviceInput.trim()]);
-      setServiceInput('');
+      setServiceInput("");
     }
   };
 
   const handleServiceKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       handleAddService();
     }
@@ -90,11 +90,11 @@ export default function VendorProfileStep({
       let logoUrl: string | null = null;
       if (profileFile) {
         const fd = new FormData();
-        fd.append('file', profileFile);
-        fd.append('folder', 'vendor-logos');
+        fd.append("file", profileFile);
+        fd.append("folder", "vendor-logos");
         const upload = await uploadMedia(fd);
         if (!upload.success) {
-          setError(upload.error || 'Logo upload failed.');
+          setError(upload.error || "Logo upload failed.");
           setIsLoading(false);
           return;
         }
@@ -110,7 +110,7 @@ export default function VendorProfileStep({
       // while a redirect was already scheduled, and a second click re-ran the write.
       const saved: ActionResult = onSave ? await onSave(payload) : { success: true };
       if (!saved.success) {
-        setError(saved.error || 'Failed to save vendor profile.');
+        setError(saved.error || "Failed to save vendor profile.");
         setIsLoading(false);
         return;
       }
@@ -119,11 +119,11 @@ export default function VendorProfileStep({
       // path because the server action redirects out of this tree.
       const finished = (await onNext?.()) as ActionResult | undefined;
       if (finished && !finished.success) {
-        setError(finished.error || 'Failed to finish setup.');
+        setError(finished.error || "Failed to finish setup.");
       }
       setIsLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile.');
+      setError(err instanceof Error ? err.message : "Failed to save profile.");
       setIsLoading(false);
     }
   };
@@ -149,7 +149,7 @@ export default function VendorProfileStep({
                 keyboard, which made the only avatar control mouse-only. */}
             <label
               htmlFor="vendor-logo"
-              className="group relative block cursor-pointer rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gray-900"
+              className="group relative block cursor-pointer rounded-full focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary"
             >
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-line-loud bg-paper p-1">
                 {profileImage ? (
@@ -177,7 +177,7 @@ export default function VendorProfileStep({
               />
             </label>
             <span className="mt-3 text-sm font-semibold uppercase text-ink">
-              {formData.username || 'Your business'}
+              {formData.username || "Your business"}
             </span>
           </div>
 
@@ -188,7 +188,9 @@ export default function VendorProfileStep({
               </h2>
 
               <div>
-                <label htmlFor="vendor-username" className={labelClass}>Username</label>
+                <label htmlFor="vendor-username" className={labelClass}>
+                  Username
+                </label>
                 <input
                   id="vendor-username"
                   type="text"
@@ -201,7 +203,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-description" className={labelClass}>Description</label>
+                <label htmlFor="vendor-description" className={labelClass}>
+                  Description
+                </label>
                 <div className="relative mt-1 w-full">
                   <input
                     id="vendor-description"
@@ -220,7 +224,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-address" className={labelClass}>Address</label>
+                <label htmlFor="vendor-address" className={labelClass}>
+                  Address
+                </label>
                 <input
                   id="vendor-address"
                   type="text"
@@ -233,7 +239,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-email" className={labelClass}>Email</label>
+                <label htmlFor="vendor-email" className={labelClass}>
+                  Email
+                </label>
                 <input
                   id="vendor-email"
                   type="email"
@@ -246,7 +254,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-contact" className={labelClass}>Contact No</label>
+                <label htmlFor="vendor-contact" className={labelClass}>
+                  Contact No
+                </label>
                 <input
                   id="vendor-contact"
                   type="tel"
@@ -265,7 +275,9 @@ export default function VendorProfileStep({
               </h2>
 
               <div>
-                <label htmlFor="vendor-established" className={labelClass}>Established</label>
+                <label htmlFor="vendor-established" className={labelClass}>
+                  Established
+                </label>
                 <input
                   id="vendor-established"
                   type="text"
@@ -278,7 +290,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-recovery" className={labelClass}>Recovery Contact</label>
+                <label htmlFor="vendor-recovery" className={labelClass}>
+                  Recovery Contact
+                </label>
                 <input
                   id="vendor-recovery"
                   type="text"
@@ -291,7 +305,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-services" className={labelClass}>Services</label>
+                <label htmlFor="vendor-services" className={labelClass}>
+                  Services
+                </label>
                 <div className="mt-1 space-y-2">
                   <div className="relative w-full">
                     <input
@@ -337,7 +353,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-website" className={labelClass}>Website</label>
+                <label htmlFor="vendor-website" className={labelClass}>
+                  Website
+                </label>
                 <input
                   id="vendor-website"
                   type="url"
@@ -350,7 +368,9 @@ export default function VendorProfileStep({
               </div>
 
               <div>
-                <label htmlFor="vendor-link1" className={labelClass}>Link 1</label>
+                <label htmlFor="vendor-link1" className={labelClass}>
+                  Link 1
+                </label>
                 <input
                   id="vendor-link1"
                   type="url"
@@ -371,9 +391,9 @@ export default function VendorProfileStep({
               <button
                 type="button"
                 onClick={() => setIsSocialsOpen(true)}
-                className={buttonClass('secondary', 'lg', 'w-full')}
+                className={buttonClass("secondary", "lg", "w-full")}
               >
-                Add Socials{' '}
+                Add Socials{" "}
                 {socialLinks.filter((s) => s.url).length > 0 &&
                   `(${socialLinks.filter((s) => s.url).length})`}
               </button>
@@ -381,9 +401,9 @@ export default function VendorProfileStep({
               <button
                 type="submit"
                 disabled={isLoading}
-                className={buttonClass('primary', 'lg', 'w-full')}
+                className={buttonClass("primary", "lg", "w-full")}
               >
-                {isLoading ? 'Saving…' : 'Save and finish'}
+                {isLoading ? "Saving…" : "Save and finish"}
               </button>
             </div>
           </div>

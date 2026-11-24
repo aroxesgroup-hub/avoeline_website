@@ -56,10 +56,7 @@ export function GroupedAttendeeList({
         const hasAmount = typeof group.amount === "number" && group.amount > 0;
         const paymentStatus = hasAmount && group.payment === "not_required" ? null : group.payment;
         return (
-          <div
-            key={group.id}
-            className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm"
-          >
+          <div key={group.id} className="overflow-hidden rounded-xl border border-line bg-paper">
             <div className="flex items-center gap-3 px-5 py-4">
               <button
                 type="button"

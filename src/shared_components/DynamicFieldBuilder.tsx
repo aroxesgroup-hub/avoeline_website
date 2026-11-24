@@ -82,7 +82,7 @@ export function DynamicFieldBuilder({
             <button
               type="button"
               onClick={() => onChange(fields.filter((_, i) => i !== idx))}
-              className="rounded p-1 text-ink-soft transition hover:text-rose-600"
+              className="rounded p-1 text-ink-soft transition hover:text-danger"
               title="Remove field"
             >
               <Trash2 className="h-4 w-4" />

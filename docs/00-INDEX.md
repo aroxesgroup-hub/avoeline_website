@@ -22,6 +22,8 @@ For a single document covering **every role, tab, flow, plan/module gate, securi
 | Department dashboard, club oversight, tenures, budgets | `02-department.md` |
 | Club president portal, club team roles, requests to department | `03-club-president.md` |
 | Organizer dashboard, any paid vs free feature question | `04-organizer.md` |
+| Design parity (organizer/event UI vs `design/` PNGs) | `design-parity.md` (+ plans `plans/2026-11-22-design-parity-stage-*.md`) |
+| Product design system (tokens, recipes, gallery) | `design-system.md` (+ `/dev/design-system`) |
 | Teams, staff, recruitment, access grants | `12-teams-and-staff.md` (+ `plans/2026-10-12-phase6-teams.md`) |
 | Cross-cutting security checklist | `15-security-baseline.md` (+ Connections: `17-connections-system.md`) |
 | Feature × role × plan coverage matrix | `20-feature-coverage.md` |

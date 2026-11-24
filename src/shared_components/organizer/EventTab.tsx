@@ -20,6 +20,8 @@ import {
   Ticket,
   KeyRound,
   Code2,
+  Wallet,
+  FolderOpen,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -44,8 +46,10 @@ const iconMap: Record<string, ComponentType<{ size?: number; className?: string 
   vendors: MapPinned,
   venues: MapPinned,
   sponsors: Handshake,
+  expenses: Wallet,
   certificates: Award,
   exports: Download,
+  files: FolderOpen,
   analytics: ChartColumn,
   settings: Settings,
   tickets: Ticket,
@@ -61,8 +65,8 @@ const iconMap: Record<string, ComponentType<{ size?: number; className?: string 
 /**
  * Section navigation for one event.
  *
- * Compact horizontal strip matching the slim dashboard rail density
- * (`text-xs`, 14px icons, tight padding). Scrolls on narrow screens.
+ * Pathname-driven (unlike FilterTabs query strips). Token-aligned with Stage 3
+ * FilterTabs: accent active underline, text-sm, scroll strip. Icons kept.
  */
 export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
   const current_tab = usePathname();
@@ -72,7 +76,10 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
-    <nav aria-label="Event sections" className="-mb-px mt-3 flex gap-0.5 overflow-x-auto">
+    <nav
+      aria-label="Event sections"
+      className="-mb-px mt-5 flex gap-1 overflow-x-auto border-b border-line"
+    >
       {tabs.map((tab) => {
         const isActive = tab.href === activeHref;
         const Icon = iconMap[tab.value] || LayoutDashboard;
@@ -82,13 +89,13 @@ export function EventsTab({ tabs }: { tabs: EventTabItem[] }) {
             key={tab.value}
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
-            className={`flex shrink-0 items-center gap-1.5 border-b-[3px] px-2.5 py-2 text-xs transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
+            className={`flex shrink-0 items-center gap-2 border-b-2 px-3 pb-3 pt-1 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] ${
               isActive
-                ? "border-ink font-semibold text-ink"
-                : "border-transparent font-medium text-ink-faint hover:border-line-loud hover:text-ink-soft"
+                ? "border-accent font-semibold text-ink"
+                : "border-transparent font-medium text-ink-soft hover:border-line-loud hover:text-ink"
             }`}
           >
-            <Icon size={14} className={`shrink-0 ${isActive ? "text-ink" : "text-ink-soft"}`} />
+            <Icon size={14} className={`shrink-0 ${isActive ? "text-accent" : "text-ink-soft"}`} />
             {tab.label}
           </Link>
         );

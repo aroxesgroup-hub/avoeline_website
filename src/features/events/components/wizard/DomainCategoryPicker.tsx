@@ -55,12 +55,13 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
     name: "Technology & Engineering",
     tagline: "Coding competitions, developer conferences, tech summits and hacker arenas",
     icon: Code2,
-    accentColor: "from-blue-600 to-indigo-600",
+    accentColor: "from-series-2 to-series-1",
     formats: [
       {
         id: "hackathon",
         name: "Hackathon & CTF Challenge",
-        description: "Competitive multi-track build and hacking sprint with CTF engine, sandboxes & live scoring.",
+        description:
+          "Competitive multi-track build and hacking sprint with CTF engine, sandboxes & live scoring.",
         icon: Terminal,
         badge: "CTF Engine Ready",
         isHackathon: true,
@@ -76,7 +77,8 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
       {
         id: "conference",
         name: "Tech Conference",
-        description: "Multi-track developer conference with keynotes, technical breakouts, and workshops.",
+        description:
+          "Multi-track developer conference with keynotes, technical breakouts, and workshops.",
         icon: Layers,
         badge: "Multi-Track",
         features: ["Speaker Management", "Multi-Track Agenda", "Sponsor Tiers"],
@@ -124,7 +126,7 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
     name: "Festivals, Culture & Entertainment",
     tagline: "Live entertainment, music festivals, cultural showcases, and award galas",
     icon: Music,
-    accentColor: "from-pink-600 to-rose-600",
+    accentColor: "from-series-3 to-danger",
     formats: [
       {
         id: "cultural-festival",
@@ -137,7 +139,8 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
       {
         id: "award-ceremony",
         name: "Award Ceremony & Gala",
-        description: "Prestigious recognition gala with red carpet, nomination tiers, and trophies.",
+        description:
+          "Prestigious recognition gala with red carpet, nomination tiers, and trophies.",
         icon: Award,
         badge: "Gala Event",
         features: ["Nomination Voting", "Seating Tables", "Run of Show"],
@@ -163,7 +166,7 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
     name: "Corporate & Business",
     tagline: "Executive summits, product launches, corporate galas, and networking mixers",
     icon: Briefcase,
-    accentColor: "from-amber-600 to-orange-600",
+    accentColor: "from-warning to-warning",
     formats: [
       {
         id: "business-summit",
@@ -193,7 +196,7 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
     name: "Sports & Esports Tournaments",
     tagline: "Bracketed competitions, gaming tournaments, athletics, and league matches",
     icon: Trophy,
-    accentColor: "from-emerald-600 to-teal-600",
+    accentColor: "from-primary to-series-1",
     formats: [
       {
         id: "esports-tournament",
@@ -217,12 +220,13 @@ export const DOMAIN_GROUPS: DomainGroup[] = [
     name: "Academic & Education",
     tagline: "University conferences, research symposiums, and training bootcamps",
     icon: GraduationCap,
-    accentColor: "from-purple-600 to-violet-600",
+    accentColor: "from-series-3 to-accent",
     formats: [
       {
         id: "symposium",
         name: "Academic Symposium",
-        description: "Research paper presentations, academic peer review sessions, and keynote talks.",
+        description:
+          "Research paper presentations, academic peer review sessions, and keynote talks.",
         icon: GraduationCap,
         features: ["Paper Submissions", "Peer Review", "Certificates"],
       },
@@ -246,7 +250,7 @@ export function DomainCategoryPicker({
   const [activeDomainId, setActiveDomainId] = useState<string>(() => {
     // If already chosen, locate domain, else default to 'technology'
     const found = DOMAIN_GROUPS.find(
-      (d) => d.id === selectedSuperId || d.formats.some((f) => f.id === selectedFormatId)
+      (d) => d.id === selectedSuperId || d.formats.some((f) => f.id === selectedFormatId),
     );
     return found?.id ?? "technology";
   });
@@ -256,10 +260,11 @@ export function DomainCategoryPicker({
   const handlePick = (format: FormatOption) => {
     // Check if entry exists in database taxonomy, or slugify
     const matchedSuper = entries.find(
-      (e) => e.kind === "super" && (e.id === currentDomain.id || slugifyId(e.name) === currentDomain.id)
+      (e) =>
+        e.kind === "super" && (e.id === currentDomain.id || slugifyId(e.name) === currentDomain.id),
     );
     const matchedFormat = entries.find(
-      (e) => e.kind === "format" && (e.id === format.id || slugifyId(e.name) === format.id)
+      (e) => e.kind === "format" && (e.id === format.id || slugifyId(e.name) === format.id),
     );
 
     const superId = matchedSuper?.id || currentDomain.id;
@@ -274,13 +279,16 @@ export function DomainCategoryPicker({
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center rounded-lg bg-indigo-500/10 p-1.5 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400">
+          <span className="inline-flex items-center justify-center rounded-lg bg-series-2/10 p-1.5 text-series-2 dark:bg-accent-soft dark:text-series-2">
             <Layers size={18} />
           </span>
-          <h2 className="text-xl font-bold tracking-tight text-ink">Choose Event Category & Domain</h2>
+          <h2 className="text-xl font-bold tracking-tight text-ink">
+            Choose Event Category & Domain
+          </h2>
         </div>
         <p className="mt-1 text-sm text-ink-soft">
-          Select your event&apos;s domain to automatically load tailored workflows, checklists, and specialized engines.
+          Select your event&apos;s domain to automatically load tailored workflows, checklists, and
+          specialized engines.
         </p>
       </div>
 
@@ -309,7 +317,7 @@ export function DomainCategoryPicker({
               />
               <span>{domain.name}</span>
               {hasSelectedChild && !isActive ? (
-                <span className="h-2 w-2 rounded-full bg-emerald-500" title="Active selection" />
+                <span className="h-2 w-2 rounded-full bg-primary-soft0" title="Active selection" />
               ) : null}
             </button>
           );
@@ -340,10 +348,10 @@ export function DomainCategoryPicker({
               onClick={() => handlePick(format)}
               className={`relative flex cursor-pointer flex-col justify-between rounded-2xl border p-5 transition-all duration-200 ${
                 isSelected
-                  ? "border-indigo-600 bg-indigo-50/50 shadow-md ring-2 ring-indigo-600/30 dark:border-indigo-500 dark:bg-indigo-950/20"
+                  ? "border-series-2 bg-accent-soft/50 shadow-md ring-2 ring-series-2/30 dark:border-accent-line dark:bg-accent-soft"
                   : isHack
-                  ? "border-indigo-200/80 bg-gradient-to-b from-white to-indigo-50/20 hover:border-indigo-400 hover:shadow-md dark:border-indigo-900/60 dark:from-surface dark:to-indigo-950/10"
-                  : "border-line bg-paper hover:border-ink/30 hover:shadow-sm"
+                    ? "border-accent-line/80 bg-gradient-to-b from-white to-accent-soft hover:border-accent hover:shadow-md dark:border-accent-line dark:from-surface dark:to-accent-soft"
+                    : "border-line bg-paper hover:border-ink/30 hover:shadow-sm"
               }`}
             >
               <div>
@@ -351,10 +359,10 @@ export function DomainCategoryPicker({
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                       isHack
-                        ? "bg-indigo-600 text-white shadow-sm"
+                        ? "bg-series-2 text-white shadow-sm"
                         : isSelected
-                        ? "bg-indigo-600 text-white"
-                        : "bg-muted text-ink"
+                          ? "bg-series-2 text-white"
+                          : "bg-muted text-ink"
                     }`}
                   >
                     <Icon size={20} />
@@ -365,7 +373,7 @@ export function DomainCategoryPicker({
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider ${
                           isHack
-                            ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200"
+                            ? "bg-accent-soft text-series-2 dark:bg-accent-soft dark:text-series-2"
                             : "bg-muted text-ink-soft"
                         }`}
                       >
@@ -374,7 +382,7 @@ export function DomainCategoryPicker({
                     ) : null}
 
                     {isSelected ? (
-                      <CheckCircle2 size={20} className="text-indigo-600 dark:text-indigo-400" />
+                      <CheckCircle2 size={20} className="text-series-2 dark:text-series-2" />
                     ) : null}
                   </div>
                 </div>
@@ -409,7 +417,7 @@ export function DomainCategoryPicker({
                   }}
                   className={`w-full rounded-xl py-2 text-xs font-semibold transition-all ${
                     isSelected
-                      ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
+                      ? "bg-series-2 text-white shadow-sm hover:bg-series-2"
                       : "bg-muted text-ink hover:bg-ink hover:text-white"
                   }`}
                 >

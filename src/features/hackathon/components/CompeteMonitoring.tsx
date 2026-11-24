@@ -48,7 +48,7 @@ export function CompeteMonitoring({
   if (!activityOn && !integrityOn) return null;
 
   return (
-    <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+    <p className="rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-xs text-warning">
       Monitoring is active for this competition
       {activityOn ? " (activity check)" : ""}
       {integrityOn ? " (tab-leave logging)" : ""}. Only event type and server time are recorded —

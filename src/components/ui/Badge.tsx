@@ -1,13 +1,7 @@
 import React from "react";
 
 export type BadgeVariant =
-  | "default"
-  | "primary"
-  | "success"
-  | "warning"
-  | "danger"
-  | "neutral"
-  | "outline";
+  "default" | "primary" | "success" | "warning" | "danger" | "neutral" | "outline";
 
 export type BadgeSize = "sm" | "md";
 
@@ -23,7 +17,7 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   success: "bg-success-soft text-success border-success-line",
   warning: "bg-warning-soft text-warning border-warning-line",
   danger: "bg-danger-soft text-danger border-danger-line",
-  neutral: "bg-neutral-100 dark:bg-neutral-800 text-ink-soft border-neutral-200 dark:border-neutral-700",
+  neutral: "bg-muted text-ink-soft border-line",
   outline: "bg-transparent text-ink border-line-loud",
 };
 
