@@ -366,7 +366,7 @@ export default async function AttendeesPage({
         connectionsHref={`/organizer/${organizer_id}/connections`}
       />
       {proofFallbackCount > 0 ? (
-        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+        <p className="mb-4 rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning">
           {proofFallbackCount} payment proof{proofFallbackCount === 1 ? " is" : "s are"} in
           temporary storage because Drive was unavailable. Connect Drive under Connections so they
           can be promoted.

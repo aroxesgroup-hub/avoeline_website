@@ -201,15 +201,15 @@ export const CsvWhitelistUploader: React.FC<CsvWhitelistUploaderProps> = ({
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <div className="p-2.5 rounded-lg bg-primary-soft text-primary dark:bg-primary-soft dark:text-primary">
               <span className="block font-bold text-sm">{report.valid.length}</span>
               Valid Emails
             </div>
-            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <div className="p-2.5 rounded-lg bg-warning-soft text-warning dark:bg-warning-soft dark:text-warning-on-ink">
               <span className="block font-bold text-sm">{report.duplicates.length}</span>
               Duplicates
             </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+            <div className="p-2.5 rounded-lg bg-danger-soft text-danger dark:bg-danger-soft dark:text-danger-on-ink">
               <span className="block font-bold text-sm">{report.invalid.length}</span>
               Invalid Rows
             </div>
@@ -223,9 +223,7 @@ export const CsvWhitelistUploader: React.FC<CsvWhitelistUploaderProps> = ({
                   Line {inv.line}: &quot;{inv.text}&quot;
                 </div>
               ))}
-              {report.invalid.length > 5 && (
-                <div>...and {report.invalid.length - 5} more</div>
-              )}
+              {report.invalid.length > 5 && <div>...and {report.invalid.length - 5} more</div>}
             </div>
           )}
 
@@ -255,11 +253,7 @@ export const CsvWhitelistUploader: React.FC<CsvWhitelistUploaderProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-neutral-500">
             <span>Whitelisted Emails ({emails.length})</span>
-            <button
-              type="button"
-              onClick={clearAll}
-              className="text-rose-600 hover:underline"
-            >
+            <button type="button" onClick={clearAll} className="text-danger hover:underline">
               Clear all
             </button>
           </div>
@@ -274,7 +268,7 @@ export const CsvWhitelistUploader: React.FC<CsvWhitelistUploaderProps> = ({
                 <button
                   type="button"
                   onClick={() => removeEmail(email)}
-                  className="text-neutral-400 hover:text-rose-600"
+                  className="text-neutral-400 hover:text-danger"
                 >
                   <X className="w-3 h-3" />
                 </button>

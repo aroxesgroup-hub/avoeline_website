@@ -86,7 +86,7 @@ export function AccessGate({
 
     return (
       <div className="rounded-2xl border border-line bg-paper p-8 text-center shadow-sm">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-700">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-danger-soft text-danger">
           <ShieldAlert className="h-6 w-6" />
         </div>
         <h1 className="mb-2 font-display text-xl font-bold text-ink">{title}</h1>

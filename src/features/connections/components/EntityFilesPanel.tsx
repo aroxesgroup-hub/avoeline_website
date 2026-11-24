@@ -82,7 +82,7 @@ export function EntityFilesPanel({
           message="Connect Google Drive to attach or create files"
         />
       ) : (
-        <div className="space-y-3 rounded-xl border border-line bg-canvas/30 px-3 py-3">
+        <div className="space-y-3 rounded-xl border border-line bg-paper px-3 py-3">
           <label className="block text-xs text-ink">
             Drive account
             <select

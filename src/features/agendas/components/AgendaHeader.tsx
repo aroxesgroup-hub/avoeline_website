@@ -24,10 +24,10 @@ export default function AgendaHeader({
   const searchParams = useSearchParams();
 
   return (
-    <div className="flex w-full items-end justify-between gap-4 border-b border-line pt-4">
-      <div className="no-scrollbar flex items-center gap-8 overflow-x-auto">
+    <div className="flex w-full items-end justify-between gap-4 border-b border-line">
+      <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
         {days.length === 0 ? (
-          <p className="pb-4 text-sm text-ink-soft">No days yet — add the first session.</p>
+          <p className="pb-3 text-sm text-ink-soft">No days yet — add the first session.</p>
         ) : null}
         {days.map((day, index) => {
           const isActive = activeDate === day.date;
@@ -41,20 +41,22 @@ export default function AgendaHeader({
               href={`?${params.toString()}`}
               scroll={false}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-2 whitespace-nowrap border-b-2 pb-4 transition-colors ${
-                isActive ? "border-ink text-ink" : "border-transparent text-ink-soft hover:text-ink"
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3 pb-3 pt-1 text-sm transition ${
+                isActive
+                  ? "border-accent font-semibold text-ink"
+                  : "border-transparent font-medium text-ink-soft hover:border-line-loud hover:text-ink"
               }`}
             >
-              <span className={`text-sm ${isActive ? "font-bold" : "font-medium"}`}>
+              <span>
                 Day {index + 1} ({day.label})
               </span>
               {sessionCount > 0 && (
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-2xs font-bold tabular-nums transition-colors ${
+                  className={`rounded-full px-1.5 py-0.5 text-2xs tabular-nums ${
                     isActive ? "bg-ink text-ink-invert" : "bg-muted text-ink-soft"
                   }`}
                 >
-                  {sessionCount} sessions
+                  {sessionCount}
                 </span>
               )}
             </Link>
@@ -63,7 +65,7 @@ export default function AgendaHeader({
       </div>
 
       {onAdd ? (
-        <div className="shrink-0 pb-3">
+        <div className="shrink-0 pb-2">
           <button type="button" onClick={onAdd} className={buttonClass("secondary", "sm")}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             Add item

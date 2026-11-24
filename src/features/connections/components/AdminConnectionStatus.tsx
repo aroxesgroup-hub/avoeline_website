@@ -47,7 +47,7 @@ export function AdminConnectionStatus({
                   Last used {new Date(c.lastUsedAt).toLocaleString()}
                 </p>
               ) : null}
-              {c.lastError ? <p className="mt-1 text-xs text-red-700">{c.lastError}</p> : null}
+              {c.lastError ? <p className="mt-1 text-xs text-danger">{c.lastError}</p> : null}
             </li>
           ))}
         </ul>
@@ -137,7 +137,7 @@ export function AdminConnectionStatus({
       </fieldset>
 
       {message ? <p className="text-xs text-ink-soft">{message}</p> : null}
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
       {!primary ? null : null}
     </section>
   );

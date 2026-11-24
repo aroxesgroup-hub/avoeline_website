@@ -18,13 +18,14 @@ import type { DailySeriesPoint } from "@/src/features/analytics/analyticsDerive"
 import { topEventStackKeys } from "@/src/features/analytics/analyticsDerive";
 import { buttonClass } from "@/src/lib/ui";
 
+/** Cap three brand series; overflow stacks use muted/ink tokens (not status hues). */
 const STACK_COLORS = [
   "var(--series-1)",
   "var(--series-2)",
   "var(--series-3)",
-  "#8a8a8a",
-  "#b0b0b0",
-  "#d0d0d0",
+  "var(--ink-soft)",
+  "var(--ink-faint)",
+  "var(--muted-strong)",
 ];
 
 const TOOLTIP_STYLE = {

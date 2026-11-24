@@ -168,7 +168,7 @@ export function TeamRosterView({
           {canEditTeam ? (
             <button
               type="button"
-              className="rounded-lg border border-rose-200 px-2 py-1 text-xs font-medium text-rose-600"
+              className="rounded-lg border border-danger-line px-2 py-1 text-xs font-medium text-danger"
               onClick={async () => {
                 if (!confirm(`Delete ${team.name}? Members are removed from this roster.`)) return;
                 const fd = new FormData();
@@ -195,7 +195,7 @@ export function TeamRosterView({
                   title="Copy join code"
                 >
                   {copied ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    <Check className="h-3.5 w-3.5 text-primary" />
                   ) : (
                     <Copy className="h-3.5 w-3.5" />
                   )}
@@ -210,7 +210,7 @@ export function TeamRosterView({
               >
                 {copiedLink ? (
                   <>
-                    <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    <Check className="h-3.5 w-3.5 text-primary" />
                     <span>Link Copied</span>
                   </>
                 ) : (
@@ -258,7 +258,7 @@ export function TeamRosterView({
                         {isSelf && <span className="ml-1.5 text-2xs text-ink-soft">(You)</span>}
                       </span>
                       {isLead ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/10 px-2 py-0.5 text-2xs font-semibold text-purple-600 dark:text-purple-400">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft0/10 px-2 py-0.5 text-2xs font-semibold text-series-3 dark:text-series-3">
                           <Crown className="h-3 w-3" />
                           Lead
                         </span>
@@ -335,7 +335,7 @@ export function TeamRosterView({
                           type="button"
                           disabled={isBusy}
                           onClick={() => handleRoleChange(member.id, "lead")}
-                          className="inline-flex items-center gap-1 rounded-lg border border-line bg-paper px-2.5 py-1 text-xs font-medium text-purple-600 transition hover:bg-purple-50 dark:hover:bg-purple-950/30 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-lg border border-line bg-paper px-2.5 py-1 text-xs font-medium text-series-3 transition hover:bg-accent-soft dark:hover:bg-accent-soft disabled:opacity-50"
                           title="Promote to lead"
                         >
                           <Crown className="h-3.5 w-3.5" />
@@ -349,7 +349,7 @@ export function TeamRosterView({
                         type="button"
                         disabled={isBusy}
                         onClick={() => handleRemoveMember(member.id, name)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-100 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-400 disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-lg border border-danger-line bg-danger-soft px-2.5 py-1 text-xs font-medium text-danger transition hover:bg-danger-soft dark:border-danger-line dark:bg-danger-soft dark:text-danger-on-ink disabled:opacity-50"
                         title="Remove from team"
                       >
                         <UserMinus className="h-3.5 w-3.5" />

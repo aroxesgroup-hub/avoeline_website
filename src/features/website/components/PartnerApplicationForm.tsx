@@ -295,7 +295,7 @@ export function PartnerApplicationForm({ turnstileSiteKey }: { turnstileSiteKey?
 
         {siteKey ? <div ref={widgetHost} className="min-h-[65px]" /> : null}
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
 
         <button
           type="submit"

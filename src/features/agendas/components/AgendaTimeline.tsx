@@ -154,7 +154,7 @@ function SessionCard({
         {!isLast && <div className="w-px flex-1 bg-line" />}
       </div>
 
-      <div className={`flex-1 rounded-2xl border border-line bg-paper p-5 ${isLast ? "" : "mb-6"}`}>
+      <div className={`flex-1 rounded-xl border border-line bg-paper p-5 ${isLast ? "" : "mb-6"}`}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -238,7 +238,7 @@ export default function AgendaTimeline({
 
   if (view === "list") {
     return (
-      <ul className="rounded-2xl border border-line bg-paper px-4">
+      <ul className="rounded-xl border border-line bg-paper px-4">
         {sessions.map((s) => (
           <SessionCard
             key={s.id}

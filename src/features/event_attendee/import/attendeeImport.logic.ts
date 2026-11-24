@@ -1,5 +1,11 @@
 /** Pure helpers for attendee Excel/Sheets import. */
 
+/** Max data rows per import (excludes header). */
+export const ATTENDEE_IMPORT_ROW_CAP = 500;
+
+/** Insert chunk size inside commit. */
+export const ATTENDEE_IMPORT_CHUNK_SIZE = 50;
+
 export type ImportColumnKey = "email" | "name" | "phone" | "tier" | "skip" | `custom:${string}`;
 
 export type ImportFieldOption = {
@@ -146,4 +152,34 @@ export function previewMappedRows(
     seen.add(email);
     return { rowIndex: row.rowIndex, ok: true, row: { ...row, email } };
   });
+}
+
+/** Template headers: Email, Name, Phone, Access tier, then custom field labels (skip Ignore). */
+export function templateHeadersFromOptions(options: ImportFieldOption[]): string[] {
+  const order: ImportColumnKey[] = ["email", "name", "phone", "tier"];
+  const byKey = new Map(options.map((o) => [o.key, o.label]));
+  const headers = order.map((k) => byKey.get(k) || k);
+  for (const o of options) {
+    if (o.key === "skip" || order.includes(o.key as ImportColumnKey)) continue;
+    if (String(o.key).startsWith("custom:")) headers.push(o.label || o.key);
+  }
+  return headers;
+}
+
+/** Merge import batch markers into registration extra (Stage 8). */
+export function withImportBatchExtra(
+  extra: Record<string, unknown>,
+  importBatchId: string,
+): Record<string, unknown> {
+  return { ...extra, imported: true, importBatchId };
+}
+
+/** Rows eligible for undo: matching batch id and not already cancelled. */
+export function filterUndoableImportIds(
+  rows: Array<{ id: string; status: string; importBatchId?: string | null }>,
+  batchId: string,
+): string[] {
+  return rows
+    .filter((r) => r.importBatchId === batchId && r.status !== "cancelled" && Boolean(r.id))
+    .map((r) => r.id);
 }

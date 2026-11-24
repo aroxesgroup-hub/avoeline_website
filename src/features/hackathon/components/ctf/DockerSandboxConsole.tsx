@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import {
-  Box,
-  Server,
-  RotateCcw,
-  Shield,
-  Clock,
-  Terminal,
-  Cpu,
-} from "lucide-react";
+import { Box, Server, RotateCcw, Shield, Clock, Terminal, Cpu } from "lucide-react";
 import type { DockerSandboxInstance } from "../../types";
 import { resetSandboxAction } from "../../actions/ctf.action";
 
@@ -23,7 +15,9 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const activeSandboxes = sandboxes.filter((s) => s.status === "running");
-  const filtered = sandboxes.filter((s) => (statusFilter === "all" ? true : s.status === statusFilter));
+  const filtered = sandboxes.filter((s) =>
+    statusFilter === "all" ? true : s.status === statusFilter,
+  );
 
   const handleReset = (sandboxId: string) => {
     startTransition(async () => {
@@ -37,36 +31,39 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-bold text-ink flex items-center gap-2">
-              <Box className="text-indigo-600 dark:text-indigo-400" size={20} />
+              <Box className="text-series-2 dark:text-series-2" size={20} />
               Docker Sandboxing Orchestrator
             </h3>
-            <span className="rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+            <span className="rounded-full bg-gradient-to-r from-warning-soft to-warning-soft px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider text-warning dark:text-warning-on-ink">
               Premium Tier
             </span>
           </div>
           <p className="text-xs text-ink-soft">
-            Per-team isolated Linux/Docker target environments to prevent cross-team exploitation and DoS interference.
+            Per-team isolated Linux/Docker target environments to prevent cross-team exploitation
+            and DoS interference.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-xl border border-line bg-paper px-3 py-1.5 text-xs text-ink">
-            <Cpu size={14} className="text-indigo-600" />
+            <Cpu size={14} className="text-series-2" />
             <span className="font-semibold">{activeSandboxes.length} Active Pods</span>
           </div>
         </div>
       </div>
 
       {/* Premium Tier Cost & Infrastructure Callout */}
-      <div className="rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/30 p-5 dark:border-indigo-900/60 dark:from-indigo-950/20 dark:to-blue-950/10">
+      <div className="rounded-2xl border border-accent-line bg-gradient-to-r from-accent-soft to-accent-soft p-5 dark:border-accent-line dark:from-accent-soft dark:to-accent-soft">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <h4 className="font-bold text-sm text-ink flex items-center gap-1.5">
-              <Shield className="text-indigo-600" size={16} />
+              <Shield className="text-series-2" size={16} />
               Container Isolation & Cost Optimization
             </h4>
             <p className="text-xs text-ink-soft max-w-2xl leading-relaxed">
-              Live exploitable containers consume real computing memory & CPU. Ephemeral port mapping, strict 60-minute TTL countdowns, and rate-limited team resets ensure maximum security without cloud runaway costs.
+              Live exploitable containers consume real computing memory & CPU. Ephemeral port
+              mapping, strict 60-minute TTL countdowns, and rate-limited team resets ensure maximum
+              security without cloud runaway costs.
             </p>
           </div>
           <div className="flex shrink-0 gap-2 text-2xs font-semibold">
@@ -76,7 +73,7 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
             </div>
             <div className="rounded-xl border border-line bg-paper px-3 py-2 text-center">
               <span className="block text-ink-soft">Isolation</span>
-              <span className="text-sm font-bold text-emerald-600">Per-Team</span>
+              <span className="text-sm font-bold text-primary">Per-Team</span>
             </div>
           </div>
         </div>
@@ -90,10 +87,13 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
             type="button"
             onClick={() => setStatusFilter(st)}
             className={`rounded-lg px-3 py-1 text-xs font-semibold capitalize transition ${
-              statusFilter === st ? "bg-ink text-white" : "bg-muted text-ink-soft hover:bg-muted-strong"
+              statusFilter === st
+                ? "bg-ink text-white"
+                : "bg-muted text-ink-soft hover:bg-muted-strong"
             }`}
           >
-            {st} ({st === "all" ? sandboxes.length : sandboxes.filter((s) => s.status === st).length})
+            {st} (
+            {st === "all" ? sandboxes.length : sandboxes.filter((s) => s.status === st).length})
           </button>
         ))}
       </div>
@@ -104,7 +104,8 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
           <Server className="mx-auto text-ink-faint mb-2" size={32} />
           <h4 className="font-semibold text-ink">No sandbox containers active</h4>
           <p className="text-xs text-ink-soft mt-1">
-            When teams launch challenge machines from their arena, isolated container pods appear here.
+            When teams launch challenge machines from their arena, isolated container pods appear
+            here.
           </p>
         </div>
       ) : (
@@ -112,21 +113,23 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
           {filtered.map((sb) => (
             <div
               key={sb.id}
-              className="rounded-2xl border border-line bg-paper p-5 shadow-xs transition hover:border-indigo-300"
+              className="rounded-2xl border border-line bg-paper p-5 shadow-xs transition hover:border-accent-line"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="inline-flex items-center gap-1 font-mono text-2xs font-semibold text-indigo-600 dark:text-indigo-400">
+                  <span className="inline-flex items-center gap-1 font-mono text-2xs font-semibold text-series-2 dark:text-series-2">
                     <Terminal size={12} /> {sb.id}
                   </span>
                   <h4 className="font-bold text-ink text-sm mt-0.5">{sb.challengeTitle}</h4>
-                  <p className="text-xs text-ink-soft">Allocated to Team: {sb.teamId.slice(0, 8)}</p>
+                  <p className="text-xs text-ink-soft">
+                    Allocated to Team: {sb.teamId.slice(0, 8)}
+                  </p>
                 </div>
 
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider ${
                     sb.status === "running"
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      ? "bg-primary-soft text-primary dark:bg-primary-soft dark:text-primary"
                       : "bg-muted text-ink-soft"
                   }`}
                 >
@@ -143,7 +146,7 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
                 {sb.portMappings.map((pm, idx) => (
                   <div key={idx} className="flex justify-between">
                     <span className="text-ink-soft">{pm.protocol} Port:</span>
-                    <span className="font-semibold text-indigo-600">{pm.hostPort}</span>
+                    <span className="font-semibold text-series-2">{pm.hostPort}</span>
                   </div>
                 ))}
                 {sb.credentials?.username ? (
@@ -164,7 +167,7 @@ export function DockerSandboxConsole({ eventId, sandboxes }: DockerSandboxConsol
                     type="button"
                     onClick={() => handleReset(sb.id)}
                     disabled={isPending}
-                    className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                    className="flex items-center gap-1 text-xs font-semibold text-series-2 hover:text-series-2"
                   >
                     <RotateCcw size={12} /> Reset Instance
                   </button>

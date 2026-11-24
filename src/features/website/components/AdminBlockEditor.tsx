@@ -206,9 +206,9 @@ export function AdminBlockEditor({
           );
         })}
 
-        {jsonError ? <p className="text-sm text-red-600">{jsonError}</p> : null}
+        {jsonError ? <p className="text-sm text-danger">{jsonError}</p> : null}
         {!previewParsed.ok ? (
-          <p className="text-sm text-red-600">Schema: {previewParsed.error.issues[0]?.message}</p>
+          <p className="text-sm text-danger">Schema: {previewParsed.error.issues[0]?.message}</p>
         ) : null}
 
         <button

@@ -60,7 +60,7 @@ export function OrganizerEmailConnectPanel({
             {connection.createdBy === "saas_owner" ? " · provisioned by platform" : ""}
           </p>
           {connection.provider === "smtp" ? (
-            <p className="mt-1 text-xs text-amber-800">
+            <p className="mt-1 text-xs text-warning">
               This SMTP connection still works until you disconnect. Reconnect with Google when you
               can.
             </p>
@@ -71,7 +71,7 @@ export function OrganizerEmailConnectPanel({
             </p>
           ) : null}
           {connection.lastError ? (
-            <p className="mt-1 text-xs text-red-700">{connection.lastError}</p>
+            <p className="mt-1 text-xs text-danger">{connection.lastError}</p>
           ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -105,7 +105,7 @@ export function OrganizerEmailConnectPanel({
           </div>
         </div>
       ) : (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+        <p className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning">
           Email is not connected. Attendee and certificate sends are blocked until you connect
           Google
           {asOwner ? " for this organizer" : ""}.
@@ -141,7 +141,7 @@ export function OrganizerEmailConnectPanel({
       </div>
 
       {message ? <p className="text-sm text-ink">{message}</p> : null}
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
     </section>
   );
 }

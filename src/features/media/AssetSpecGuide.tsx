@@ -11,7 +11,7 @@ export function AssetSpecGuide({
   if (variant === "compact") {
     return (
       <p
-        className={`rounded-xl border border-emerald-200/80 bg-emerald-50/80 px-3 py-2 text-xs leading-relaxed text-emerald-950 ${className}`}
+        className={`rounded-xl border border-accent-line/80 bg-primary-soft/80 px-3 py-2 text-xs leading-relaxed text-primary ${className}`}
       >
         <span className="font-semibold">Media specs: </span>
         {formatAssetGuideSummary()}
@@ -21,14 +21,14 @@ export function AssetSpecGuide({
 
   return (
     <aside
-      className={`rounded-2xl border border-emerald-200/80 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 ${className}`}
+      className={`rounded-2xl border border-accent-line/80 bg-primary-soft/90 px-4 py-3 text-sm text-primary ${className}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-800/80">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary/80">
             Organizer Media & Asset specification guide
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-emerald-950/90">
+          <p className="mt-1 text-sm leading-relaxed text-primary">
             Ensure your event banner looks high-quality. Recommended: Banner (
             {ASSET_SPEC.event_banner.recommended}, {ASSET_SPEC.event_banner.formats},{" "}
             {ASSET_SPEC.event_banner.maxLabel}), Gallery ({ASSET_SPEC.event_gallery.recommended},{" "}
@@ -37,7 +37,7 @@ export function AssetSpecGuide({
           </p>
         </div>
       </div>
-      <ul className="mt-3 grid gap-2 text-xs text-emerald-900/90 sm:grid-cols-2">
+      <ul className="mt-3 grid gap-2 text-xs text-primary sm:grid-cols-2">
         <li>
           <span className="font-semibold">Banner:</span> {ASSET_SPEC.event_banner.aspect} ·{" "}
           {ASSET_SPEC.event_banner.maxLabel}

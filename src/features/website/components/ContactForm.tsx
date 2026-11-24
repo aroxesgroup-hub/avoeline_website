@@ -289,7 +289,7 @@ export function ContactForm({ turnstileSiteKey, initialTopic }: Props) {
       {siteKey ? <div ref={widgetHost} className="min-h-[65px]" /> : null}
 
       {error ? (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {error}
         </p>
       ) : null}

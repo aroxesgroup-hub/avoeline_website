@@ -51,7 +51,7 @@ export function EventDriveFoldersPanel({
   }, [reload]);
 
   return (
-    <section className="space-y-3 rounded-xl border border-line bg-white/70 p-4">
+    <section className="space-y-3 rounded-xl border border-line bg-paper p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="font-display text-lg text-ink">Event folders</h2>

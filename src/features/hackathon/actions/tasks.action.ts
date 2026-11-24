@@ -1030,15 +1030,24 @@ export async function submitTaskWork(
     extra: Object.keys(extra).length ? extra : null,
   });
 
+  // Reviewable work: do not award full points until organizer/judge accept (Stage 7).
+  // Late or pending submit → incorrect / 0 so the live board stays honest.
   await supabaseAdmin.from(TABLES.HACKATHON_TASK_COMPLETIONS).upsert(
     {
       hackathon_team_id: team.id,
       task_id: task.id,
       submitted_flag: null,
-      is_correct: !late,
-      points_awarded: late ? 0 : (task.points ?? 0),
+      is_correct: false,
+      points_awarded: 0,
       attempted_at: nowIso,
-      extra: { submissionUrl: link, links, filePath, storedFileId, textAnswer },
+      extra: {
+        submissionUrl: link,
+        links,
+        filePath,
+        storedFileId,
+        textAnswer,
+        pendingReview: true,
+      },
     },
     { onConflict: "hackathon_team_id,task_id" },
   );

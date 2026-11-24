@@ -10,45 +10,30 @@ import {
   type AnalyticsFilters,
   type AnalyticsPreset,
 } from "@/src/features/analytics/analytics.filters";
-import { buttonClass } from "@/src/lib/ui";
-import { exportAnalyticsAction } from "@/src/features/analytics/actions/exportAnalytics.action";
+import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 
 export default function AnalyticsFiltersBar({
-  organizerId,
   basePath,
   filters,
   eventOptions,
   rangeLabel,
 }: {
-  organizerId: string;
   basePath: string;
   filters: AnalyticsFilters;
   eventOptions: { id: string; title: string }[];
   rangeLabel: string;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   function go(overrides: Partial<AnalyticsFilters>) {
     router.push(analyticsHref(basePath, filters, overrides));
   }
 
-  async function onExport() {
-    const res = await exportAnalyticsAction({
-      organizerId,
-      range: filters.preset,
-      event: filters.eventId ?? undefined,
-      from: filters.from ?? undefined,
-      to: filters.to ?? undefined,
-    });
-    if (res.ok && res.data?.url) {
-      window.location.href = res.data.url;
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
+    <Card tone="flat">
+      <CardBody className="space-y-4">
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Date range">
           {ANALYTICS_PRESETS.filter((p) => p !== "custom").map((p) => (
             <Link
@@ -85,22 +70,22 @@ export default function AnalyticsFiltersBar({
               });
             }}
           >
-            <label className="text-xs text-ink-soft">
+            <label className={labelClass}>
               From
               <input
                 name="from"
                 type="date"
                 defaultValue={filters.from ?? ""}
-                className="mt-1 block rounded-lg border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+                className={`${fieldClass} mt-1`}
               />
             </label>
-            <label className="text-xs text-ink-soft">
+            <label className={labelClass}>
               To
               <input
                 name="to"
                 type="date"
                 defaultValue={filters.to ?? ""}
-                className="mt-1 block rounded-lg border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+                className={`${fieldClass} mt-1`}
               />
             </label>
             <button type="submit" className={buttonClass("primary", "sm")}>
@@ -109,11 +94,11 @@ export default function AnalyticsFiltersBar({
           </form>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs text-ink-soft">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className={labelClass}>
             Event
             <select
-              className="mt-1 block max-w-xs rounded-lg border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+              className={`${fieldClass} mt-1 max-w-xs`}
               value={filters.eventId ?? "all"}
               onChange={(e) => {
                 const v = e.target.value;
@@ -130,16 +115,7 @@ export default function AnalyticsFiltersBar({
           </label>
           <p className="pt-5 text-sm text-ink-soft tabular-nums">{rangeLabel}</p>
         </div>
-      </div>
-
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => startTransition(() => void onExport())}
-        className={buttonClass("primary", "md")}
-      >
-        Export xlsx
-      </button>
-    </div>
+      </CardBody>
+    </Card>
   );
 }

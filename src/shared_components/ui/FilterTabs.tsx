@@ -60,7 +60,7 @@ export function FilterTabs({
               <span
                 className={`rounded-full px-1.5 py-0.5 text-2xs tabular-nums ${
                   tab.warnWhenPositive && tab.count > 0
-                    ? "bg-amber-100 text-amber-900 ring-1 ring-amber-300"
+                    ? "bg-warning-soft text-warning ring-1 ring-warning-line"
                     : isActive
                       ? "bg-ink text-ink-invert"
                       : "bg-muted text-ink-soft"

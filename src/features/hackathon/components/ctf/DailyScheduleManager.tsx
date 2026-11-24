@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Calendar,
-  Clock,
-  Plus,
-  FileText,
-  GitBranch,
-  Globe,
-  Paperclip,
-} from "lucide-react";
+import { Calendar, Clock, Plus, FileText, GitBranch, Globe, Paperclip } from "lucide-react";
 import type { HackathonDailySchedule } from "../../types";
 import { saveDailyScheduleAction } from "../../actions/ctf.action";
 import { buttonClass, fieldClass, labelClass } from "@/src/lib/ui";
@@ -32,11 +24,12 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
       <div className="flex flex-col justify-between gap-4 border-b border-line pb-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="text-lg font-bold text-ink flex items-center gap-2">
-            <Calendar className="text-indigo-600 dark:text-indigo-400" size={20} />
+            <Calendar className="text-series-2 dark:text-series-2" size={20} />
             Daily Calendar & Shift Scheduling
           </h3>
           <p className="text-xs text-ink-soft">
-            Schedule multi-day hackathon shifts and release day-wise tasks with GitHub and external link requirements.
+            Schedule multi-day hackathon shifts and release day-wise tasks with GitHub and external
+            link requirements.
           </p>
         </div>
 
@@ -63,7 +56,9 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
             }`}
           >
             <span>Day {sch.dayNumber}</span>
-            {sch.date ? <span className="text-2xs font-normal opacity-80">({sch.date})</span> : null}
+            {sch.date ? (
+              <span className="text-2xs font-normal opacity-80">({sch.date})</span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -165,7 +160,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
                     name="requireGithub"
                     value="true"
                     defaultChecked
-                    className="h-4 w-4 rounded accent-indigo-600"
+                    className="h-4 w-4 rounded accent-primary"
                   />
                   Require GitHub Repository Link
                 </label>
@@ -175,7 +170,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
                     name="requireExternalLink"
                     value="true"
                     defaultChecked
-                    className="h-4 w-4 rounded accent-indigo-600"
+                    className="h-4 w-4 rounded accent-primary"
                   />
                   Require External Demo / Figma Link
                 </label>
@@ -190,11 +185,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className={buttonClass("primary", "sm")}
-              >
+              <button type="submit" disabled={isPending} className={buttonClass("primary", "sm")}>
                 {isPending ? "Saving..." : "Save Schedule"}
               </button>
             </div>
@@ -208,7 +199,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
           {/* Shifts Grid */}
           <div className="rounded-2xl border border-line bg-paper p-5">
             <h4 className="font-bold text-sm text-ink mb-3 flex items-center gap-2">
-              <Clock size={16} className="text-indigo-600" />
+              <Clock size={16} className="text-series-2" />
               Day {currentSchedule.dayNumber} Shifts & Mentor Hours
             </h4>
 
@@ -219,7 +210,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
                   className="rounded-xl border border-line bg-muted/40 p-3.5 space-y-1"
                 >
                   <span className="font-semibold text-ink text-xs block">{shift.title}</span>
-                  <p className="text-2xs font-mono text-indigo-600 dark:text-indigo-400">
+                  <p className="text-2xs font-mono text-series-2 dark:text-series-2">
                     {shift.startTime} – {shift.endTime}
                   </p>
                   {shift.leadMentorOrJudge ? (
@@ -235,7 +226,7 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
           {/* Released Tasks */}
           <div className="rounded-2xl border border-line bg-paper p-5">
             <h4 className="font-bold text-sm text-ink mb-3 flex items-center gap-2">
-              <FileText size={16} className="text-indigo-600" />
+              <FileText size={16} className="text-series-2" />
               Released Tasks & Prompts (Any File Format Supported)
             </h4>
 
@@ -246,11 +237,11 @@ export function DailyScheduleManager({ eventId, schedules }: DailyScheduleManage
                 {currentSchedule.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="rounded-xl border border-indigo-200 bg-indigo-50/20 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/10 space-y-2"
+                    className="rounded-xl border border-accent-line bg-accent-soft p-4 dark:border-accent-line dark:bg-accent-soft space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-xs text-ink">{task.title}</span>
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-2xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                      <span className="rounded-full bg-primary-soft px-2 py-0.5 text-2xs font-bold text-primary dark:bg-primary-soft dark:text-primary">
                         Live Task
                       </span>
                     </div>

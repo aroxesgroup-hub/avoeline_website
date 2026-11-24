@@ -3,6 +3,7 @@ import { AuthService } from "@/src/features/auth/authService";
 import { AnalyticsService } from "@/src/services/anaylService";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { Card, CardBody } from "@/src/shared_components/ui/Card";
+import PageHeader from "@/src/shared_components/ui/PageHeader";
 import { Calendar, Plus, Star, Users, Wallet, Bot } from "lucide-react";
 import Link from "next/link";
 import { buttonClass } from "@/src/lib/ui";
@@ -40,34 +41,31 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
   const displayName = u.name?.trim() || u.email?.split("@")[0]?.trim() || "";
 
   return (
-    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8 font-sans">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1">
-            <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
-              {displayName ? `Welcome back, ${displayName}` : "Welcome back"}
-            </h1>
-            <p className="text-sm text-ink-soft">
-              Manage your events, registrations, and analytics.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Link
-              href={`/organizer/${organizer_id}/chatbot`}
-              className={buttonClass("secondary", "md")}
-            >
-              <Bot size={16} aria-hidden="true" />
-              Chat with AI
-            </Link>
-            <Link
-              href={`/organizer/${organizer_id}/events/create`}
-              className={buttonClass("primary", "md")}
-            >
-              <Plus size={16} aria-hidden="true" />
-              Create event
-            </Link>
-          </div>
-        </header>
+    <div className="px-4 py-8 font-sans text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <PageHeader
+          eyebrow="Console · Workspace overview"
+          title={displayName ? `Welcome back, ${displayName}` : "Welcome back"}
+          description="Manage your events, registrations, and analytics."
+          actions={
+            <>
+              <Link
+                href={`/organizer/${organizer_id}/chatbot`}
+                className={buttonClass("secondary", "md")}
+              >
+                <Bot size={16} aria-hidden="true" />
+                Chat with AI
+              </Link>
+              <Link
+                href={`/organizer/${organizer_id}/events/create`}
+                className={buttonClass("primary", "md")}
+              >
+                <Plus size={16} aria-hidden="true" />
+                Create event
+              </Link>
+            </>
+          }
+        />
 
         <Suspense fallback={<StatsSkeleton />}>
           <DashboardStats organizerId={organizer_id} />
@@ -77,14 +75,14 @@ export default async function Dashboard({ params }: { params: Promise<{ organize
           <DashboardConnectionsChecklist organizerId={organizer_id} />
         </Suspense>
 
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
-          <div className="space-y-6">
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.95fr)]">
+          <div className="space-y-4">
             <Suspense fallback={<WidgetSkeleton height="h-64" />}>
               <DashboardMain organizerId={organizer_id} />
             </Suspense>
           </div>
 
-          <aside className="space-y-6">
+          <aside className="space-y-4">
             <Suspense fallback={<WidgetSkeleton height="h-48" />}>
               <DashboardUpcoming organizerId={organizer_id} />
             </Suspense>
@@ -108,7 +106,7 @@ async function DashboardStats({ organizerId }: { organizerId: string }) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-      <div className="ink-panel on-ink relative overflow-hidden rounded-xl border border-neutral-800 p-6 shadow-xs">
+      <div className="ink-panel on-ink relative overflow-hidden rounded-xl border border-rail-fg/10 p-6 shadow-xs">
         <p className="text-2xs font-medium uppercase tracking-wider text-white/60">Registrations</p>
         <p className="figure mt-2.5 text-5xl font-bold tracking-tight text-white">
           {stats.registrations}
@@ -149,7 +147,7 @@ async function DashboardMain({ organizerId }: { organizerId: string }) {
   const { todayEvents, recentReg, regTrend } = await AnalyticsService.getDashboardData(organizerId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card title="Today's schedule">
         <CardBody>
           <TodaysSchedule events={todayEvents} />

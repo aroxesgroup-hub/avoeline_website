@@ -23,7 +23,7 @@ export function PublicFormClient({
 
   if (done) {
     return (
-      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-6 text-sm text-emerald-950">
+      <p className="rounded-xl border border-accent-line bg-primary-soft px-4 py-6 text-sm text-primary">
         Thanks — your response was recorded.
       </p>
     );
@@ -78,7 +78,7 @@ export function PublicFormClient({
         <input name="respondent_email" type="email" className={`${fieldClass} mt-1`} />
       </label>
       <CustomFieldsRenderer fields={fields} />
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
       <button type="submit" className={buttonClass("primary")} disabled={pending}>
         {pending ? "Submitting…" : "Submit"}
       </button>

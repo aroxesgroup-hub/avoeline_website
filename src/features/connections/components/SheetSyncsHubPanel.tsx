@@ -40,7 +40,7 @@ export function SheetSyncsHubPanel({
                 ? `Last sync ${new Date(s.lastSyncedAt).toLocaleString()}`
                 : "Not synced yet"}
             </p>
-            {s.lastError ? <p className="text-xs text-red-700">{s.lastError}</p> : null}
+            {s.lastError ? <p className="text-xs text-danger">{s.lastError}</p> : null}
           </div>
           <div className="flex flex-wrap gap-2">
             <a

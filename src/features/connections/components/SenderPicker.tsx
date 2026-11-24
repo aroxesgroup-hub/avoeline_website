@@ -38,7 +38,7 @@ export function SenderPicker({
 
   if (!options.length && !pending) {
     return (
-      <p className="text-xs text-amber-800">
+      <p className="text-xs text-warning">
         Sending as — no connection available. Connect Google under Settings → Connections.
       </p>
     );

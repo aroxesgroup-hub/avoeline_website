@@ -7,6 +7,7 @@ import { SingleAttendeeView } from "./SingleAttendeeView";
 import { AttendeeInput } from "./AttendeeInput";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { ExportButton } from "@/src/features/exports/components/ExportButton";
 import type { ExportResult } from "@/src/features/exports/types";
 import { Users, UserCheck, Clock, Ban } from "lucide-react";
@@ -367,26 +368,35 @@ export function AttendeeClientSide({
     : false;
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row">
+    <div className="flex flex-col gap-6 lg:flex-row">
       <div className="min-w-0 flex-1">
-        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <h2 className="font-display text-xl text-ink">
-            {(teams?.length || groups?.length) && view === "grouped" ? "Groups" : "Attendees"}
-          </h2>
-          <div className="flex items-center gap-3">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+              Roster · Check-in
+            </p>
+            <h2 className="font-display text-xl text-ink">
+              {(teams?.length || groups?.length) && view === "grouped" ? "Groups" : "Attendees"}
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             {teams?.length || groups?.length || defaultGrouped ? (
-              <div className="flex rounded-full border border-line text-xs">
+              <div
+                className="inline-flex rounded-lg border border-line p-0.5 text-sm"
+                role="group"
+                aria-label="Roster view"
+              >
                 <button
                   type="button"
                   onClick={() => setView("grouped")}
-                  className={`rounded-full px-3 py-1.5 ${view === "grouped" ? "bg-ink text-ink-invert" : "text-ink-soft"}`}
+                  className={`rounded-md px-3 py-1.5 transition ${view === "grouped" ? "bg-ink text-ink-invert" : "text-ink-soft hover:text-ink"}`}
                 >
                   Grouped
                 </button>
                 <button
                   type="button"
                   onClick={() => setView("flat")}
-                  className={`rounded-full px-3 py-1.5 ${view === "flat" ? "bg-ink text-ink-invert" : "text-ink-soft"}`}
+                  className={`rounded-md px-3 py-1.5 transition ${view === "flat" ? "bg-ink text-ink-invert" : "text-ink-soft hover:text-ink"}`}
                 >
                   Flat
                 </button>
@@ -442,7 +452,7 @@ export function AttendeeClientSide({
             {exportsHref ? (
               <Link
                 href={exportsHref}
-                className="rounded-lg border border-line bg-paper px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted/50"
+                className={buttonClass("ghost", "sm")}
                 title={
                   sheetsConnected
                     ? "Open Exports / Google Sheets"
@@ -456,53 +466,57 @@ export function AttendeeClientSide({
         </div>
 
         {importOpen && importPanel ? (
-          <div className="mb-6 rounded-xl border border-line bg-paper p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="text-sm font-medium text-ink">Import attendees</h3>
-              <button
-                type="button"
-                className="text-xs text-ink-soft hover:text-ink"
-                onClick={() => setImportOpen(false)}
-              >
-                Close
-              </button>
-            </div>
-            {importPanel}
-          </div>
+          <Card className="mb-6">
+            <CardBody>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-sm font-medium text-ink">Import attendees</h3>
+                <button
+                  type="button"
+                  className={buttonClass("ghost", "sm")}
+                  onClick={() => setImportOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+              {importPanel}
+            </CardBody>
+          </Card>
         ) : null}
 
         {selectedIds.size > 0 ? (
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-muted/40 px-4 py-3">
-            <span className="text-sm text-ink">{selectedIds.size} selected</span>
-            <button
-              type="button"
-              disabled={bulkBusy}
-              className={buttonClass("primary", "sm")}
-              onClick={() => void runBulk("approve")}
-            >
-              Bulk approve
-            </button>
-            <button
-              type="button"
-              disabled={bulkBusy}
-              className={buttonClass("destructive", "sm")}
-              onClick={() => void runBulk("reject")}
-            >
-              Bulk reject
-            </button>
-            <button
-              type="button"
-              className="text-xs text-ink-soft hover:text-ink"
-              onClick={() => setSelectedIds(new Set())}
-            >
-              Clear
-            </button>
-          </div>
+          <Card className="mb-4">
+            <CardBody className="flex flex-wrap items-center gap-2 !py-3">
+              <span className="text-sm text-ink">{selectedIds.size} selected</span>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                className={buttonClass("primary", "sm")}
+                onClick={() => void runBulk("approve")}
+              >
+                Bulk approve
+              </button>
+              <button
+                type="button"
+                disabled={bulkBusy}
+                className={buttonClass("destructive", "sm")}
+                onClick={() => void runBulk("reject")}
+              >
+                Bulk reject
+              </button>
+              <button
+                type="button"
+                className={buttonClass("ghost", "sm")}
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear
+              </button>
+            </CardBody>
+          </Card>
         ) : null}
 
         {eventId ? <CheckInLookupBar eventId={eventId} /> : null}
 
-        <section className="mb-8 grid grid-cols-2 rounded-xl border border-line bg-paper shadow-xs sm:grid-cols-4 sm:divide-x sm:divide-line">
+        <Card tone="raised" className="mb-6 grid grid-cols-2 overflow-hidden sm:grid-cols-4">
           <MetricTile
             label={occupyingCount != null ? "Team registrations" : "People on list"}
             value={`${stats.total}`}
@@ -531,7 +545,7 @@ export function AttendeeClientSide({
             icon={<Ban className="h-4 w-4" />}
             sublabel="Cancelled, rejected, or no-show"
           />
-        </section>
+        </Card>
 
         <div className="mb-6">
           <AttendeeInput tracks={tracks} hidePayment={isFree} />
@@ -540,17 +554,19 @@ export function AttendeeClientSide({
         {extra}
 
         {attendee.length === 0 && leftover.length === 0 && groupedCards.length === 0 ? (
-          <div className="rounded-xl border border-line bg-paper p-5 shadow-sm">
-            <EmptyState
-              icon={<Users className="h-6 w-6 text-primary" />}
-              title={filtering ? "No attendees match that search" : "No one has registered yet"}
-              description={
-                filtering
-                  ? "Try part of a name, or clear the filters to see everyone."
-                  : "Share the event's registration link. Everyone who signs up appears here with their ticket, payment and check-in state."
-              }
-            />
-          </div>
+          <Card>
+            <CardBody>
+              <EmptyState
+                icon={<Users className="h-6 w-6 text-primary" />}
+                title={filtering ? "No attendees match that search" : "No one has registered yet"}
+                description={
+                  filtering
+                    ? "Try part of a name, or clear the filters to see everyone."
+                    : "Share the event's registration link. Everyone who signs up appears here with their ticket, payment and check-in state."
+                }
+              />
+            </CardBody>
+          </Card>
         ) : view === "grouped" && (teams?.length || groups?.length) ? (
           <GroupedAttendeeList
             groups={groupedCards}
@@ -569,7 +585,7 @@ export function AttendeeClientSide({
             onToggleSelect={toggleSelect}
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-line bg-paper shadow-sm">
+          <Card className="overflow-hidden">
             <div className="grid grid-cols-[auto_minmax(0,2.2fr)_minmax(0,1fr)_auto_auto_auto] border-b border-line bg-muted/30 px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-soft">
               <div aria-hidden="true" />
               <div>Attendee</div>
@@ -595,7 +611,7 @@ export function AttendeeClientSide({
                 />
               ))}
             </div>
-          </div>
+          </Card>
         )}
       </div>
 

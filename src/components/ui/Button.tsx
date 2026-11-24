@@ -15,9 +15,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   fullWidth?: boolean;
 }
 
+/** Matches `buttonClass` in src/lib/ui.ts. `danger` maps to outlined destructive. */
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "border border-primary bg-primary text-white shadow-xs hover:bg-primary-hover hover:border-primary-hover focus-visible:outline-accent",
+    "border border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover hover:border-primary-hover focus-visible:outline-accent",
   secondary:
     "border border-line-loud bg-paper text-ink shadow-xs hover:border-ink hover:bg-muted focus-visible:outline-accent",
   outline:
@@ -25,7 +26,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost:
     "border border-transparent bg-transparent text-ink-soft hover:bg-muted hover:text-ink focus-visible:outline-accent",
   danger:
-    "border border-danger bg-danger text-white shadow-xs hover:brightness-90 focus-visible:outline-danger",
+    "border border-ink bg-paper text-ink hover:bg-ink hover:text-ink-invert focus-visible:outline-ink",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -53,7 +54,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type = "button",
       ...props
     },
-    ref
+    ref,
   ) => {
     const combinedClassName = `${BASE_CLASS} ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${
       fullWidth ? "w-full" : ""
@@ -88,7 +89,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {content}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

@@ -247,7 +247,7 @@ export function AddTeamModal({
         </>
       }
     >
-      {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mb-3 text-sm text-danger">{error}</p> : null}
 
       {step === 1 ? (
         <div className="space-y-3">

@@ -73,7 +73,7 @@ export function AdminRail({ items }: { items: AdminRailItem[] }) {
     .filter((i) => pathMatchesHref(pathname, i.href))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
-  const links = (onInk: boolean) =>
+  const links = (onRail: boolean) =>
     items.map((item) => {
       const Icon = ICONS[item.icon];
       const active = item.href === activeHref;
@@ -83,17 +83,27 @@ export function AdminRail({ items }: { items: AdminRailItem[] }) {
           href={item.href}
           onClick={() => setOpen(false)}
           aria-current={active ? "page" : undefined}
-          className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition ${
-            onInk
+          className={`relative flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition ${
+            onRail
               ? active
-                ? "bg-white/12 font-semibold text-white"
-                : "text-white/70 hover:bg-white/8 hover:text-white"
+                ? "bg-rail-active font-semibold text-rail-fg"
+                : "text-rail-muted hover:bg-rail-active/60 hover:text-rail-fg"
               : active
                 ? "bg-muted font-semibold text-ink"
                 : "text-ink-soft hover:bg-muted hover:text-ink"
           }`}
         >
-          <Icon size={14} className="shrink-0" aria-hidden />
+          {onRail && active ? (
+            <span
+              className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-rail-accent"
+              aria-hidden="true"
+            />
+          ) : null}
+          <Icon
+            size={14}
+            className={`shrink-0 ${onRail && active ? "text-rail-accent" : ""}`}
+            aria-hidden
+          />
           {item.label}
         </Link>
       );
@@ -101,12 +111,13 @@ export function AdminRail({ items }: { items: AdminRailItem[] }) {
 
   return (
     <>
-      <aside className="on-ink fixed inset-y-0 left-0 z-30 hidden w-48 flex-col bg-gradient-to-b from-gray-900 to-gray-950 text-white shadow-[inset_-1px_0_0_rgba(255,255,255,0.07)] md:flex">
+      {/* Forest chrome via --rail-* (Stage 5 Batch 3; mirrors DashboardNav) */}
+      <aside className="on-ink fixed inset-y-0 left-0 z-30 hidden w-48 flex-col bg-rail text-rail-fg shadow-[inset_-1px_0_0_color-mix(in_srgb,var(--rail-fg)_10%,transparent)] md:flex">
         <Link href="/admin" className="flex h-12 shrink-0 items-center gap-2 px-3">
           <BrandMark inverted className="h-6 w-auto shrink-0" />
-          <span className="font-display text-sm tracking-tight">Admin</span>
+          <span className="font-display text-sm tracking-tight text-rail-fg">Admin</span>
         </Link>
-        <p className="px-3 pb-1 text-2xs font-medium uppercase tracking-wider text-white/40">
+        <p className="px-3 pb-1 text-2xs font-medium uppercase tracking-wider text-rail-muted">
           Platform
         </p>
         <nav

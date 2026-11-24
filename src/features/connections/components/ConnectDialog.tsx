@@ -5,6 +5,7 @@ import type { IntegrationCatalogEntry } from "../types";
 import { PermissionList } from "./PermissionList";
 import { startConnectAction } from "../actions/connections.action";
 import { formatSafeActionError } from "../lib/connectionUserErrors";
+import { buttonClass } from "@/src/lib/ui";
 
 export function ConnectDialog({
   open,
@@ -49,14 +50,14 @@ export function ConnectDialog({
           </a>
         </p>
         {error ? (
-          <p role="alert" className="mt-3 text-sm text-red-700">
+          <p role="alert" className="mt-3 text-sm text-danger">
             {error}
           </p>
         ) : null}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            className="rounded-lg border border-line px-3 py-1.5 text-sm text-ink"
+            className={buttonClass("secondary", "sm")}
             onClick={onClose}
             disabled={pending}
           >
@@ -65,7 +66,7 @@ export function ConnectDialog({
           <button
             type="button"
             disabled={pending || !entry.active}
-            className="rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+            className={buttonClass("primary", "sm")}
             onClick={() =>
               start(async () => {
                 setError(null);

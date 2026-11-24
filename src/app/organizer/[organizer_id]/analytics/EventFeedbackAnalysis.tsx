@@ -8,7 +8,13 @@ import { buttonClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
 
 function Donut({ distribution }: { distribution: Record<string, number> }) {
   const total = Object.values(distribution).reduce((a, b) => a + b, 0) || 1;
-  const colors = ["#c4c4c4", "#a3a3a3", "#737373", "#404040", "#171717"];
+  const colors = [
+    "var(--muted-strong)",
+    "var(--ink-faint)",
+    "var(--ink-soft)",
+    "var(--ink)",
+    "var(--panel-bg)",
+  ];
   let acc = 0;
   const stops: string[] = [];
   for (let i = 1; i <= 5; i++) {

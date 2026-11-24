@@ -33,8 +33,8 @@ export default function ProfileLoadingState({
       <div className="relative flex h-16 w-16 items-center justify-center">
         {/* Two counter-rotating rings: the outer one carries the motion, the inner
             one is nearly still, so the mark reads as held rather than spun. */}
-        <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-gray-900 [animation-duration:1.1s]" />
-        <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-gray-300 [animation-direction:reverse] [animation-duration:1.8s]" />
+        <span className="absolute inset-0 animate-spin rounded-full border-2 border-line border-t-ink [animation-duration:1.1s]" />
+        <span className="absolute inset-2 animate-spin rounded-full border border-transparent border-b-line [animation-direction:reverse] [animation-duration:1.8s]" />
         <BrandMark className="h-7 w-auto" />
       </div>
 

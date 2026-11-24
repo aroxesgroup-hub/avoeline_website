@@ -225,7 +225,7 @@ export const ChecklistTemplateModal: React.FC<ChecklistTemplateModalProps> = ({
                     <button
                       type="button"
                       onClick={() => removeItem(idx)}
-                      className="text-ink-soft hover:text-rose-600 p-2 rounded transition"
+                      className="text-ink-soft hover:text-danger p-2 rounded transition"
                       title="Delete task"
                     >
                       <Trash2 className="w-4 h-4" />

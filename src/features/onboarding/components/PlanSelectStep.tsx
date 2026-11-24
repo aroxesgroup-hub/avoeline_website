@@ -56,7 +56,7 @@ export function PlanSelectStep({
           </p>
         ) : null}
       </div>
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
 
       {!paidPlan ? (
         <ul className="grid gap-4 sm:grid-cols-1">
@@ -144,7 +144,7 @@ export function PlanSelectStep({
               <p className="mt-3 text-[var(--mkt-muted)]">{billing.instructions}</p>
             ) : null}
             {!billing.bankName && !billing.accountNumber && !billing.iban ? (
-              <p className="mt-2 text-amber-800">
+              <p className="mt-2 text-warning">
                 Platform bank details are not configured yet. Ask the SaaS owner to set them under
                 Admin → Billing.
               </p>

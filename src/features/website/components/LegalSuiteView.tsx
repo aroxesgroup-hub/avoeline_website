@@ -81,21 +81,19 @@ export function LegalSuiteView({
           </div>
 
           <div className="mt-4 rounded-2xl bg-[var(--mkt-accent-deep)] p-5 text-white shadow-[var(--mkt-card-shadow)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
               {settings.zeroSell.title}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-emerald-50/95">
-              {settings.zeroSell.body}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-invert">{settings.zeroSell.body}</p>
             <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/15 pt-4">
               <div>
-                <dt className="text-[10px] uppercase tracking-wide text-emerald-200/80">
+                <dt className="text-[10px] uppercase tracking-wide text-primary">
                   {settings.zeroSell.stat1Label}
                 </dt>
                 <dd className="mt-1 text-sm font-semibold">{settings.zeroSell.stat1Value}</dd>
               </div>
               <div>
-                <dt className="text-[10px] uppercase tracking-wide text-emerald-200/80">
+                <dt className="text-[10px] uppercase tracking-wide text-primary">
                   {settings.zeroSell.stat2Label}
                 </dt>
                 <dd className="mt-1 text-sm font-semibold">{settings.zeroSell.stat2Value}</dd>

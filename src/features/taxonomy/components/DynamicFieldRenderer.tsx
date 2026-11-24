@@ -43,9 +43,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
         <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-soft">
           Category Custom Attributes ({fields.length})
         </h4>
-        <span className="text-[11px] text-ink-soft">
-          Fields defined for this Super Category
-        </span>
+        <span className="text-[11px] text-ink-soft">Fields defined for this Super Category</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -72,7 +70,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
                   className="cursor-pointer select-none text-sm text-ink"
                 >
                   <span className="font-medium">{field.label}</span>
-                  {field.required && <span className="text-rose-500 ml-1">*</span>}
+                  {field.required && <span className="text-danger ml-1">*</span>}
                   <span className="block text-xs text-ink-soft mt-0.5">
                     Toggle to confirm or enable this option for your event
                   </span>
@@ -90,7 +88,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
                     {getIconForType(field.type)}
                     <span>{field.label}</span>
                   </span>
-                  {field.required && <span className="text-rose-500">*</span>}
+                  {field.required && <span className="text-danger">*</span>}
                 </label>
                 <select
                   id={`field-${field.key}`}
@@ -119,7 +117,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
                     {getIconForType(field.type)}
                     <span>{field.label}</span>
                   </span>
-                  {field.required && <span className="text-rose-500">*</span>}
+                  {field.required && <span className="text-danger">*</span>}
                 </label>
                 <input
                   type="number"
@@ -146,7 +144,7 @@ export const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
                   {getIconForType(field.type)}
                   <span>{field.label}</span>
                 </span>
-                {field.required && <span className="text-rose-500">*</span>}
+                {field.required && <span className="text-danger">*</span>}
               </label>
               <input
                 type="text"

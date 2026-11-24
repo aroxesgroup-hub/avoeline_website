@@ -66,7 +66,8 @@ export function FormBuilder({
         <div>
           <h3 className="text-lg font-bold text-ink">Registration questions</h3>
           <p className="text-sm text-ink-soft">
-            Google Forms-style questions. Multiple choice uses one radio per line; checkboxes let people pick several.
+            Google Forms-style questions. Multiple choice uses one radio per line; checkboxes let
+            people pick several.
           </p>
         </div>
         <button
@@ -74,7 +75,13 @@ export function FormBuilder({
           onClick={() =>
             onChange([
               ...fields,
-              { id: `field-${Date.now()}`, label: "Untitled question", type: "text", required: false, options: [] },
+              {
+                id: `field-${Date.now()}`,
+                label: "Untitled question",
+                type: "text",
+                required: false,
+                options: [],
+              },
             ])
           }
           className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-ink-invert"
@@ -104,7 +111,11 @@ export function FormBuilder({
                 const type = e.target.value as CustomFieldType;
                 update(field.id, {
                   type,
-                  options: usesOptions(type) ? optionsOf(field).filter(Boolean).length ? optionsOf(field) : ["Option 1"] : [],
+                  options: usesOptions(type)
+                    ? optionsOf(field).filter(Boolean).length
+                      ? optionsOf(field)
+                      : ["Option 1"]
+                    : [],
                 });
               }}
               aria-label="Question type"
@@ -121,7 +132,10 @@ export function FormBuilder({
           {usesOptions(field.type) ? (
             <div className="flex flex-col gap-2">
               {optionsOf(field).map((option, optionIndex) => (
-                <div key={`${field.id}-opt-${optionIndex}`} className="flex w-full items-center gap-2">
+                <div
+                  key={`${field.id}-opt-${optionIndex}`}
+                  className="flex w-full items-center gap-2"
+                >
                   <span
                     className={`h-4 w-4 shrink-0 border border-ink ${
                       field.type === "checkboxes" ? "rounded-sm" : "rounded-full"
@@ -144,7 +158,11 @@ export function FormBuilder({
                   </button>
                 </div>
               ))}
-              <button type="button" onClick={() => addOption(field)} className="self-start text-xs font-semibold text-ink underline">
+              <button
+                type="button"
+                onClick={() => addOption(field)}
+                className="self-start text-xs font-semibold text-ink underline"
+              >
                 Add option
               </button>
             </div>
@@ -164,7 +182,9 @@ export function FormBuilder({
                 Ask once
                 <select
                   value={field.askOnce === "group" ? "group" : "member"}
-                  onChange={(e) => update(field.id, { askOnce: e.target.value as "group" | "member" })}
+                  onChange={(e) =>
+                    update(field.id, { askOnce: e.target.value as "group" | "member" })
+                  }
                   className="rounded-lg border border-line px-2 py-1 text-xs"
                 >
                   <option value="member">Per member</option>
@@ -173,7 +193,12 @@ export function FormBuilder({
               </label>
             ) : null}
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => move(index, -1)} disabled={index === 0} className="text-xs text-ink-soft disabled:opacity-40">
+              <button
+                type="button"
+                onClick={() => move(index, -1)}
+                disabled={index === 0}
+                className="text-xs text-ink-soft disabled:opacity-40"
+              >
                 Up
               </button>
               <button
@@ -184,7 +209,11 @@ export function FormBuilder({
               >
                 Down
               </button>
-              <button type="button" onClick={() => onChange(fields.filter((f) => f.id !== field.id))} className="text-xs font-medium text-red-700">
+              <button
+                type="button"
+                onClick={() => onChange(fields.filter((f) => f.id !== field.id))}
+                className="text-xs font-medium text-danger"
+              >
                 Delete
               </button>
             </div>

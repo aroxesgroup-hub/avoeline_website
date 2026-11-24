@@ -6,7 +6,7 @@ export async function DelayedConfirmationsBanner({ ownerId }: { ownerId: string 
   return (
     <p
       role="status"
-      className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+      className="rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning"
     >
       {n} confirmation{n === 1 ? "" : "s"} delayed — waiting for send capacity. Ticket and status
       pages still work as the fallback.

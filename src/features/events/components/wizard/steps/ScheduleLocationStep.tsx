@@ -63,7 +63,7 @@ export function ScheduleLocationStep({
               Same as start date
             </label>
             {endBeforeStart ? (
-              <p className="mt-2 text-xs text-red-600">
+              <p className="mt-2 text-xs text-danger">
                 End date must be on or after the start date.
               </p>
             ) : null}
@@ -89,7 +89,7 @@ export function ScheduleLocationStep({
           />
         </div>
         {sameDayEndBeforeStart ? (
-          <p className="text-xs text-red-600">End time must be after start time on the same day.</p>
+          <p className="text-xs text-danger">End time must be after start time on the same day.</p>
         ) : null}
         <p className="text-sm font-medium text-ink">
           {durationLabel(
@@ -161,7 +161,7 @@ export function ScheduleLocationStep({
               <p className="mb-3 text-2xs text-ink-soft">{mapsUrlHint()}</p>
               {(formData.mapsUrl || formData.mapUrl) &&
               !isValidMapsUrl(formData.mapsUrl || formData.mapUrl) ? (
-                <p className="mb-2 text-xs text-red-600">Maps link must be an https:// URL.</p>
+                <p className="mb-2 text-xs text-danger">Maps link must be an https:// URL.</p>
               ) : null}
               <MapPreview mapUrl={formData.mapsUrl || formData.mapUrl || ""} />
             </div>

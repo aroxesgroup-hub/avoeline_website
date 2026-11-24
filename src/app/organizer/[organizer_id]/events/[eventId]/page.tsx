@@ -214,14 +214,13 @@ export default async function EventDetailsPage({
   return (
     // No <main>, no page padding and no title here: the event layout renders all
     // of them, along with the breadcrumb, the status and the section tabs.
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-4">
       {/* Banner lives once in the layout header (EventHeaderMedia). Overview
                 only shows orientation facts — no second hero image. */}
-      {/* bg-panel, not bg-ink: --ink is *text*, so in dark mode it resolves to
-                near-white and this hero would become a white slab carrying white text.
-                --panel-bg is the surface that stays dark in both themes. */}
-      <section className="overflow-hidden rounded-xl bg-panel shadow-sm">
-        <div className="flex min-w-0 flex-col justify-center gap-6 p-6 sm:p-8">
+      {/* Card tone="panel" uses ink-panel / --panel-bg so the hero stays dark
+                in both themes (bg-ink would invert in dark mode). */}
+      <Card tone="panel">
+        <CardBody className="flex min-w-0 flex-col justify-center gap-6 sm:!p-8">
           <div className="flex flex-wrap gap-1.5">
             {/* No language chip: event.service.ts hardcodes language: "en".
                             format is kept only when off the wizard's `physical` default. */}
@@ -312,25 +311,26 @@ export default async function EventDetailsPage({
               </a>
             </div>
           ) : null}
-        </div>
-      </section>
+        </CardBody>
+      </Card>
 
       {/* The attendees tab tells organizers to "share the event's registration
                 link", and until now there was nowhere to get one: the publish success
                 screen showed it once, on publish day, and never again. */}
       {registrationUrl && (
-        <section className="rounded-xl border border-line bg-paper p-6 shadow-sm">
-          <h2 className="font-display text-lg text-ink">Registration link</h2>
-          <p className="mt-1 text-sm text-ink-soft">
-            Anyone with this link can register. No account needed.
-          </p>
-          <p className="mt-4 truncate rounded-lg border border-line bg-muted px-3 py-2 font-mono text-xs text-ink">
-            {registrationUrl}
-          </p>
-          <div className="mt-4">
-            <ShareRow eventUrl={registrationUrl} eventTitle={event.title} />
-          </div>
-        </section>
+        <Card title="Registration link">
+          <CardBody>
+            <p className="text-sm text-ink-soft">
+              Anyone with this link can register. No account needed.
+            </p>
+            <p className="mt-4 truncate rounded-lg border border-line bg-muted px-3 py-2 font-mono text-xs text-ink">
+              {registrationUrl}
+            </p>
+            <div className="mt-4">
+              <ShareRow eventUrl={registrationUrl} eventTitle={event.title} />
+            </div>
+          </CardBody>
+        </Card>
       )}
 
       {/* The fourth tile used to be "Avg. Rating 4.8 / Based on 142 reviews" over a
@@ -341,8 +341,9 @@ export default async function EventDetailsPage({
                 units, so the meter absorbs both and the freed tile carries the seats
                 still available — the number an organizer is actually deciding on. */}
       {takesRegistrations ? (
-        <section
-          className={`grid grid-cols-1 overflow-hidden rounded-xl border border-line bg-paper shadow-sm ${hasCapacity ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}
+        <Card
+          tone="raised"
+          className={`grid grid-cols-1 overflow-hidden ${hasCapacity ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}
         >
           <MetricTile
             label={teams.length ? "Team registrations" : "Registrations"}
@@ -390,12 +391,12 @@ export default async function EventDetailsPage({
             iconTone="warning"
             sublabel="Amounts actually paid"
           />
-        </section>
+        </Card>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <OverviewCard icon={<Clock size={16} />} title="Schedule">
               <div className="space-y-5">
                 <InfoBlock label="Start date" value={formatDate(event.schedule?.startDate)} />
@@ -655,7 +656,7 @@ export default async function EventDetailsPage({
           ) : null}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {takesRegistrations ? (
             <OverviewCard
               icon={<Users size={16} />}

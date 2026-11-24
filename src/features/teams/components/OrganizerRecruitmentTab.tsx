@@ -170,7 +170,7 @@ export function OrganizerRecruitmentTab({
         ))}
       </div>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
       {flash ? <p className="text-sm text-ink">{flash}</p> : null}
 
       {!forms.length ? (
@@ -544,7 +544,7 @@ function RecruitmentFormModal({
       }
     >
       <div className="space-y-4">
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         {libraryForms.length ? (
           <div className="flex flex-wrap items-end gap-2 rounded-lg border border-line bg-canvas/30 px-3 py-3">
             <label className="block min-w-[12rem] flex-1 text-xs text-ink">
@@ -775,7 +775,7 @@ function ApplicantDrawer({
           </button>
         </div>
 
-        {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
         <section className="mt-6 space-y-2">
           <h3 className="text-2xs font-medium uppercase text-ink-soft">Answers</h3>

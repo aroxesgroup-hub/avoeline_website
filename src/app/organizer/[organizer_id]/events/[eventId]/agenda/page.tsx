@@ -23,14 +23,25 @@ export default async function AgendaPage({
   ]);
 
   return (
-    <AgendaClientContent
-      id={eventId}
-      organizer_id={organizer_id}
-      days={days}
-      sessionsByDay={sessionsByDay}
-      speakers={speakers.map((s) => ({ speakerId: s.speakerId, name: s.name }))}
-      tracks={tracks.map((t) => ({ id: t.id, name: t.name }))}
-      attendeeTiers={event.access?.attendeeTiers ?? []}
-    />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Agenda
+        </p>
+        <h2 className="font-display text-xl text-ink">Agenda</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Build the run of show by day — sessions, speakers, and timing for this event.
+        </p>
+      </div>
+      <AgendaClientContent
+        id={eventId}
+        organizer_id={organizer_id}
+        days={days}
+        sessionsByDay={sessionsByDay}
+        speakers={speakers.map((s) => ({ speakerId: s.speakerId, name: s.name }))}
+        tracks={tracks.map((t) => ({ id: t.id, name: t.name }))}
+        attendeeTiers={event.access?.attendeeTiers ?? []}
+      />
+    </div>
   );
 }

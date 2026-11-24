@@ -44,7 +44,7 @@ export function CopyShareLink({ url, showQr = true }: { url: string; showQr?: bo
           title="Copy application link"
         >
           {copied ? (
-            <Check className="h-3.5 w-3.5 text-emerald-600" />
+            <Check className="h-3.5 w-3.5 text-primary" />
           ) : (
             <Copy className="h-3.5 w-3.5" />
           )}
@@ -57,7 +57,7 @@ export function CopyShareLink({ url, showQr = true }: { url: string; showQr?: bo
       >
         {copied ? (
           <>
-            <Check className="h-3.5 w-3.5 text-emerald-600" />
+            <Check className="h-3.5 w-3.5 text-primary" />
             <span>Link Copied</span>
           </>
         ) : (

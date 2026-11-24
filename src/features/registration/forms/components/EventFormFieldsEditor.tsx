@@ -305,7 +305,7 @@ export function EventFormFieldsEditor({
         </button>
       </div>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
 
       {fields.length === 0 ? (
         <p className="rounded-xl border border-dashed border-line bg-muted px-4 py-6 text-sm text-ink-soft">
@@ -415,7 +415,7 @@ export function EventFormFieldsEditor({
                 {!systemCore && !paymentLocked ? (
                   <button
                     type="button"
-                    className="text-red-700 underline"
+                    className="text-danger underline"
                     disabled={pending}
                     onClick={() => removeField(field)}
                   >

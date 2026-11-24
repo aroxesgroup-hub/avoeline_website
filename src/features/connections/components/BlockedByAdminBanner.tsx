@@ -7,13 +7,13 @@ export function BlockedByAdminBanner({ note }: { note: string }) {
   return (
     <div
       role="alert"
-      className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+      className="space-y-2 rounded-xl border border-warning-line bg-warning-soft px-4 py-3 text-sm text-warning"
     >
       <p className="font-medium">Your organization&apos;s Google admin must allow this app.</p>
       <p className="text-xs">
         Copy the note below for your Workspace admin, or connect a personal Gmail instead.
       </p>
-      <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg border border-amber-200 bg-paper/80 p-2 text-[11px] text-ink">
+      <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg border border-warning-line bg-paper/80 p-2 text-[11px] text-ink">
         {note}
       </pre>
       <button

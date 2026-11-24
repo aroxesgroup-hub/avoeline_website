@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
+import { labelClass } from "@/src/lib/ui";
 
 export interface SelectOption {
   label: string;
@@ -30,7 +31,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       required,
       ...props
     },
-    ref
+    ref,
   ) => {
     const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
     const errorId = selectId && error ? `${selectId}-error` : undefined;
@@ -39,10 +40,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={`w-full ${wrapperClassName}`}>
         {label && (
-          <label
-            htmlFor={selectId}
-            className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-ink-soft"
-          >
+          <label htmlFor={selectId} className={`mb-1.5 ${labelClass}`}>
             {label}
             {required && <span className="ml-1 text-danger">*</span>}
           </label>
@@ -87,7 +85,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = "Select";

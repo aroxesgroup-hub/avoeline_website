@@ -71,7 +71,7 @@ export function HackathonTracksStep({
               <button
                 type="button"
                 onClick={() => setTracks(tracks.filter((t) => t.id !== track.id))}
-                className="text-xs text-red-700"
+                className="text-xs text-danger"
               >
                 Remove
               </button>

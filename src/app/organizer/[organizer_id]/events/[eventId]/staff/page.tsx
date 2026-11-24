@@ -66,9 +66,12 @@ export default async function EventStaffPage({
     });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-ink">Event team</h2>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Team assignment
+        </p>
+        <h2 className="font-display text-xl text-ink">Event team</h2>
         <p className="mt-1 text-sm text-ink-soft">
           Assign library teams and members for this event. Recruitment, grants, and roster edits
           live on Manage in Teams.

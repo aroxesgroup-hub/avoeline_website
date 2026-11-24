@@ -67,7 +67,7 @@ export function PublicShareMenu({ sharePath, title }: { sharePath: string; title
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink hover:bg-muted"
                   onClick={() => void copy()}
                 >
-                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden /> : null}
+                  {copied ? <Check className="h-3.5 w-3.5 text-primary" aria-hidden /> : null}
                   {copied ? "Copied" : item.label}
                 </button>
               ) : (

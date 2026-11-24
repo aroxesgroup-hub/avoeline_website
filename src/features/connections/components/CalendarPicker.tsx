@@ -24,7 +24,7 @@ export function CalendarPicker({ connectionId }: { connectionId: string }) {
   }, [connectionId]);
 
   if (!calendars.length && !pending) {
-    return message ? <p className="text-xs text-red-700">{message}</p> : null;
+    return message ? <p className="text-xs text-danger">{message}</p> : null;
   }
 
   return (

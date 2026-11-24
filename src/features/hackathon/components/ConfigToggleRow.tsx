@@ -61,7 +61,7 @@ export function ConfigToggleRow({
         ) : (
           <p className="text-2xs text-ink-faint">Not enabled on any competition yet.</p>
         )}
-        {conflictWarning ? <p className="text-xs text-amber-800">{conflictWarning}</p> : null}
+        {conflictWarning ? <p className="text-xs text-warning">{conflictWarning}</p> : null}
         <label className="flex items-center gap-2 text-xs text-ink">
           <input type="checkbox" name="allTracks" defaultChecked />
           All competitions{ctfOnly ? " (CTF only)" : ""}

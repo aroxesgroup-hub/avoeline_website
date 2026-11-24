@@ -202,7 +202,17 @@ export default async function EventAccessPage({
   let step = 1;
 
   return (
-    <div className="space-y-10">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Access & ticketing
+        </p>
+        <h2 className="font-display text-xl text-ink">Access</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Who can register, guest lists, and ticket SKUs for this event.
+        </p>
+      </div>
+
       <HowAccessWorks />
 
       <Card title={`Step ${step++} — Access settings`}>

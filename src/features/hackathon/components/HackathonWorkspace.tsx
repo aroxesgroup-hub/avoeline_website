@@ -157,11 +157,11 @@ export default async function HackathonWorkspace({
       : [];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {e ? <FormFeedback error={e} /> : null}
       {ok ? <FormFeedback success={ok} /> : null}
 
-      <section className="grid grid-cols-2 gap-y-8 border-b border-line pb-8 sm:grid-cols-4 sm:divide-x sm:divide-line">
+      <section className="grid grid-cols-2 gap-y-6 border-b border-line pb-6 sm:grid-cols-4 sm:divide-x sm:divide-line">
         <MetricTile label="Tracks" value={`${trackCount}`} icon={<Flag className="h-4 w-4" />} />
         <MetricTile
           label="Team registrations"
@@ -223,7 +223,7 @@ export default async function HackathonWorkspace({
       ) : null}
 
       {view === "settings" ? (
-        <div className="space-y-10">
+        <div className="space-y-6">
           <Card title="Event settings">
             <CardBody>
               <HackathonSettingsForm

@@ -174,7 +174,7 @@ export default async function EditServicePage({
                     name="inclusions"
                     value={inc.id}
                     defaultChecked={inclusions.includes(inc.id)}
-                    className="h-4 w-4 rounded-xs border-line-loud accent-gray-900"
+                    className="h-4 w-4 rounded-xs border-line-loud accent-primary"
                   />
                   <span className="text-sm text-ink">{inc.label}</span>
                 </label>

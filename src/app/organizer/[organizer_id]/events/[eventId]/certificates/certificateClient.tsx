@@ -15,6 +15,7 @@ import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { ConfirmButton } from "@/src/shared_components/ui/ConfirmDialog";
 import { DownloadCertificate } from "@/src/features/certificates/components/DownloadCertificate";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { CapacityStrip } from "@/src/features/connections/components/CapacityStrip";
 import { SenderPicker } from "@/src/features/connections/components/SenderPicker";
 import { buttonClass, fieldClass, tableCell, tableHead, tableRow } from "@/src/lib/ui";
@@ -276,20 +277,14 @@ export default function CertificateIssuanceClient({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-xl text-ink">Certificates</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            Issue digital certificates, email verify/download links, and open the template editor.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <Link href={`${pathName}/making-template`} className={buttonClass("secondary", "sm")}>
           Edit template
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <Card tone="raised" className="grid grid-cols-1 overflow-hidden sm:grid-cols-3">
         <MetricTile label="Registrants" value={String(totalAttendees)} icon={<Users size={16} />} />
         <MetricTile
           label="Issued"
@@ -297,7 +292,7 @@ export default function CertificateIssuanceClient({
           icon={<Award size={16} />}
         />
         <MetricTile label="Not emailed yet" value={String(unsentCount)} />
-      </div>
+      </Card>
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -423,7 +418,7 @@ export default function CertificateIssuanceClient({
                     </td>
                     <td className={tableCell}>
                       {generationResultsByUserId[a.registrationId]?.error ? (
-                        <span className="text-xs text-red-600">
+                        <span className="text-xs text-danger">
                           {generationResultsByUserId[a.registrationId]?.error}
                         </span>
                       ) : (

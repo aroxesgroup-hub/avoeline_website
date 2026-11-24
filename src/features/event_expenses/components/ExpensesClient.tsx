@@ -10,6 +10,7 @@ import { SubmitButton } from "@/src/shared_components/SubmitButton";
 import { MetricTile } from "@/src/shared_components/ui/MetricTile";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
 import { StatusBadge } from "@/src/shared_components/ui/StatusBadge";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { formatCurrency } from "@/src/lib/money";
 import type { ActionResult } from "@/src/lib/action";
 import {
@@ -109,28 +110,28 @@ export function ExpensesClient({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="font-display text-xl text-ink">Expenses</h2>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={buttonClass("secondary", "sm")}
-            onClick={() => {
-              void exportEventExpensesAction(eventId).then((file) => {
-                if (file.success) window.location.href = file.url;
-              });
-            }}
-          >
-            Export xlsx
-          </button>
-          <button type="button" className={buttonClass("primary", "sm")} onClick={openCreate}>
-            Add entry
-          </button>
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          className={buttonClass("secondary", "sm")}
+          onClick={() => {
+            void exportEventExpensesAction(eventId).then((file) => {
+              if (file.success) window.location.href = file.url;
+            });
+          }}
+        >
+          Export xlsx
+        </button>
+        <button type="button" className={buttonClass("primary", "sm")} onClick={openCreate}>
+          Add entry
+        </button>
       </div>
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <Card
+        tone="raised"
+        className="grid grid-cols-1 overflow-hidden sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+      >
         <MetricTile
           label="Income received"
           value={formatCurrency(totals.incomeReceived, currency)}
@@ -163,98 +164,105 @@ export function ExpensesClient({
           icon={<Wallet className="h-4 w-4" />}
           sublabel="Expected − (paid + planned)"
         />
-      </section>
+      </Card>
 
       {overBudget ? (
         <p
           role="alert"
-          className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900"
+          className="rounded-xl border border-danger-line bg-danger-soft px-4 py-3 text-sm text-danger"
         >
           Paid expenses exceed the event budget by{" "}
           {formatCurrency(totals.expensesPaid - totals.budget, currency)}.
         </p>
       ) : null}
 
-      <form
-        action={budgetAction}
-        className="flex flex-wrap items-end gap-3 rounded-xl border border-line bg-paper p-4"
-      >
-        <input type="hidden" name="eventId" value={eventId} />
-        <div>
-          <label className={labelClass} htmlFor="budget-total">
-            Event budget
-          </label>
-          <input
-            id="budget-total"
-            name="budgetTotal"
-            inputMode="decimal"
-            defaultValue={budgetTotal ?? ""}
-            className={`${fieldClass} mt-1 w-40`}
-            placeholder="0"
-          />
-        </div>
-        <SubmitButton className={buttonClass("secondary", "sm")}>Save budget</SubmitButton>
-        {budgetState?.error ? <FormFeedback error={budgetState.error} /> : null}
-        {budgetState?.success ? <FormFeedback success="Budget updated." /> : null}
-      </form>
+      <Card>
+        <CardBody>
+          <form action={budgetAction} className="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="eventId" value={eventId} />
+            <div>
+              <label className={labelClass} htmlFor="budget-total">
+                Event budget
+              </label>
+              <input
+                id="budget-total"
+                name="budgetTotal"
+                inputMode="decimal"
+                defaultValue={budgetTotal ?? ""}
+                className={`${fieldClass} mt-1 w-40`}
+                placeholder="0"
+              />
+            </div>
+            <SubmitButton className={buttonClass("secondary", "sm")}>Save budget</SubmitButton>
+            {budgetState?.error ? <FormFeedback error={budgetState.error} /> : null}
+            {budgetState?.success ? <FormFeedback success="Budget updated." /> : null}
+          </form>
+        </CardBody>
+      </Card>
 
-      <div className="flex flex-wrap gap-2">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search ledger"
-          className={`${fieldClass} max-w-xs`}
-        />
-        <select
-          className={fieldClass}
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="all">All categories</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          className={fieldClass}
-          value={direction}
-          onChange={(e) => setDirection(e.target.value)}
-        >
-          <option value="all">Income + expense</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-        </select>
-        <select className={fieldClass} value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="all">All statuses</option>
-          <option value="received">received</option>
-          <option value="expected">expected</option>
-          <option value="paid">paid</option>
-          <option value="planned">planned</option>
-        </select>
-        <select
-          className={fieldClass}
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-        >
-          <option value="all">Auto + manual</option>
-          <option value="auto">Automatic only</option>
-          <option value="manual">Manual only</option>
-        </select>
-      </div>
+      <Card>
+        <CardBody className="flex flex-wrap gap-2 !py-3">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search ledger"
+            className={`${fieldClass} max-w-xs`}
+          />
+          <select
+            className={fieldClass}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="all">All categories</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <select
+            className={fieldClass}
+            value={direction}
+            onChange={(e) => setDirection(e.target.value)}
+          >
+            <option value="all">Income + expense</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select className={fieldClass} value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="received">received</option>
+            <option value="expected">expected</option>
+            <option value="paid">paid</option>
+            <option value="planned">planned</option>
+          </select>
+          <select
+            className={fieldClass}
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
+            <option value="all">Auto + manual</option>
+            <option value="auto">Automatic only</option>
+            <option value="manual">Manual only</option>
+          </select>
+        </CardBody>
+      </Card>
 
       {!filtered.length ? (
-        <EmptyState
-          icon={<Wallet className="h-5 w-5" />}
-          title="No ledger lines yet"
-          description="Automatic ticket, sponsor, vendor, and competition rows appear here alongside manual entries."
-          action={
-            <button type="button" className={buttonClass("primary", "sm")} onClick={openCreate}>
-              Add entry
-            </button>
-          }
-        />
+        <Card>
+          <CardBody>
+            <EmptyState
+              icon={<Wallet className="h-5 w-5" />}
+              title="No ledger lines yet"
+              description="Automatic ticket, sponsor, vendor, and competition rows appear here alongside manual entries."
+              action={
+                <button type="button" className={buttonClass("primary", "sm")} onClick={openCreate}>
+                  Add entry
+                </button>
+              }
+            />
+          </CardBody>
+        </Card>
       ) : (
         <ul className="divide-y divide-line rounded-xl border border-line bg-paper">
           {filtered.map((line) => {

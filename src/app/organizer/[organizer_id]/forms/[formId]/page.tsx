@@ -3,6 +3,7 @@ import { AuthService } from "@/src/features/auth/authService";
 import { getCustomFormForOwner } from "@/src/features/custom_forms/customForms.service";
 import { FormEditorClient } from "@/src/features/custom_forms/components/FormEditorClient";
 import PageHeader from "@/src/shared_components/ui/PageHeader";
+import { Breadcrumbs } from "@/src/shared_components/ui/Breadcrumbs";
 import { headers } from "next/headers";
 
 export default async function OrganizerFormEditorPage({
@@ -27,12 +28,22 @@ export default async function OrganizerFormEditorPage({
   const publicOrigin = `${proto}://${host}`;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <PageHeader
-        title={form.title}
-        description="Edit questions, open the form, and share the link."
-      />
-      <FormEditorClient ownerId={organizer_id} form={form} publicOrigin={publicOrigin} />
+    <div className="px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: `/organizer/${organizer_id}/dashboard` },
+            { label: "Forms", href: `/organizer/${organizer_id}/forms` },
+            { label: form.title },
+          ]}
+        />
+        <PageHeader
+          eyebrow="Custom forms · Survey editor"
+          title={form.title}
+          description="Edit questions, open the form, and share the link."
+        />
+        <FormEditorClient ownerId={organizer_id} form={form} publicOrigin={publicOrigin} />
+      </div>
     </div>
   );
 }

@@ -124,14 +124,14 @@ function AttendeeListItemBase({
                 if (approveBlock) return;
                 onQuickStatusChange?.(attendee_reg, "confirmed");
               }}
-              className="rounded-md bg-emerald-700 px-2 py-1 text-xs font-semibold text-white shadow-xs transition enabled:hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-md bg-primary px-2 py-1 text-xs font-semibold text-white shadow-xs transition enabled:hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               Approve
             </button>
             <button
               type="button"
               onClick={() => onQuickStatusChange?.(attendee_reg, "rejected")}
-              className="rounded-md border border-rose-300 bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-800 transition hover:bg-rose-200 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+              className="rounded-md border border-danger-line bg-danger-soft px-2 py-1 text-xs font-semibold text-danger transition hover:bg-danger-soft dark:border-danger-line dark:bg-danger-soft dark:text-danger-on-ink"
             >
               Reject
             </button>

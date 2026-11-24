@@ -228,9 +228,9 @@ export function TeamCreator({
       ) : null}
 
       {showJoinCodes && createdCode && (
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 dark:bg-emerald-950/20">
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-accent-line bg-primary-soft0/5 px-4 py-3 dark:bg-primary-soft">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <Sparkles className="h-4 w-4 text-primary dark:text-primary" />
             <span className="text-xs text-ink-soft">
               Team Join Code:{" "}
               <span className="font-mono text-sm font-bold tracking-wider text-ink">
@@ -246,7 +246,7 @@ export function TeamCreator({
             >
               {copied ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                   Copied!
                 </>
               ) : (
@@ -265,7 +265,7 @@ export function TeamCreator({
             >
               {copiedLink ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  <Check className="h-3.5 w-3.5 text-primary" />
                   Link Copied!
                 </>
               ) : (

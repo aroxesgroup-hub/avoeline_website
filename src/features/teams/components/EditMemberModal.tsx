@@ -124,7 +124,7 @@ export function EditMemberModal({
         </>
       }
     >
-      {error ? <p className="mb-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mb-3 text-sm text-danger">{error}</p> : null}
       <div className="space-y-3">
         <div>
           <label className={labelClass} htmlFor="edit-member-name">

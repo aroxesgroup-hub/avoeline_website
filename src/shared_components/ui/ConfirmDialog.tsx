@@ -6,22 +6,24 @@ import { TriangleAlert, HelpCircle } from "lucide-react";
 export type ConfirmTone = "danger" | "default";
 
 /**
- * The two tones differ by the weight of the badge and by their icon, not by hue.
- * Both confirm buttons are solid ink: the dialog itself is the safety mechanism,
- * so making the destructive button quieter than the cancel button would just make
- * it harder to find. Pass a `confirmLabel` that names the act ("Delete event",
- * not "Confirm") -- that wording is the channel that actually prevents mistakes.
+ * The two tones differ by badge weight and icon. Confirm uses brand primary
+ * (default) or filled danger (tone=danger); the dialog itself is the safety
+ * mechanism. Pass a `confirmLabel` that names the act ("Delete event", not
+ * "Confirm") -- that wording is the channel that actually prevents mistakes.
+ * No brightness() hovers — they invert wrong in dark mode.
  */
 const TONE: Record<ConfirmTone, { icon: ReactNode; badge: string; confirm: string }> = {
   danger: {
     icon: <TriangleAlert className="h-5 w-5" aria-hidden="true" />,
     badge: "bg-danger-soft text-danger ring-1 ring-danger-line",
-    confirm: "bg-danger text-ink-invert hover:brightness-90 focus-visible:outline-accent",
+    confirm:
+      "border border-danger bg-danger text-ink-invert hover:bg-danger-soft hover:text-danger focus-visible:outline-danger",
   },
   default: {
     icon: <HelpCircle className="h-5 w-5" aria-hidden="true" />,
     badge: "bg-muted text-ink-soft ring-1 ring-line",
-    confirm: "bg-ink text-ink-invert hover:bg-ink-soft focus-visible:outline-accent",
+    confirm:
+      "border border-primary bg-primary text-primary-foreground hover:bg-primary-hover hover:border-primary-hover focus-visible:outline-accent",
   },
 };
 
@@ -96,7 +98,7 @@ export function ConfirmDialog({
       onClick={(e) => {
         if (e.target === ref.current && !busy) onCancel();
       }}
-      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-paper p-0 text-ink shadow-2xl backdrop:bg-black/50"
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl bg-paper p-0 text-ink shadow-2xl backdrop:bg-ink/50"
     >
       <div className="p-6">
         <div className="flex gap-4">

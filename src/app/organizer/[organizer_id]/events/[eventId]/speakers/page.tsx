@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SpeakerSearchBar } from "@/src/features/event_speakers/components/SpeakerSearchBar";
 import { SpeakerCard } from "@/src/features/event_speakers/components/SpeakerCard";
 import { EmptyState } from "@/src/shared_components/ui/EmptyState";
+import { Card, CardBody } from "@/src/shared_components/ui/Card";
 import { buttonClass } from "@/src/lib/ui";
 import { UserRoundCog, Plus } from "lucide-react";
 import { sessionsBySpeakerIds } from "@/src/features/agendas/agendaSpeakers.service";
@@ -36,58 +37,68 @@ export default async function SpeakerPage({
   const count_of_speakers = allSpeaker.length;
 
   return (
-    // The event layout already supplies the page padding.
-    <div className="mx-auto max-w-7xl">
-      {/* Section header, not a page header: the event layout already renders the
-                event's name, status and breadcrumb above this. */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
-        <h2 className="flex items-center gap-3 font-display text-xl text-ink">
-          Speakers
-          <span className="text-sm text-ink-soft tabular-nums">{count_of_speakers}</span>
-        </h2>
-
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+            Event · Speakers
+          </p>
+          <h2 className="font-display text-xl text-ink">
+            Speakers
+            <span className="ml-2 text-sm font-normal text-ink-soft tabular-nums">
+              {count_of_speakers}
+            </span>
+          </h2>
+          <p className="mt-1 text-sm text-ink-soft">
+            Directory of presenters for this event — profiles, contacts, and session links.
+          </p>
+        </div>
         <Link
           href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
-          className={buttonClass("primary")}
+          className={buttonClass("primary", "sm")}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           Add speaker
         </Link>
       </div>
 
-      <div className="mb-8">
-        <SpeakerSearchBar />
-      </div>
+      <Card>
+        <CardBody className="!py-3">
+          <SpeakerSearchBar />
+        </CardBody>
+      </Card>
 
-      {/* Grid Container. Without the empty branch this rendered a blank page:
-                a heading, a search box, and then nothing at all. */}
       {count_of_speakers > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {withSessions.map(({ speaker, sessions }) => (
             <SpeakerCard key={speaker.speakerId} speaker={speaker} sessions={sessions} />
           ))}
         </div>
       ) : (
-        <EmptyState
-          icon={<UserRoundCog className="h-5 w-5" />}
-          title={resolvedParams.input_val ? "No speakers match that search" : "No speakers yet"}
-          description={
-            resolvedParams.input_val
-              ? "Try a different name, company or session."
-              : "Add the people presenting at this event so attendees can see who is speaking."
-          }
-          action={
-            resolvedParams.input_val ? undefined : (
-              <Link
-                href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
-                className={buttonClass("primary")}
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Add speaker
-              </Link>
-            )
-          }
-        />
+        <Card>
+          <CardBody>
+            <EmptyState
+              icon={<UserRoundCog className="h-5 w-5" />}
+              title={resolvedParams.input_val ? "No speakers match that search" : "No speakers yet"}
+              description={
+                resolvedParams.input_val
+                  ? "Try a different name, company or session."
+                  : "Add the people presenting at this event so attendees can see who is speaking."
+              }
+              action={
+                resolvedParams.input_val ? undefined : (
+                  <Link
+                    href={`/organizer/${organizer_id}/events/${eventId}/speakers/create-speaker`}
+                    className={buttonClass("primary", "sm")}
+                  >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    Add speaker
+                  </Link>
+                )
+              }
+            />
+          </CardBody>
+        </Card>
       )}
     </div>
   );

@@ -27,7 +27,16 @@ export default async function EventSponsorsPage({
   const currency = event.pricing?.currency || "PKR";
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div>
+        <p className="mb-1 text-2xs font-medium uppercase tracking-wider text-ink-soft">
+          Event · Sponsors
+        </p>
+        <h2 className="font-display text-xl text-ink">Sponsors & partners</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Organizations supporting this event — tiers, benefits, and public visibility.
+        </p>
+      </div>
       <SponsorsBoard
         eventId={eventId}
         organizerId={organizer_id}

@@ -44,7 +44,7 @@ export default function CreateSpeakerForm({
   const prefixedInput = `${fieldClass} rounded-l-none`;
 
   return (
-    <div className="w-full max-w-4xl rounded-2xl border border-line bg-paper p-8">
+    <div className="w-full max-w-4xl rounded-xl border border-line bg-paper p-8">
       <div className="mb-8 flex items-center justify-between">
         <h2 className="font-display text-xl text-ink">Add New Speaker</h2>
         {/* Was a bare <button> with no handler sitting where a close control belongs.
@@ -63,7 +63,7 @@ export default function CreateSpeakerForm({
       <form action={handle_speaker_submission}>
         <div className="grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
           <div className="space-y-6">
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-line p-8">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-line p-8">
               <MediaUpload
                 kind="speaker_photo"
                 eventId={eventId}
